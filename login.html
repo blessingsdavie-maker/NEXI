@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="portal.css">
+    <script src="nexi-api.js" defer></script>
     <script src="auth.js" defer></script>
   </head>
   <body class="auth-page">
@@ -27,21 +28,23 @@
       </section>
 
       <section class="auth-card" id="authCard" aria-labelledby="authTitle">
-        <div class="auth-heading"><p class="eyebrow">Welcome to Nexi</p><h2 id="authTitle">Sign in or create an account</h2><p id="authDescription">Start with your email. We’ll find your account or help you set one up.</p></div>
+        <div class="auth-heading"><p class="eyebrow">Welcome to Nexi</p><h2 id="authTitle">Sign in to your account</h2><p id="authDescription">Use your account email and password to continue.</p></div>
 
+        <div class="auth-mode-switch" role="group" aria-label="Account action">
+          <button class="auth-mode-button" type="button" data-auth-mode="login" aria-pressed="true">Sign in</button>
+          <button class="auth-mode-button" type="button" data-auth-mode="register" aria-pressed="false">Create account</button>
+        </div>
         <form class="auth-form" id="accountForm" autocomplete="on">
           <div class="auth-field"><label for="accountEmail">Email address</label><input id="accountEmail" name="email" type="email" autocomplete="username" required placeholder="you@example.com"></div>
-          <div class="auth-field" id="accountNameField" hidden><label for="accountName">Your name</label><input id="accountName" name="name" autocomplete="name" maxlength="70" placeholder="e.g. Amina Wanjiku"></div>
-          <div class="auth-field" id="accountPasswordField" hidden><label for="accountPassword" id="accountPasswordLabel">Password</label><input id="accountPassword" name="password" type="password" autocomplete="current-password" placeholder="Your password"></div>
+          <div class="auth-field" id="accountNameField" hidden><label for="accountName">Your name</label><input id="accountName" name="full_name" autocomplete="name" maxlength="70" placeholder="e.g. Amina Wanjiku"></div>
+          <div class="auth-field"><label for="accountPassword" id="accountPasswordLabel">Password</label><input id="accountPassword" name="password" type="password" autocomplete="current-password" minlength="8" required placeholder="Your password"></div>
           <div class="auth-field" id="accountConfirmField" hidden><label for="accountConfirm">Confirm password</label><input id="accountConfirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Enter it again"></div>
-          <button class="auth-submit" id="accountSubmit" type="submit">Continue with email <span aria-hidden="true">→</span></button>
+          <button class="auth-submit" id="accountSubmit" type="submit">Sign in <span aria-hidden="true">→</span></button>
         </form>
-        <button class="auth-reset" id="changeEmail" type="button" hidden>Use a different email</button>
         <p class="auth-message" id="authMessage" aria-live="polite"></p>
-        <p class="auth-disclaimer"><strong>Prototype account only.</strong> Account details stay in this browser; this is not secure production authentication. Do not use a real password.</p>
+        <p class="auth-disclaimer"><strong>Your account is protected.</strong> Passwords are hashed before storage, and sign-in is maintained with a secure server session.</p>
       </section>
     </main>
     <footer class="auth-footer"><span>© <span id="authYear"></span> Nexi</span><span>This prototype does not provide emergency services.</span></footer>
-  <script src="js/signup.js"></script>
   </body>
 </html>

@@ -3,9 +3,6 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 
-const sql = require("./lib/db");
-const authRoutes = require("./routes/auth");
-
 const app = express();
 
 if (!process.env.DATABASE_URL) {
@@ -13,9 +10,21 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
+const sql = require("./lib/db");
+const authRoutes = require("./routes/auth");
+const allowedOrigins = new Set((process.env.FRONTEND_ORIGINS || "http://localhost:4173,http://127.0.0.1:4173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean));
+
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin(origin, callback) {
+    callback(null, !origin || allowedOrigins.has(origin));
+  },
+  credentials: true
+}));
+app.use(express.json({ limit: "16kb" }));
 app.use("/api", authRoutes);
 
 // Homepage test
@@ -49,12 +58,36 @@ app.get("/api/test", async (req, res) => {
   }
 });
 
-// Authentication routes
-app.use("/api", authRoutes);
-
-// Start server
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Nexi backend running on http://localhost:${PORT}`);
+const startServer = async () => {
+  await sql`
+    CREATE TABLE IF NOT EXISTS users (
+      id BIGSERIAL PRIMARY KEY,
+      full_name VARCHAR(70) NOT NULL,
+      email VARCHAR(320) NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE UNIQUE INDEX IF NOT EXISTS users_email_lower_unique ON users (LOWER(email))`;
+  await sql`
+    CREATE TABLE IF NOT EXISTS user_sessions (
+      token_hash CHAR(64) PRIMARY KEY,
+      user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      expires_at TIMESTAMPTZ NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+  await sql`CREATE INDEX IF NOT EXISTS user_sessions_expiry_idx ON user_sessions (expires_at)`;
+  await sql`DELETE FROM user_sessions WHERE expires_at <= NOW()`;
+
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Nexi backend running on port ${PORT}`);
+  });
+};
+
+startServer().catch((error) => {
+  console.error("Backend startup failed:", error.message);
+  process.exit(1);
 });

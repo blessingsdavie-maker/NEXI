@@ -218,6 +218,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-heading { margin: 4px 0 22px; }
 .auth-heading h2 { margin: 0 0 6px; color: var(--portal-ink); font: 700 1.55rem/1.08 var(--portal-display); }
 .auth-heading p:last-child { margin: 0; color: var(--portal-muted); font-size: .77rem; }
+.auth-mode-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; border: 1px solid var(--portal-line); border-radius: 5px; background: var(--portal-bg); margin-bottom: 16px; padding: 4px; }
+.auth-mode-button { min-height: 36px; border: 0; border-radius: 3px; background: transparent; color: var(--portal-muted); font-size: .76rem; font-weight: 700; }
+.auth-mode-button[aria-pressed="true"] { background: var(--portal-surface); color: var(--portal-ink); box-shadow: 0 1px 3px rgb(20 35 27 / 12%); }
 .auth-form { display: grid; gap: 13px; }
 .auth-field { display: grid; gap: 5px; }
 .auth-step-entering { animation: auth-step-in .28s ease both; }
@@ -232,6 +235,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-field input::placeholder { color: var(--portal-muted); opacity: .8; }
 .auth-submit { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 10px; border: 0; border-radius: 5px; background: var(--portal-green); margin-top: 4px; padding: 0 13px; color: #fff; font-size: .82rem; font-weight: 700; }
 .auth-submit:hover { background: var(--portal-green-dark); }
+.auth-submit:disabled { cursor: wait; opacity: .7; }
 .auth-submit span { font-size: 1.1rem; }
 .auth-reset { border: 0; background: transparent; margin-top: 13px; padding: 0; color: var(--portal-green); font-size: .75rem; font-weight: 700; }
 .auth-reset:hover { color: var(--portal-coral); }

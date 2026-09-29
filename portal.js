@@ -1,17 +1,19 @@
-(() => {
+(async () => {
   "use strict";
 
   const role = document.body.dataset.role;
   const themeKey = "nexi-demo-state";
-  const userSessionKey = "nexi-user-session";
   let userSession = null;
   if (role === "user") {
     try {
-      userSession = JSON.parse(sessionStorage.getItem(userSessionKey) || "null");
+      const response = await window.nexiApi.request("/me");
+      if (!response.ok) {
+        window.location.replace("login.html?mode=login");
+        return;
+      }
+      const data = await response.json();
+      userSession = data.user;
     } catch {
-      userSession = null;
-    }
-    if (!userSession?.email) {
       window.location.replace("login.html?mode=login");
       return;
     }
@@ -72,16 +74,23 @@
   });
   get("portalDate")?.replaceChildren(document.createTextNode(new Intl.DateTimeFormat("en", { weekday: "long", month: "long", day: "numeric" }).format(new Date())));
   get("portalYear")?.replaceChildren(document.createTextNode(String(new Date().getFullYear())));
-  document.querySelectorAll("[data-user-signout]").forEach((button) => button.addEventListener("click", () => {
-    sessionStorage.removeItem(userSessionKey);
-    window.location.replace("login.html?mode=login");
+  document.querySelectorAll("[data-user-signout]").forEach((button) => button.addEventListener("click", async () => {
+    button.disabled = true;
+    try {
+      const response = await window.nexiApi.request("/logout", { method: "POST" });
+      if (!response.ok) throw new Error("Sign out failed");
+      window.location.replace("login.html?mode=login");
+    } catch {
+      button.disabled = false;
+      window.alert("Could not sign out. Check your connection and try again.");
+    }
   }));
 
   if (role === "user") setupUser();
   if (role === "admin") setupAdmin();
 
   function setupUser() {
-    const profileName = userSession.name?.trim() || "Nexi member";
+    const profileName = userSession.full_name?.trim() || "Nexi member";
     const profileInitials = profileName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
     get("userGreetingName").textContent = profileName.split(/\s+/)[0];
     get("userProfileName").textContent = profileName;
