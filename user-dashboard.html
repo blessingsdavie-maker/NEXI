@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f5ef">
+    <meta name="description" content="Your Nexi circle, check-ins, schedule, and trusted support contacts.">
+    <title>Your dashboard — Nexi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portal.css">
+    <script src="portal.js" defer></script>
+  </head>
+  <body data-role="user">
+    <a class="portal-skip" href="#portalMain">Skip to dashboard</a>
+    <div class="portal-shell">
+      <header class="portal-topbar">
+        <div class="portal-brand-meta"><a class="portal-brand" href="index.html" aria-label="Nexi home"><span class="portal-brandmark">N</span><span>Nexi</span></a><span class="prototype-tag">Prototype</span></div>
+        <div class="topbar-actions">
+          <button class="theme-button notification-button" type="button" data-open-view="userNotifications" aria-label="Notifications"><span aria-hidden="true">🔔</span><i></i></button>
+          <button class="theme-button" id="portalTheme" type="button" aria-label="Use dark theme" title="Change colour theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+        </div>
+      </header>
+      <div class="portal-layout">
+        <aside class="portal-sidebar" id="portalSidebar">
+          <p class="sidebar-caption">Your Nexi</p>
+          <nav class="portal-nav" aria-label="User dashboard">
+            <button type="button" data-view-target="userOverview" aria-current="page"><span class="nav-glyph" aria-hidden="true">⌂</span>Dashboard</button>
+            <button type="button" data-view-target="userSupport"><span class="nav-glyph" aria-hidden="true">⌕</span>Explore</button>
+            <button type="button" data-view-target="userActivity"><span class="nav-glyph" aria-hidden="true">▤</span>Activity</button>
+            <button type="button" data-view-target="userNotifications"><span class="nav-glyph" aria-hidden="true">♧</span>Notifications</button>
+            <button type="button" data-view-target="userProfile"><span class="nav-glyph" aria-hidden="true">◉</span>Profile</button>
+            <p class="sidebar-caption sidebar-tools-caption">Your circle</p>
+            <button type="button" data-view-target="userCircle"><span class="nav-glyph" aria-hidden="true">◎</span>My circle</button>
+            <button type="button" data-view-target="userSchedule"><span class="nav-glyph" aria-hidden="true">◷</span>Check-in schedule</button>
+          </nav>
+          <div class="sidebar-note"><strong>Your information stays yours</strong>Location sharing is off unless you choose otherwise. This is sample data saved only in this browser.</div>
+          <div class="sidebar-profile"><span class="profile-avatar" id="userAvatar">AW</span><span><b id="userProfileName">Amina Wanjiku</b><small>Circle member</small></span><button class="button button-secondary button-small" type="button" data-user-signout>Sign out</button></div>
+        </aside>
+        <main class="portal-main" id="portalMain">
+          <section class="portal-view is-active" id="userOverview" aria-labelledby="userOverviewTitle">
+            <div class="view-heading"><div><p class="eyebrow">Your circle, your pace</p><h1 id="userOverviewTitle">Good evening, <span id="userGreetingName">Amina</span></h1><p>One small update can help your people feel close.</p></div><span class="date-label" id="portalDate"></span></div>
+            <div class="stats-grid">
+              <article class="stat-card"><div class="stat-top"><span>In your circle</span><span class="stat-icon" aria-hidden="true">◉</span></div><div class="stat-value" id="userCircleCount">5</div><div class="stat-foot">People you chose</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Checked in today</span><span class="stat-icon" aria-hidden="true">✓</span></div><div class="stat-value" id="userCheckedCount">4 / 5</div><div class="stat-foot">A gentle check-in, not tracking</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Next reminder</span><span class="stat-icon" aria-hidden="true">◷</span></div><div class="stat-value" id="scheduleSummary">7:00 PM</div><div class="stat-foot" id="scheduleFoot">Today · device reminder</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Location sharing</span><span class="stat-icon" aria-hidden="true">⌖</span></div><div class="stat-value">Off</div><div class="stat-foot">You decide when to share</div></article>
+            </div>
+            <div class="overview-grid">
+              <section class="checkin-banner" id="userCheckinBanner" aria-labelledby="userCheckinTitle"><div><p class="eyebrow">Tonight's check-in</p><h2 id="userCheckinTitle">Have you arrived safely?</h2><p id="userCheckinText">A quick check-in lets your circle know you have arrived.</p></div><button class="button" id="userCheckinAction" type="button" data-checkin-action="safe">I'm safe</button></section>
+              <section class="panel"><div class="panel-heading"><div><h2>Circle check-in</h2><p id="userMemberCount">5 people</p></div><button class="button button-secondary button-small" type="button" data-open-view="userCircle">View circle</button></div><div class="quick-list"><div class="quick-row"><span><b>You</b><small id="userMemberStatus">Waiting for your update</small></span><span class="state-dot pending" id="userMemberStatusDot">Pending</span></div><div class="quick-row"><span><b>Mum</b><small>Checked in at 6:42 PM</small></span><span class="state-dot">Safe</span></div><div class="quick-row"><span><b>3 more people</b><small>Updates shared with your circle</small></span><span class="state-dot">Safe</span></div></div></section>
+            </div>
+            <div class="content-grid">
+              <section class="panel"><div class="panel-heading"><div><h2>Your people</h2><p>Only people you invited can join.</p></div><button class="button button-secondary button-small" type="button" data-open-view="userCircle">Manage circle</button></div><div class="member-list" id="userMemberList"></div></section>
+              <section class="panel"><div class="panel-heading"><div><h2>Trusted support</h2><p>Keep useful options close.</p></div><button class="button button-secondary button-small" type="button" data-open-view="userSupport">View contacts</button></div><div class="quick-list"><div class="quick-row"><span><b>Nearest health service</b><small>Sample listing · not verified</small></span><span class="state-dot offline">Demo</span></div><div class="quick-row"><span><b>Your chosen people</b><small>Support is shared only with your circle</small></span><span class="state-dot">Private</span></div></div></section>
+            </div>
+            <p class="portal-footer">Demo only. Nexi does not contact anyone or provide emergency services.</p>
+          </section>
+
+          <section class="portal-view" id="userCircle" aria-labelledby="userCircleTitle">
+            <div class="view-heading"><div><p class="eyebrow">People you trust</p><h1 id="userCircleTitle">Your circle</h1><p>Manage your invited people. They cannot see your location unless you share it.</p></div><span class="role-tag" id="userCircleMembersLabel">5 people</span></div>
+            <section class="panel"><div class="panel-heading"><div><h2>Circle members</h2><p>Check-in status is shared within this circle only.</p></div></div><div class="member-list" id="userMemberList"></div>
+              <form class="form-grid" id="inviteMemberForm"><div class="field"><label for="inviteMemberName">Person's name</label><input class="input-control" id="inviteMemberName" name="name" autocomplete="name" required placeholder="e.g. Nia Kamau"></div><div class="field"><label for="inviteMemberEmail">Email for demo invite</label><input class="input-control" id="inviteMemberEmail" name="email" type="email" autocomplete="email" required placeholder="nia@example.com"></div><button class="button button-primary" type="submit">＋ Add person</button></form><p class="form-message" id="inviteMemberMessage" aria-live="polite"></p>
+            </section>
+            <div class="privacy-note"><span aria-hidden="true">◈</span><span><strong>Invites are a prototype here</strong>No email is sent and no one is actually added to an account.</span></div>
+          </section>
+
+          <section class="portal-view" id="userSchedule" aria-labelledby="userScheduleTitle">
+            <div class="view-heading"><div><p class="eyebrow">A rhythm that works for you</p><h1 id="userScheduleTitle">Check-in schedule</h1><p>Choose when this device reminds you. You can pause it whenever you like.</p></div></div>
+            <section class="panel schedule-card"><div><h2>Daily family check-in</h2><p id="scheduleSaved" aria-live="polite">A reminder is set for this device.</p></div><div class="schedule-form"><label class="toggle-label" for="userScheduleEnabled"><span>Reminder</span><input id="userScheduleEnabled" type="checkbox"><span class="toggle-ui" aria-hidden="true"></span></label><input id="userScheduleTime" type="time" aria-label="Reminder time"></div></section>
+            <div class="notice-box">Prototype schedule only. This page does not run background notifications or send reminders to other people.</div>
+          </section>
+
+          <section class="portal-view" id="userActivity" aria-labelledby="userActivityTitle">
+            <div class="view-heading"><div><p class="eyebrow">Your recent updates</p><h1 id="userActivityTitle">Activity</h1><p>A simple record of your check-ins and account changes.</p></div></div>
+            <section class="panel"><div class="panel-heading"><div><h2>Recent activity</h2><p>Visible only in this demo account.</p></div></div><div class="quick-list" id="userActivityList"></div></section>
+            <div class="privacy-note"><span aria-hidden="true">◈</span><span><strong>No location history</strong>This activity view records check-in actions only. Location tracking is not enabled.</span></div>
+          </section>
+
+          <section class="portal-view" id="userNotifications" aria-labelledby="userNotificationsTitle">
+            <div class="view-heading"><div><p class="eyebrow">Your updates</p><h1 id="userNotificationsTitle">Notifications</h1><p>Helpful account and circle updates, without emergency claims.</p></div></div>
+            <section class="panel"><div class="panel-heading"><div><h2>Recent notifications</h2><p>Sample activity for this local prototype.</p></div><span class="status-pill neutral">Demo</span></div><div class="quick-list"><div class="quick-row"><span><b>Your circle is ready</b><small>Review who is in your circle and choose a check-in time.</small></span><span class="date-label">Today</span></div><div class="quick-row"><span><b>Location sharing is off</b><small>Your location is not being collected by Nexi.</small></span><span class="date-label">Today</span></div></div></section>
+          </section>
+
+          <section class="portal-view" id="userProfile" aria-labelledby="userProfileTitle">
+            <div class="view-heading"><div><p class="eyebrow">Your account</p><h1 id="userProfileTitle">My profile</h1><p>Manage your details and personal check-in preferences.</p></div></div>
+            <section class="panel profile-panel"><div class="profile-large"><span class="profile-avatar" id="userProfileAvatar">AW</span><div><h2 id="userProfileDisplayName">Amina Wanjiku</h2><p id="userProfileEmail">Email address</p></div></div><div class="profile-actions"><button class="button button-secondary" type="button" data-open-view="userCircle">Manage my circle</button><button class="button button-secondary" type="button" data-open-view="userSchedule">Check-in schedule</button><button class="button button-danger" type="button" data-user-signout>Sign out</button></div></section>
+          </section>
+
+          <section class="portal-view" id="userSupport" aria-labelledby="userSupportTitle">
+            <div class="view-heading"><div><p class="eyebrow">Help, on your terms</p><h1 id="userSupportTitle">Support contacts</h1><p>Keep trusted options nearby and decide who sees a support signal.</p></div></div>
+            <div class="support-grid">
+              <article class="support-item"><span class="support-icon" aria-hidden="true">♡</span><div><h3>Your trusted circle</h3><p>People you choose to receive a support update.</p><button class="button button-secondary button-small" type="button" data-request-support>Preview support flow</button></div></article>
+              <article class="support-item"><span class="support-icon" aria-hidden="true">✚</span><div><h3>Health services</h3><p>Sample directory listings are illustrative and not verified.</p><button class="button button-secondary button-small" type="button" data-open-view="userCircle">Review your circle</button></div></article>
+              <article class="support-item"><span class="support-icon" aria-hidden="true">⌖</span><div><h3>Location sharing</h3><p>Off by default. Choose to share for a specific moment.</p><span class="status-pill neutral">Currently off</span></div></article>
+              <article class="support-item"><span class="support-icon" aria-hidden="true">i</span><div><h3>Urgent help</h3><p>Nexi is not an emergency service. Contact your local emergency provider when immediate help is needed.</p></div></article>
+            </div>
+          </section>
+        </main>
+        <nav class="user-bottom-nav" aria-label="Main navigation">
+          <button type="button" data-view-target="userOverview" aria-current="page"><span aria-hidden="true">⌂</span>Dashboard</button>
+          <button type="button" data-view-target="userSupport"><span aria-hidden="true">⌕</span>Explore</button>
+          <button type="button" data-view-target="userActivity"><span aria-hidden="true">▤</span>Activity</button>
+          <button type="button" data-view-target="userProfile"><span aria-hidden="true">◉</span>Profile</button>
+        </nav>
+      </div>
+    </div>
+    <dialog class="dialog" id="supportConfirmDialog" aria-labelledby="supportDialogTitle"><p class="eyebrow">Support flow preview</p><h2 id="supportDialogTitle">Choose to share a support update?</h2><p>This demo only changes the status shown on this page. It will not notify anyone or share your location.</p><div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Go back</button><button class="button button-primary" id="confirmUserSupport" type="button">Show demo update</button></div></dialog>
+  </body>
+</html>

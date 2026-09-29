@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Nexi makes everyday family check-ins feel simple, private, and human.">
+    <meta name="theme-color" content="#0f4d36">
+    <title>Nexi — A little check-in can mean a lot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header">
+      <div class="nav-shell">
+        <a class="brand" href="#home" aria-label="Nexi home">
+          <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+            <path d="M20 3.7 33.8 9v9.6c0 8.7-5.5 15-13.8 17.8C11.7 33.6 6.2 27.3 6.2 18.6V9L20 3.7Z" fill="currentColor"/>
+            <path d="M13 20.5 17.5 25 27.8 14.7" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2"/>
+          </svg>
+          <span>Nexi</span>
+        </a>
+
+        <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="primaryNav">
+          <span class="sr-only" id="navToggleLabel">Open navigation</span>
+          <span></span><span></span>
+        </button>
+
+        <nav class="primary-nav" id="primaryNav" aria-label="Primary navigation">
+          <a href="#home">Home</a>
+          <a href="#safety">Discover</a>
+          <a href="#services">Services</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#about">About</a>
+          <a href="#faq">Contact</a>
+          <span class="mobile-nav-actions">
+            <a href="login.html">Login</a>
+            <a class="mobile-get-started" href="login.html?mode=register">Get Started</a>
+          </span>
+        </nav>
+
+        <div class="nav-actions">
+          <button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="Use dark theme" title="Change colour theme">
+            <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          </button>
+          <a class="btn btn-small btn-quiet nav-login" href="login.html">Login</a>
+          <a class="btn btn-small btn-primary nav-get-started" href="login.html?mode=register">Get Started</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="hero section" id="home">
+        <div class="hero-backdrop" aria-hidden="true">
+          <video class="hero-background-video" autoplay muted loop playsinline preload="metadata" tabindex="-1" data-desktop-src="VID%201.mp4" data-mobile-src="VID%201.1.mp4" aria-hidden="true"></video>
+        </div>
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="eyebrow-dot"></span> Built for everyday peace of mind</p>
+          <h1>A little check-in<br>can mean <em>a lot.</em></h1>
+          <p class="hero-lead">Nexi helps your people stay in the loop — with gentle check-ins, support close by, and a safer way to ask for help.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" type="button" data-open-dashboard>
+              Try a family check-in
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5"/></svg>
+            </button>
+            <a class="text-link" href="#how-it-works">See how Nexi works <span aria-hidden="true">↓</span></a>
+          </div>
+          <ul class="hero-points" aria-label="Nexi highlights">
+            <li><span class="check-dot">✓</span> You choose what to share</li>
+            <li><span class="check-dot">✓</span> Designed for Kenya, first</li>
+          </ul>
+        </div>
+
+        <div class="hero-showcase" aria-label="Illustration of a Nexi family check-in">
+          <div class="shape shape-one"></div>
+          <div class="shape shape-two"></div>
+          <div class="showcase-card family-card">
+            <div class="card-topline">
+              <span class="mini-logo">N</span>
+              <span>Tuesday check-in</span>
+              <span class="time-label">7:00 PM</span>
+            </div>
+            <p class="card-question">Has everyone made it home?</p>
+            <div class="member-row">
+              <div class="person person-mom"><span>M</span><b>Mom</b><i>✓</i></div>
+              <div class="person person-dad"><span>D</span><b>Dad</b><i>✓</i></div>
+              <div class="person person-bri"><span>B</span><b>Brianna</b><i>✓</i></div>
+              <div class="person person-james"><span>J</span><b>James</b><i>✓</i></div>
+              <div class="person person-you"><span>Y</span><b>You</b><i>?</i></div>
+            </div>
+            <div class="card-status"><span></span> 4 of 5 have checked in</div>
+          </div>
+          <div class="showcase-card notification-card">
+            <div class="notification-icon">✓</div>
+            <div><b>Mom checked in safe</b><span>Just now</span></div>
+          </div>
+          <div class="showcase-card location-card">
+            <svg viewBox="0 0 44 44" aria-hidden="true"><path d="M22 4.7a13.3 13.3 0 0 0-13.3 13.3c0 10 13.3 21.3 13.3 21.3S35.3 28 35.3 18A13.3 13.3 0 0 0 22 4.7Zm0 18.1a4.8 4.8 0 1 1 0-9.7 4.8 4.8 0 0 1 0 9.7Z"/></svg>
+            <span>Help is close by</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="trust-strip" aria-label="Nexi promises">
+        <div><span class="trust-icon">◌</span> No public location tracking</div>
+        <div><span class="trust-icon">⌁</span> Your circle, your rules</div>
+        <div><span class="trust-icon">✦</span> Calm by design</div>
+      </section>
+
+      <section class="section intro-section" id="how-it-works">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">How it works</p>
+            <h2>Stay close without<br> hovering.</h2>
+          </div>
+          <p>Nexi turns the question “did you get there safely?” into a kind, simple ritual — one your family controls together.</p>
+        </div>
+
+        <div class="steps-grid">
+          <article class="step-card">
+            <span class="step-number">01</span>
+            <div class="step-illustration setup-art"><span>☺</span><span>♥</span><span>✦</span></div>
+            <h3>Make your circle</h3>
+            <p>Invite the people you care about and set the check-ins that make sense for all of you.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">02</span>
+            <div class="step-illustration check-art"><span class="mini-check">✓</span><span class="check-line"></span><span class="check-line short"></span></div>
+            <h3>Check in, your way</h3>
+            <p>A quick “safe” is enough. If you need support, you can say so quietly and decide who knows.</p>
+          </article>
+          <article class="step-card">
+            <span class="step-number">03</span>
+            <div class="step-illustration support-art"><span class="support-heart">♥</span><span class="support-ring"></span></div>
+            <h3>Feel the difference</h3>
+            <p>Everyone gets a little more reassurance, without anyone giving up their independence.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section checkin-section" id="safety">
+        <div class="checkin-copy">
+          <p class="eyebrow eyebrow-light">A kinder safety signal</p>
+          <h2>Safe can be<br>just one tap away.</h2>
+          <p>Check in at the time you choose. A missed check-in stays private to your circle, and any support signal is shared only with the people you select.</p>
+          <ul class="feature-list">
+            <li><span>✓</span> No one can add themselves to your circle</li>
+            <li><span>✓</span> Change or pause a schedule anytime</li>
+            <li><span>✓</span> Choose when to share your location</li>
+          </ul>
+        </div>
+        <div class="live-demo">
+          <div class="demo-topbar"><span class="demo-live-dot"></span> Interactive demo</div>
+          <p class="demo-kicker">THE KAMAU CIRCLE</p>
+          <h3>Have you arrived safely?</h3>
+          <p class="demo-subtext" id="demoStatus" aria-live="polite">Your family gets a gentle update, not your every move.</p>
+          <div class="demo-actions" id="demoActions">
+            <button class="demo-safe" type="button" data-demo-checkin="safe"><span>✓</span> I’m safe</button>
+            <button class="demo-help" type="button" data-demo-checkin="help"><span>♡</span> I need support</button>
+          </div>
+          <p class="demo-safety-note">Demo only — no alert, message, or location is sent.</p>
+          <button class="demo-reset" id="demoReset" type="button" hidden>Try again</button>
+          <div class="demo-members" aria-hidden="true">
+            <span class="avatar a-one">M</span><span class="avatar a-two">D</span><span class="avatar a-three">B</span>
+            <p>3 people in your circle</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section service-section" id="services">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">Help, close by</p>
+            <h2>Find support when<br> you need it.</h2>
+          </div>
+          <p>Keep trusted services in one place. Search by what you need and save useful contacts for later.</p>
+        </div>
+
+        <div class="service-finder" aria-label="Demo service finder">
+          <div class="finder-controls">
+            <label class="search-field" for="serviceSearch">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.3 4.3"/></svg>
+              <span class="sr-only">Search sample services</span>
+              <input id="serviceSearch" type="search" placeholder="Search support near you">
+            </label>
+            <div class="filter-row" role="group" aria-label="Filter services">
+              <button class="filter-chip is-active" type="button" data-category="all" aria-pressed="true">All services</button>
+              <button class="filter-chip" type="button" data-category="health" aria-pressed="false">Health</button>
+              <button class="filter-chip" type="button" data-category="safety" aria-pressed="false">Safety</button>
+              <button class="filter-chip" type="button" data-category="support" aria-pressed="false">Support</button>
+            </div>
+          </div>
+          <div class="service-results" id="serviceResults" aria-live="polite"></div>
+          <p class="finder-note">Illustrative listings only — live directory verification comes before launch.</p>
+        </div>
+      </section>
+
+      <section class="section privacy-section" id="about">
+        <div class="privacy-art" aria-hidden="true">
+          <div class="privacy-orbit orbit-one"></div><div class="privacy-orbit orbit-two"></div>
+          <div class="privacy-shield"><svg viewBox="0 0 64 64"><path d="M32 5 54 13.5v15.3C54 42.7 45.2 53.2 32 59 18.8 53.2 10 42.7 10 28.8V13.5L32 5Z"/><path d="m21.5 31.5 7 7 14-15"/></svg></div>
+        </div>
+        <div class="privacy-copy">
+          <p class="eyebrow">Privacy is the feature</p>
+          <h2>Care should never feel like control.</h2>
+          <p>Nexi is built around consent. You decide your circle, your check-ins, your emergency contacts, and what information is shared.</p>
+          <a class="text-link dark-link" href="#faq">Read our safety principles <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="section pricing-section" id="pricing">
+        <div class="section-heading centered-heading">
+          <p class="eyebrow">Simple from the start</p>
+          <h2>Peace of mind shouldn’t<br> be complicated.</h2>
+          <p>Start with Nexi at no cost. Upgrade only when your circle needs more.</p>
+        </div>
+        <div class="price-grid">
+          <article class="price-card">
+            <p class="plan-label">Nexi Free</p>
+            <p class="price"><span>KES</span>0</p>
+            <p class="plan-copy">For one person and the people they trust.</p>
+            <ul><li>One personal safety circle</li><li>Gentle check-in reminders</li><li>Saved support contacts</li></ul>
+            <a class="btn btn-outline" href="#waitlist">Create an account</a>
+          </article>
+          <article class="price-card featured-price">
+            <span class="popular-badge">For families</span>
+            <p class="plan-label">Nexi Circle</p>
+            <p class="price"><span>KES</span>100 <small>once</small></p>
+            <p class="plan-copy">A shared rhythm for the whole household.</p>
+            <ul><li>Up to 8 people in your circle</li><li>Flexible schedules and alerts</li><li>Priority access to new tools</li></ul>
+            <a class="btn btn-primary" href="#waitlist">Create an account</a>
+          </article>
+        </div>
+        <p class="pricing-note">Pricing shown is an early launch direction and will be confirmed before payment is available.</p>
+      </section>
+
+      <section class="section faq-section" id="faq">
+        <div class="faq-intro">
+          <p class="eyebrow">Questions, answered</p>
+          <h2>A safety tool<br> should be clear.</h2>
+          <p>We are building Nexi carefully, with people — not surveillance — at the centre.</p>
+          <a class="text-link dark-link" href="#waitlist">Create an account <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="faq-list">
+          <details open>
+            <summary>Can someone track me with Nexi?<span aria-hidden="true"></span></summary>
+            <p>No. Location sharing is optional, specific to a moment, and under your control. It is never public or switched on by default.</p>
+          </details>
+          <details>
+            <summary>What happens if I miss a check-in?<span aria-hidden="true"></span></summary>
+            <p>Your chosen circle can receive a gentle prompt after the grace period you set. The goal is a conversation, not an alarm.</p>
+          </details>
+          <details>
+            <summary>Does Nexi replace emergency services?<span aria-hidden="true"></span></summary>
+            <p>No. Nexi is a coordination tool for your trusted people. It does not replace emergency services or guarantee emergency response.</p>
+          </details>
+          <details>
+            <summary>When will Nexi be available?<span aria-hidden="true"></span></summary>
+            <p>We are shaping the first Kenya launch with early members. Create an account to be part of the first release.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="waitlist-section" id="waitlist">
+        <div>
+          <p class="eyebrow eyebrow-light">Be part of the first circle</p>
+          <h2>Let’s make looking out<br>for each other easier.</h2>
+          <p>Create your Nexi account to get started and help shape the first circle.</p>
+        </div>
+        <div class="waitlist-next-step">
+          <a class="btn btn-light" href="login.html?mode=register">Create your account <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5"/></svg></a>
+          <p>Already have an account? <a href="login.html">Sign in</a></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-top">
+        <a class="brand footer-brand" href="#home" aria-label="Nexi home"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3.7 33.8 9v9.6c0 8.7-5.5 15-13.8 17.8C11.7 33.6 6.2 27.3 6.2 18.6V9L20 3.7Z" fill="currentColor"/><path d="M13 20.5 17.5 25 27.8 14.7" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2"/></svg><span>Nexi</span></a>
+        <p>A more human way to stay connected.</p>
+        <div class="footer-links"><a href="#how-it-works">How it works</a><a href="#safety">Safety</a><a href="#faq">Help &amp; FAQ</a><a href="#waitlist">Partners</a><a href="login.html">Sign in</a><a href="admin.html">Admin demo</a></div>
+      </div>
+      <div class="footer-bottom"><span>© <span id="year"></span> Nexi. Built with care.</span><span>This prototype does not provide emergency services.</span></div>
+    </footer>
+
+    <dialog class="dashboard-dialog" id="dashboardDialog" aria-labelledby="dashboardTitle">
+      <div class="dashboard-shell">
+        <header class="dashboard-header">
+          <div class="dashboard-brand"><span class="dashboard-brandmark">N</span><span>Nexi</span><span class="demo-pill">Demo</span></div>
+          <button class="close-dialog" type="button" data-close-dashboard aria-label="Close demo">×</button>
+        </header>
+        <div class="dashboard-content">
+          <aside class="dashboard-side">
+            <p class="side-label">YOUR CIRCLE</p>
+            <span class="side-item is-current"><span>⌂</span> Today</span>
+            <span class="side-item"><span>◌</span> My circle</span>
+            <span class="side-item"><span>♡</span> Support</span>
+            <div class="side-footer"><span class="avatar a-four">A</span><span>Amina W.</span></div>
+          </aside>
+          <section class="dashboard-main">
+            <p class="dashboard-greeting" id="dashboardDate"></p>
+            <h2 id="dashboardTitle">Hello, Amina <span>✦</span></h2>
+            <div class="dashboard-hero-card">
+              <div><p class="dashboard-card-label">TONIGHT’S CHECK-IN</p><h3>Have you arrived safely?</h3><p id="dashboardCheckinText" aria-live="polite">Your circle is waiting for a quick update.</p></div>
+              <div class="dashboard-actions" id="dashboardActions">
+                <button class="dashboard-safe" type="button" data-dashboard-checkin="safe"><span>✓</span> I’m safe</button>
+                <button class="dashboard-support" type="button" data-dashboard-checkin="help">I need support</button>
+              </div>
+              <button class="dashboard-reset" id="dashboardReset" type="button" hidden>Reset demo</button>
+            </div>
+            <div class="dashboard-columns">
+              <section class="circle-card"><div class="section-card-heading"><div><p class="dashboard-card-label">THE KAMAU CIRCLE</p><h3 id="dashboardCircleSummary">4 of 5 checked in</h3></div><span class="plain-button">Demo circle</span></div><div class="dashboard-members" id="dashboardMembers"></div></section>
+              <section class="support-card"><p class="dashboard-card-label">SAVED SUPPORT</p><h3>Useful, when it counts</h3><div class="support-row"><span class="support-icon">✚</span><div><b>Nearest hospital</b><small>Keep local details ready</small></div><span aria-hidden="true">→</span></div><div class="support-row"><span class="support-icon">⌁</span><div><b>Emergency contacts</b><small>Choose who gets your signal</small></div><span aria-hidden="true">→</span></div></section>
+            </div>
+            <p class="dashboard-disclaimer">Interactive demo only. Nexi does not send emergency alerts in this prototype.</p>
+          </section>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog class="support-dialog" id="supportDialog" aria-labelledby="supportTitle">
+      <button class="close-dialog support-close" type="button" data-close-support aria-label="Close support prompt">×</button>
+      <span class="support-pulse">♡</span>
+      <p class="eyebrow">Demo safety flow</p>
+      <h2 id="supportTitle">You’re not alone.</h2>
+      <p>In the live product, this step would show exactly who will be notified and ask for your confirmation. This demo sends nothing.</p>
+      <div class="support-dialog-actions"><button class="btn btn-primary" id="confirmSupport" type="button">Show support update</button><button class="btn btn-text" type="button" data-close-support>Go back</button></div>
+    </dialog>
+
+    <script src="script.js"></script>
+  </body>
+</html>
