@@ -28,10 +28,10 @@
     accountConfirm.required = registering;
     accountPassword.autocomplete = registering ? "new-password" : "current-password";
     accountPassword.minLength = registering ? 8 : 1;
-    get("authTitle").textContent = registering ? "Create your Nexi account" : "Sign in to your account";
+    get("authTitle").textContent = registering ? "Create your Nexi account" : "Sign in or create an account";
     get("authDescription").textContent = registering
       ? "Create an account to keep your profile available across devices."
-      : "Use your account email and password to continue.";
+      : "Sign in with your email, or choose Create account to register.";
     get("accountPasswordLabel").textContent = registering ? "Create a password" : "Password";
     accountSubmit.innerHTML = `${registering ? "Create account" : "Sign in"} <span aria-hidden="true">→</span>`;
     authModeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.authMode === mode)));
