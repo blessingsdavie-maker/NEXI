@@ -8,7 +8,7 @@ signupForm.addEventListener("submit", async (event) => {
     const password = document.getElementById("password").value;
 
     try {
-        const response = await fetch("http://localhost:5000/api/signup", {
+        const response = await fetch("https://nexi-6qk9.onrender.com/api/signup", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
