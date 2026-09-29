@@ -12,7 +12,7 @@ if (!process.env.DATABASE_URL) {
 
 const sql = require("./lib/db");
 const authRoutes = require("./routes/auth");
-const allowedOrigins = new Set((process.env.FRONTEND_ORIGINS || "http://localhost:4173,http://127.0.0.1:4173")
+const allowedOrigins = new Set((process.env.FRONTEND_ORIGINS || "http://localhost:4173,http://127.0.0.1:4173,http://localhost:5500,http://127.0.0.1:5500")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean));
