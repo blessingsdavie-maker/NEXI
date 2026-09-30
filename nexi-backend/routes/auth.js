@@ -1,159 +1,192 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
-const sql = require("../lib/db");
+const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { query } = require('../db');
+const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
-const sessionCookieName = "nexi_session";
-const sessionDurationSeconds = 60 * 60 * 24 * 30;
-const sameSite = process.env.SESSION_COOKIE_SAMESITE || (process.env.NODE_ENV === "production" ? "None" : "Lax");
-const secureCookie = process.env.NODE_ENV === "production" || process.env.SESSION_COOKIE_SECURE === "true";
 
-const readSessionToken = (req) => {
-  const cookie = req.headers.cookie?.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${sessionCookieName}=`));
-  return cookie ? cookie.slice(sessionCookieName.length + 1) : null;
-};
+function signToken(user) {
+  return jwt.sign(
+    { sub: String(user.id), role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+  );
+}
 
-const setSessionCookie = (res, token) => {
-  const secure = secureCookie ? "; Secure" : "";
-  res.setHeader("Set-Cookie", `${sessionCookieName}=${token}; Path=/; HttpOnly; SameSite=${sameSite}; Max-Age=${sessionDurationSeconds}${secure}`);
-};
+function publicUser(user) {
+  return {
+    id: user.id,
+    full_name: user.full_name,
+    email: user.email,
+    role: user.role,
+    status: user.status,
+    created_at: user.created_at,
+    updated_at: user.updated_at,
+    last_login_at: user.last_login_at
+  };
+}
 
-const clearSessionCookie = (res) => {
-  const secure = secureCookie ? "; Secure" : "";
-  res.setHeader("Set-Cookie", `${sessionCookieName}=; Path=/; HttpOnly; SameSite=${sameSite}; Max-Age=0${secure}`);
-};
+function setAuthCookie(res, token) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  res.cookie(process.env.COOKIE_NAME || 'nexi_token', token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: '/'
+  });
+}
 
-const createSession = async (user, res) => {
-  const token = crypto.randomBytes(32).toString("hex");
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-  await sql`
-    INSERT INTO user_sessions (token_hash, user_id, expires_at)
-    VALUES (${tokenHash}, ${user.id}, NOW() + INTERVAL '30 days')
-  `;
-  setSessionCookie(res, token);
-};
-
-const currentUser = async (req) => {
-  const token = readSessionToken(req);
-  if (!token || !/^[a-f0-9]{64}$/.test(token)) return null;
-  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-  const rows = await sql`
-    SELECT users.id, users.full_name, users.email
-    FROM user_sessions
-    JOIN users ON users.id = user_sessions.user_id
-    WHERE user_sessions.token_hash = ${tokenHash}
-      AND user_sessions.expires_at > NOW()
-    LIMIT 1
-  `;
-  return rows[0] || null;
-};
-
-router.post("/signup", async (req, res) => {
+// POST /signup
+router.post('/signup', async (req, res) => {
   try {
-    const { full_name, email, password } = req.body;
-    if (!full_name || !email || !password) {
-      return res.status(400).json({ success: false, message: "Full name, email and password are required." });
+    const fullName = String(req.body?.full_name || '').trim();
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    const password = String(req.body?.password || '');
+    const inviteToken = req.body?.invite_token ? String(req.body.invite_token).trim() : null;
+
+    if (!fullName || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Full name, email and password are required.' });
     }
 
-    if (typeof full_name !== "string" || typeof email !== "string" || typeof password !== "string") {
-      return res.status(400).json({ success: false, message: "Enter valid account details." });
-    }
-    const cleanName = full_name.trim();
-    const cleanEmail = email.trim().toLowerCase();
-
-    if (cleanName.length < 2 || cleanName.length > 70) {
-      return res.status(400).json({ success: false, message: "Name must be between 2 and 70 characters." });
+    if (password.length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters.' });
     }
 
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail) || cleanEmail.length > 320) {
-      return res.status(400).json({ success: false, message: "Enter a valid email address." });
+    const existing = await query('SELECT id FROM users WHERE email = $1 LIMIT 1', [email]);
+    if (existing.rowCount) {
+      return res.status(409).json({ success: false, message: 'An account with that email already exists.' });
     }
 
-    if (password.length < 8 || Buffer.byteLength(password, "utf8") > 72) {
-      return res.status(400).json({ success: false, message: "Password must be 8 or more characters and no more than 72 bytes." });
+    let role = 'user';
+
+    if (inviteToken) {
+      const invite = await query(
+        `SELECT id, role FROM invite_tokens
+         WHERE token = $1
+           AND active = TRUE
+           AND used_count < max_uses
+           AND (expires_at IS NULL OR expires_at > NOW())
+         LIMIT 1`,
+        [inviteToken]
+      );
+
+      if (!invite.rowCount) {
+        return res.status(400).json({ success: false, message: 'That invitation token is invalid or expired.' });
+      }
+
+      role = invite.rows[0].role;
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    const newUser = await sql`
-      INSERT INTO users (
-        full_name,
-        email,
-        password_hash
-      )
-      VALUES (
-        ${cleanName},
-        ${cleanEmail},
-        ${passwordHash}
-      )
-      RETURNING id, full_name, email, created_at
-    `;
 
-    await createSession(newUser[0], res);
-    res.status(201).json({ success: true, user: newUser[0] });
-  } catch (error) {
-    if (error.code === "23505") {
-      return res.status(409).json({ success: false, message: "An account with this email already exists." });
+    const clientResult = await query(
+      `INSERT INTO users (full_name, email, password_hash, role, invite_token_used)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING id, full_name, email, role, status, created_at, updated_at, last_login_at`,
+      [fullName, email, passwordHash, role, inviteToken]
+    );
+
+    const user = clientResult.rows[0];
+
+    await query(
+      `INSERT INTO user_profiles (user_id) VALUES ($1)
+       ON CONFLICT (user_id) DO NOTHING`,
+      [user.id]
+    );
+
+    if (inviteToken) {
+      await query(
+        `UPDATE invite_tokens
+         SET used_count = used_count + 1,
+             active = CASE WHEN used_count + 1 >= max_uses THEN FALSE ELSE active END
+         WHERE token = $1`,
+        [inviteToken]
+      );
     }
-    console.error("Signup error:", error.message);
-    res.status(500).json({ success: false, message: "Unable to create account." });
+
+    const token = signToken(user);
+    setAuthCookie(res, token);
+
+    return res.status(201).json({
+      success: true,
+      message: 'Account created successfully.',
+      user: publicUser(user),
+      token
+    });
+  } catch (error) {
+    console.error('Signup error:', error);
+    return res.status(500).json({ success: false, message: 'Unable to create your account right now.' });
   }
 });
 
-router.post("/login", async (req, res) => {
+// POST /login
+router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
-    if (typeof email !== "string" || typeof password !== "string" || !email.trim() || !password) {
-      return res.status(400).json({ success: false, message: "Email and password are required." });
+    const email = String(req.body?.email || '').trim().toLowerCase();
+    const password = String(req.body?.password || '');
+
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: 'Email and password are required.' });
     }
 
-    const cleanEmail = email.trim().toLowerCase();
-    const rows = await sql`
-      SELECT id, full_name, email, password_hash
-      FROM users
-      WHERE LOWER(email) = ${cleanEmail}
-      LIMIT 1
-    `;
-    const user = rows[0];
+    const result = await query(
+      `SELECT id, full_name, email, password_hash, role, status, created_at, updated_at, last_login_at
+       FROM users WHERE email = $1 LIMIT 1`,
+      [email]
+    );
+
+    const user = result.rows[0];
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-      return res.status(401).json({ success: false, message: "Email or password is incorrect." });
+      return res.status(401).json({ success: false, message: 'Invalid email or password.' });
     }
 
-    await createSession(user, res);
-    res.json({ success: true, user: { id: user.id, full_name: user.full_name, email: user.email } });
+    if (user.status !== 'active') {
+      return res.status(403).json({ success: false, message: 'Your account has been suspended.' });
+    }
+
+    const loginResult = await query(
+      `UPDATE users SET last_login_at = NOW() WHERE id = $1
+       RETURNING id, full_name, email, role, status, created_at, updated_at, last_login_at`,
+      [user.id]
+    );
+
+    const loggedInUser = loginResult.rows[0];
+    const token = signToken(loggedInUser);
+    setAuthCookie(res, token);
+
+    return res.json({
+      success: true,
+      message: 'Signed in successfully.',
+      user: publicUser(loggedInUser),
+      token
+    });
   } catch (error) {
-    console.error("Login error:", error.message);
-    res.status(500).json({ success: false, message: "Unable to sign in right now." });
+    console.error('Login error:', error);
+    return res.status(500).json({ success: false, message: 'Unable to sign you in right now.' });
   }
 });
 
-router.get("/me", async (req, res) => {
-  try {
-    const user = await currentUser(req);
-    if (!user) {
-      clearSessionCookie(res);
-      return res.status(401).json({ success: false, message: "Sign in is required." });
-    }
-    res.json({ success: true, user });
-  } catch (error) {
-    console.error("Session lookup error:", error.message);
-    res.status(500).json({ success: false, message: "Unable to verify your session." });
-  }
+// GET /me
+router.get('/me', requireAuth, async (req, res) => {
+  const profile = await query(
+    `SELECT phone, country, date_of_birth, bio, avatar_url
+     FROM user_profiles WHERE user_id = $1 LIMIT 1`,
+    [req.user.id]
+  );
+
+  return res.json({
+    success: true,
+    user: publicUser(req.user),
+    profile: profile.rows[0] || null
+  });
 });
 
-router.post("/logout", async (req, res) => {
-  try {
-    const token = readSessionToken(req);
-    if (token && /^[a-f0-9]{64}$/.test(token)) {
-      const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
-      await sql`DELETE FROM user_sessions WHERE token_hash = ${tokenHash}`;
-    }
-    clearSessionCookie(res);
-    res.json({ success: true });
-  } catch (error) {
-    console.error("Logout error:", error.message);
-    res.status(500).json({ success: false, message: "Unable to sign out right now." });
-  }
+// POST /logout
+router.post('/logout', (_req, res) => {
+  res.clearCookie(process.env.COOKIE_NAME || 'nexi_token', { path: '/' });
+  return res.json({ success: true, message: 'Signed out successfully.' });
 });
 
 module.exports = router;

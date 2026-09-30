@@ -12,7 +12,9 @@
   const accountConfirmField = get("accountConfirmField");
   const accountSubmit = get("accountSubmit");
   const authModeButtons = [...document.querySelectorAll("[data-auth-mode]")];
-  let accountMode = new URLSearchParams(window.location.search).get("mode") === "register" ? "register" : "login";
+  const query = new URLSearchParams(window.location.search);
+  const inviteToken = query.get("invite") || "";
+  let accountMode = query.get("mode") === "register" || inviteToken ? "register" : "login";
 
   const showMessage = (text, isError = false) => {
     message.textContent = text;
@@ -62,7 +64,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(registering
-          ? { full_name: accountName.value.trim(), email, password }
+          ? { full_name: accountName.value.trim(), email, password, invite_token: inviteToken || undefined }
           : { email, password })
       });
       const data = await response.json().catch(() => ({}));
@@ -72,7 +74,20 @@
         return;
       }
 
-      window.location.assign("user-dashboard.html");
+      if (inviteToken && !registering) {
+        const acceptResponse = await window.nexiApi.request("/circle/invitations/accept", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ invite_token: inviteToken })
+        });
+        const acceptance = await acceptResponse.json().catch(() => ({}));
+        if (!acceptResponse.ok) {
+          showMessage(acceptance.message || "This invitation could not be accepted.", true);
+          return;
+        }
+      }
+
+      window.location.assign(data.user?.role === "admin" ? "admin-dashboard.html" : "user-dashboard.html");
     } catch {
       showMessage("Could not connect to the account service. Please try again.", true);
     } finally {
@@ -83,7 +98,9 @@
   get("authYear").textContent = String(new Date().getFullYear());
   setMode(accountMode);
 
-  window.nexiApi.request("/me").then((response) => {
-    if (response.ok) window.location.replace("user-dashboard.html");
+  window.nexiApi.request("/me").then(async (response) => {
+    if (!response.ok) return;
+    const data = await response.json();
+    window.location.replace(data.user?.role === "admin" ? "admin-dashboard.html" : "user-dashboard.html");
   }).catch(() => {});
 })();

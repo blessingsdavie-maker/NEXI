@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f3f5ef">
+    <meta name="description" content="Nexi operations for membership, check-in summaries, and service directory review.">
+    <title>Admin dashboard — Nexi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="portal.css">
+    <script src="portal-live.js" defer></script>
+  </head>
+  <body data-role="admin">
+    <a class="portal-skip" href="#portalMain">Skip to dashboard</a>
+    <div class="portal-shell">
+      <header class="portal-topbar">
+        <div class="portal-brand-meta"><a class="portal-brand" href="index.html" aria-label="Nexi home"><span class="portal-brandmark">N</span><span>Nexi</span></a><span class="prototype-tag">Operations</span></div>
+        <div class="topbar-actions">
+          <a class="role-switch" href="admin.html">Admin home <span aria-hidden="true">↗</span></a>
+          <button class="theme-button" id="portalTheme" type="button" aria-label="Use dark theme" title="Change colour theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+          <button class="mobile-menu-button" id="portalMenu" type="button" aria-expanded="false" aria-controls="portalSidebar" aria-label="Open dashboard menu">☰</button>
+        </div>
+      </header>
+      <div class="portal-layout">
+        <aside class="portal-sidebar" id="portalSidebar">
+          <p class="sidebar-caption">Operations</p>
+          <nav class="portal-nav" aria-label="Admin dashboard">
+            <button type="button" data-view-target="adminOverview" aria-current="page"><span class="nav-glyph" aria-hidden="true">⌂</span>Overview</button>
+            <button type="button" data-view-target="adminMembers"><span class="nav-glyph" aria-hidden="true">◉</span>Members</button>
+            <button type="button" data-view-target="adminCheckins"><span class="nav-glyph" aria-hidden="true">✓</span>Check-ins</button>
+            <button type="button" data-view-target="adminDirectory"><span class="nav-glyph" aria-hidden="true">⌖</span>Directory review</button>
+          </nav>
+          <div class="sidebar-note"><strong>Privacy boundary</strong>Operations views show circle-level summaries only, never location histories or private support messages.</div>
+          <div class="sidebar-profile"><span class="profile-avatar admin-avatar">NX</span><span><b id="adminProfileName">Nexi Operations</b><small id="adminProfileRole">Administrator</small></span></div>
+        </aside>
+        <main class="portal-main" id="portalMain">
+          <section class="portal-view is-active" id="adminOverview" aria-labelledby="adminOverviewTitle">
+            <div class="view-heading"><div><p class="eyebrow">Operations overview</p><h1 id="adminOverviewTitle">Good evening, admin</h1><p>A high-level view of today's Nexi activity.</p></div><span class="date-label" id="portalDate"></span></div>
+            <div class="stats-grid">
+              <article class="stat-card"><div class="stat-top"><span>Active members</span><span class="stat-icon" aria-hidden="true">◉</span></div><div class="stat-value" id="adminActiveCount">0</div><div class="stat-foot">Across all circles</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Circles</span><span class="stat-icon" aria-hidden="true">⌂</span></div><div class="stat-value" id="adminCircleCount">0</div><div class="stat-foot">No private circle content</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Check-ins pending</span><span class="stat-icon" aria-hidden="true">◷</span></div><div class="stat-value" id="adminCheckinsPending">0</div><div class="stat-foot">Aggregated operational count</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Listings to review</span><span class="stat-icon" aria-hidden="true">!</span></div><div class="stat-value" id="adminReviewCount">0</div><div class="stat-foot">Unverified directory entries</div></article>
+            </div>
+            <div class="overview-grid">
+              <section class="panel"><div class="panel-heading"><div><h2>Today's check-in activity</h2><p>Circle-level totals only</p></div><button class="button button-secondary button-small" type="button" data-open-view="adminCheckins">View activity</button></div><div class="quick-list" id="adminTodayCheckins"></div></section>
+              <section class="panel"><div class="panel-heading"><div><h2>Needs attention</h2><p>Operational tasks, not emergency alerts.</p></div></div><div class="quick-list"><div class="quick-row"><span><b>Directory verification</b><small><span id="adminReviewCountSummary">2</span> listings awaiting review</small></span><button class="button button-secondary button-small" type="button" data-open-view="adminDirectory">Review</button></div><div class="quick-row"><span><b>Member access</b><small>Review active and paused accounts</small></span><button class="button button-secondary button-small" type="button" data-open-view="adminMembers">Manage</button></div></div></section>
+            </div>
+            <div class="privacy-note"><span aria-hidden="true">◈</span><span><strong>Admin visibility is intentionally limited</strong>No live location, direct messages, or personal support details are shown in this dashboard.</span></div>
+            <p class="portal-footer">Nexi is not an emergency service and does not dispatch assistance.</p>
+          </section>
+
+          <section class="portal-view" id="adminMembers" aria-labelledby="adminMembersTitle">
+            <div class="view-heading"><div><p class="eyebrow">Account operations</p><h1 id="adminMembersTitle">Members</h1><p>Search member accounts and pause or restore access.</p></div><button class="button button-primary" type="button" data-focus-invite>＋ Invite member</button></div>
+            <section class="panel"><div class="toolbar"><div class="toolbar-group"><input class="input-control" id="adminMemberSearch" type="search" placeholder="Search name or email" aria-label="Search members"><select class="select-control" id="adminMemberFilter" aria-label="Filter members"><option>All</option><option>Active</option><option>Paused</option></select></div></div>
+              <div class="table-wrap"><table class="data-table"><thead><tr><th>Member</th><th>Circle</th><th>Joined</th><th>Access</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="adminMemberRows"></tbody></table></div><div class="empty-state" id="adminMemberEmpty" hidden>No member accounts match that search.</div>
+              <form class="form-grid" id="adminInviteForm"><div class="field"><label for="adminInviteName">Name</label><input class="input-control" id="adminInviteName" name="name" required placeholder="New member"></div><div class="field"><label for="adminInviteEmail">Email</label><input class="input-control" id="adminInviteEmail" name="email" type="email" required placeholder="name@example.com"></div><button class="button button-primary" type="submit">Send invitation</button></form><p class="form-message" id="adminInviteMessage" aria-live="polite"></p>
+            </section>
+              <div class="notice-box">Member access changes are recorded in the operations audit log.</div>
+          </section>
+
+          <section class="portal-view" id="adminCheckins" aria-labelledby="adminCheckinsTitle">
+            <div class="view-heading"><div><p class="eyebrow">Circle-level activity</p><h1 id="adminCheckinsTitle">Check-ins</h1><p>Operational summaries only. No location trails or message contents.</p></div><button class="button button-secondary" id="adminExport" type="button">↓ Export summary</button></div>
+            <section class="panel"><div class="panel-heading"><div><h2>Today's circles</h2><p>Circle-level summaries only</p></div><span class="status-pill neutral">Current data</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Circle</th><th>Members</th><th>Checked in</th><th>Last update</th><th>Summary</th></tr></thead><tbody id="adminCheckinsTableRows"></tbody></table></div></section>
+            <div class="privacy-note"><span aria-hidden="true">◈</span><span><strong>Members control their own signals</strong>Pending check-ins are not proof of an emergency. This dashboard does not show real-time location or trigger escalation.</span></div>
+          </section>
+
+          <section class="portal-view" id="adminDirectory" aria-labelledby="adminDirectoryTitle">
+            <div class="view-heading"><div><p class="eyebrow">Service quality</p><h1 id="adminDirectoryTitle">Directory review</h1><p>Review illustrative support listings before a future launch.</p></div><span class="role-tag"><span id="adminReviewCountLabel">2</span>&nbsp; awaiting review</span></div>
+            <section class="panel"><div class="panel-heading"><div><h2>Service listings</h2><p>Only add listings that have been independently checked.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Service</th><th>Category</th><th>Area</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="adminDirectoryRows"></tbody></table></div>
+              <form class="form-grid" id="adminDirectoryForm"><div class="field"><label for="listingName">Service name</label><input class="input-control" id="listingName" required maxlength="120"></div><div class="field"><label for="listingCategory">Category</label><input class="input-control" id="listingCategory" required maxlength="60"></div><div class="field"><label for="listingArea">Area</label><input class="input-control" id="listingArea" required maxlength="120"></div><div class="field"><label for="listingContact">Contact details</label><input class="input-control" id="listingContact" maxlength="300"></div><button class="button button-primary" type="submit">Add for review</button></form><p class="form-message" id="adminDirectoryMessage" aria-live="polite"></p></section>
+            <div class="notice-box">Listings are not recommendations until an administrator independently verifies their source and details.</div>
+          </section>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

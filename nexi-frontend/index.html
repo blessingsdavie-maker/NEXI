@@ -62,10 +62,10 @@
           <h1>A little check-in<br>can mean <em>a lot.</em></h1>
           <p class="hero-lead">Nexi helps your people stay in the loop — with gentle check-ins, support close by, and a safer way to ask for help.</p>
           <div class="hero-actions">
-            <button class="btn btn-primary" type="button" data-open-dashboard>
-              Try a family check-in
+            <a class="btn btn-primary" href="login.html?mode=register">
+              Create your account
               <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5"/></svg>
-            </button>
+            </a>
             <a class="text-link" href="#how-it-works">See how Nexi works <span aria-hidden="true">↓</span></a>
           </div>
           <ul class="hero-points" aria-label="Nexi highlights">
@@ -124,13 +124,13 @@
             <span class="step-number">01</span>
             <div class="step-illustration setup-art"><span>☺</span><span>♥</span><span>✦</span></div>
             <h3>Make your circle</h3>
-            <p>Invite the people you care about and set the check-ins that make sense for all of you.</p>
+            <p>Invite the people you care about and save a check-in time that works for you.</p>
           </article>
           <article class="step-card">
             <span class="step-number">02</span>
             <div class="step-illustration check-art"><span class="mini-check">✓</span><span class="check-line"></span><span class="check-line short"></span></div>
             <h3>Check in, your way</h3>
-            <p>A quick “safe” is enough. If you need support, you can say so quietly and decide who knows.</p>
+            <p>Save a safe or support check-in for your circle. Nexi does not send alerts or contact emergency services.</p>
           </article>
           <article class="step-card">
             <span class="step-number">03</span>
@@ -145,28 +145,20 @@
         <div class="checkin-copy">
           <p class="eyebrow eyebrow-light">A kinder safety signal</p>
           <h2>Safe can be<br>just one tap away.</h2>
-          <p>Check in at the time you choose. A missed check-in stays private to your circle, and any support signal is shared only with the people you select.</p>
+          <p>Save check-ins to your account and share them with people in your circle. Reminder delivery and automatic missed-check-in alerts are not available.</p>
           <ul class="feature-list">
             <li><span>✓</span> No one can add themselves to your circle</li>
-            <li><span>✓</span> Change or pause a schedule anytime</li>
-            <li><span>✓</span> Choose when to share your location</li>
+            <li><span>✓</span> Save or pause your reminder preference</li>
+            <li><span>✓</span> Nexi does not collect your location</li>
           </ul>
         </div>
         <div class="live-demo">
-          <div class="demo-topbar"><span class="demo-live-dot"></span> Interactive demo</div>
-          <p class="demo-kicker">THE KAMAU CIRCLE</p>
-          <h3>Have you arrived safely?</h3>
-          <p class="demo-subtext" id="demoStatus" aria-live="polite">Your family gets a gentle update, not your every move.</p>
-          <div class="demo-actions" id="demoActions">
-            <button class="demo-safe" type="button" data-demo-checkin="safe"><span>✓</span> I’m safe</button>
-            <button class="demo-help" type="button" data-demo-checkin="help"><span>♡</span> I need support</button>
-          </div>
-          <p class="demo-safety-note">Demo only — no alert, message, or location is sent.</p>
-          <button class="demo-reset" id="demoReset" type="button" hidden>Try again</button>
-          <div class="demo-members" aria-hidden="true">
-            <span class="avatar a-one">M</span><span class="avatar a-two">D</span><span class="avatar a-three">B</span>
-            <p>3 people in your circle</p>
-          </div>
+          <div class="demo-topbar"><span class="demo-live-dot"></span> Your account</div>
+          <p class="demo-kicker">PRIVATE BY DEFAULT</p>
+          <h3>Check in with your circle.</h3>
+          <p class="demo-subtext">Create an account to invite trusted people and save check-ins that belong to you.</p>
+          <div class="demo-actions"><a class="demo-safe" href="login.html?mode=register"><span>✓</span> Get started</a></div>
+          <p class="demo-safety-note">Check-ins are saved to your account. Nexi does not provide emergency response.</p>
         </div>
       </section>
 
@@ -179,11 +171,11 @@
           <p>Keep trusted services in one place. Search by what you need and save useful contacts for later.</p>
         </div>
 
-        <div class="service-finder" aria-label="Demo service finder">
+        <div class="service-finder" aria-label="Verified service directory">
           <div class="finder-controls">
             <label class="search-field" for="serviceSearch">
               <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"/><path d="m16 16 4.3 4.3"/></svg>
-              <span class="sr-only">Search sample services</span>
+              <span class="sr-only">Search verified services</span>
               <input id="serviceSearch" type="search" placeholder="Search support near you">
             </label>
             <div class="filter-row" role="group" aria-label="Filter services">
@@ -194,7 +186,7 @@
             </div>
           </div>
           <div class="service-results" id="serviceResults" aria-live="polite"></div>
-          <p class="finder-note">Illustrative listings only — live directory verification comes before launch.</p>
+          <p class="finder-note">Only services verified by Nexi administrators appear here.</p>
         </div>
       </section>
 
@@ -206,7 +198,7 @@
         <div class="privacy-copy">
           <p class="eyebrow">Privacy is the feature</p>
           <h2>Care should never feel like control.</h2>
-          <p>Nexi is built around consent. You decide your circle, your check-ins, your emergency contacts, and what information is shared.</p>
+          <p>Nexi is built around consent. You decide who joins your circle and which check-ins you save. Location data is not collected.</p>
           <a class="text-link dark-link" href="#faq">Read our safety principles <span aria-hidden="true">→</span></a>
         </div>
       </section>
@@ -247,11 +239,11 @@
         <div class="faq-list">
           <details open>
             <summary>Can someone track me with Nexi?<span aria-hidden="true"></span></summary>
-            <p>No. Location sharing is optional, specific to a moment, and under your control. It is never public or switched on by default.</p>
+            <p>No. Location sharing is not available, and Nexi does not collect location data.</p>
           </details>
           <details>
             <summary>What happens if I miss a check-in?<span aria-hidden="true"></span></summary>
-            <p>Your chosen circle can receive a gentle prompt after the grace period you set. The goal is a conversation, not an alarm.</p>
+            <p>Nexi does not detect missed check-ins or send automatic prompts. Members can view check-ins saved to their circle.</p>
           </details>
           <details>
             <summary>Does Nexi replace emergency services?<span aria-hidden="true"></span></summary>
@@ -281,55 +273,12 @@
       <div class="footer-top">
         <a class="brand footer-brand" href="#home" aria-label="Nexi home"><svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 3.7 33.8 9v9.6c0 8.7-5.5 15-13.8 17.8C11.7 33.6 6.2 27.3 6.2 18.6V9L20 3.7Z" fill="currentColor"/><path d="M13 20.5 17.5 25 27.8 14.7" fill="none" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2"/></svg><span>Nexi</span></a>
         <p>A more human way to stay connected.</p>
-        <div class="footer-links"><a href="#how-it-works">How it works</a><a href="#safety">Safety</a><a href="#faq">Help &amp; FAQ</a><a href="#waitlist">Partners</a><a href="login.html">Sign in</a><a href="admin.html">Admin demo</a></div>
+        <div class="footer-links"><a href="#how-it-works">How it works</a><a href="#safety">Safety</a><a href="#faq">Help &amp; FAQ</a><a href="#waitlist">Partners</a><a href="login.html">Sign in</a><a href="admin.html">Operations</a></div>
       </div>
-      <div class="footer-bottom"><span>© <span id="year"></span> Nexi. Built with care.</span><span>This prototype does not provide emergency services.</span></div>
+      <div class="footer-bottom"><span>© <span id="year"></span> Nexi. Built with care.</span><span>Nexi does not replace emergency services.</span></div>
     </footer>
 
-    <dialog class="dashboard-dialog" id="dashboardDialog" aria-labelledby="dashboardTitle">
-      <div class="dashboard-shell">
-        <header class="dashboard-header">
-          <div class="dashboard-brand"><span class="dashboard-brandmark">N</span><span>Nexi</span><span class="demo-pill">Demo</span></div>
-          <button class="close-dialog" type="button" data-close-dashboard aria-label="Close demo">×</button>
-        </header>
-        <div class="dashboard-content">
-          <aside class="dashboard-side">
-            <p class="side-label">YOUR CIRCLE</p>
-            <span class="side-item is-current"><span>⌂</span> Today</span>
-            <span class="side-item"><span>◌</span> My circle</span>
-            <span class="side-item"><span>♡</span> Support</span>
-            <div class="side-footer"><span class="avatar a-four">A</span><span>Amina W.</span></div>
-          </aside>
-          <section class="dashboard-main">
-            <p class="dashboard-greeting" id="dashboardDate"></p>
-            <h2 id="dashboardTitle">Hello, Amina <span>✦</span></h2>
-            <div class="dashboard-hero-card">
-              <div><p class="dashboard-card-label">TONIGHT’S CHECK-IN</p><h3>Have you arrived safely?</h3><p id="dashboardCheckinText" aria-live="polite">Your circle is waiting for a quick update.</p></div>
-              <div class="dashboard-actions" id="dashboardActions">
-                <button class="dashboard-safe" type="button" data-dashboard-checkin="safe"><span>✓</span> I’m safe</button>
-                <button class="dashboard-support" type="button" data-dashboard-checkin="help">I need support</button>
-              </div>
-              <button class="dashboard-reset" id="dashboardReset" type="button" hidden>Reset demo</button>
-            </div>
-            <div class="dashboard-columns">
-              <section class="circle-card"><div class="section-card-heading"><div><p class="dashboard-card-label">THE KAMAU CIRCLE</p><h3 id="dashboardCircleSummary">4 of 5 checked in</h3></div><span class="plain-button">Demo circle</span></div><div class="dashboard-members" id="dashboardMembers"></div></section>
-              <section class="support-card"><p class="dashboard-card-label">SAVED SUPPORT</p><h3>Useful, when it counts</h3><div class="support-row"><span class="support-icon">✚</span><div><b>Nearest hospital</b><small>Keep local details ready</small></div><span aria-hidden="true">→</span></div><div class="support-row"><span class="support-icon">⌁</span><div><b>Emergency contacts</b><small>Choose who gets your signal</small></div><span aria-hidden="true">→</span></div></section>
-            </div>
-            <p class="dashboard-disclaimer">Interactive demo only. Nexi does not send emergency alerts in this prototype.</p>
-          </section>
-        </div>
-      </div>
-    </dialog>
-
-    <dialog class="support-dialog" id="supportDialog" aria-labelledby="supportTitle">
-      <button class="close-dialog support-close" type="button" data-close-support aria-label="Close support prompt">×</button>
-      <span class="support-pulse">♡</span>
-      <p class="eyebrow">Demo safety flow</p>
-      <h2 id="supportTitle">You’re not alone.</h2>
-      <p>In the live product, this step would show exactly who will be notified and ask for your confirmation. This demo sends nothing.</p>
-      <div class="support-dialog-actions"><button class="btn btn-primary" id="confirmSupport" type="button">Show support update</button><button class="btn btn-text" type="button" data-close-support>Go back</button></div>
-    </dialog>
-
-    <script src="script.js"></script>
+    <script src="nexi-api.js"></script>
+    <script src="site-live.js"></script>
   </body>
 </html>
