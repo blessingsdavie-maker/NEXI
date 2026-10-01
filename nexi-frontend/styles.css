@@ -11,18 +11,30 @@
   --danger: #b94740;
   --danger-light: #f8e5e1;
 
+  --teal: #168b80;
+  --teal-light: #dff5f0;
+  --red: #b94740;
+  --red-light: #f8e5e1;
+  --forest-pale: #e2eee7;
   --mist: #f4f5ef;
   --paper: #ffffff;
+  --surface: #ffffff;
   --ink: #202d27;
   --muted: #68776e;
   --line: #dce2d8;
+  --shadow: 0 20px 60px rgba(23, 56, 43, 0.12);
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --sans: "Inter", sans-serif;
+  --display: "Poppins", sans-serif;
+  --mouse-x: 50%;
+  --mouse-y: 50%;
 }
 
 :root[data-theme="dark"] {
   --forest: #a6d3b6;
   --forest-deep: #10271e;
   --teal: #f09270;
-  --teal-light: #3b3029;
   --red: #f18a80;
   --mist: #0c1a15;
   --paper: #132a22;

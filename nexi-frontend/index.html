@@ -39,9 +39,6 @@
           <span class="mobile-nav-actions">
             <a href="login.html">Login</a>
             <a class="mobile-get-started" href="login.html?mode=register">Get Started</a>
-            <a class="mobile-floating-cta" href="login.html?mode=register"> Get Started
-  <span>→</span>
-</a>
           </span>
         </nav>
 
@@ -306,7 +303,9 @@
       <div class="footer-bottom"><span>© <span id="year"></span> Nexi. Built with care.</span><span>Nexi does not replace emergency services.</span></div>
     </footer>
 
+    <a class="mobile-floating-cta" href="login.html?mode=register">Get Started <span aria-hidden="true">→</span></a>
     <script src="nexi-api.js"></script>
+    <script src="site-live.js"></script>
     <script>
       document
         .querySelectorAll(".nav-login, .mobile-nav-actions > a:first-child")
@@ -397,11 +396,8 @@ if (window.matchMedia("(pointer:fine)").matches) {
   });
 }
 </script>
-<article class="step-card" data-reveal></article>
-<article class="step-card reveal-delay-1" data-reveal></article>
-<article class="step-card reveal-delay-1" data-reveal></article>
 <script>
-const revealItems = document.querySelectorAll("[data-reveal]");
+const revealItems = document.querySelectorAll(".step-card");
 
 const revealObserver = new IntersectionObserver(
   (entries, observer) => {
