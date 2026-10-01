@@ -35,16 +35,7 @@
     return;
   }
 
-  /*
-   * If the user deliberately opens the registration page,
-   * remove any previous local authentication session.
-   *
-   * This prevents an old logged-in account from being
-   * treated as the current registration session.
-   */
-  if (accountMode === "register") {
-    window.nexiApi.clearToken();
-  }
+  window.nexiApi.clearToken();
 
   const showMessage = (text, isError = false) => {
     if (!message) {
@@ -392,45 +383,4 @@
    */
   setMode(accountMode);
 
-  /*
-   * IMPORTANT:
-   *
-   * Only check /me when this is LOGIN mode.
-   *
-   * When the user is on:
-   * login.html?mode=register
-   *
-   * this block does NOT execute, so an existing session
-   * cannot automatically redirect the user away from
-   * the signup page.
-   */
-  const isRegisterMode =
-    accountMode === "register";
-
-  if (!isRegisterMode) {
-    window.nexiApi
-      .request("/me")
-      .then(async (response) => {
-        if (!response.ok) {
-          return;
-        }
-
-        const data =
-          await response.json();
-
-        if (data.user) {
-          window.location.replace(
-            data.user.role === "admin"
-              ? "admin-dashboard.html"
-              : "user-dashboard.html"
-          );
-        }
-      })
-      .catch(() => {
-        /*
-         * Ignore authentication-check errors.
-         * The user can still use the login page normally.
-         */
-      });
-  }
 })();

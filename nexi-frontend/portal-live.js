@@ -87,6 +87,7 @@
     button.disabled = true;
     try {
       await api("/logout", { method: "POST" });
+      window.nexiApi.clearToken();
       window.location.replace("login.html?mode=login");
     } catch (error) {
       button.disabled = false;
