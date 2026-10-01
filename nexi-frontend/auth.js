@@ -12,7 +12,9 @@
   const accountNameField = get("accountNameField");
   const accountConfirmField = get("accountConfirmField");
   const accountSubmit = get("accountSubmit");
-  const authModeButtons = [...document.querySelectorAll("[data-auth-mode]")];
+  const authModeButtons = [
+    ...document.querySelectorAll("[data-auth-mode]")
+  ];
 
   const query = new URLSearchParams(window.location.search);
   const inviteToken = query.get("invite") || "";
@@ -22,21 +24,33 @@
       ? "register"
       : "login";
 
-  if (
-    !accountForm ||
-    !message ||
-    !accountEmail ||
-    !accountPassword ||
-    !accountSubmit ||
-    !window.nexiApi
-  ) {
+  /*
+   * Make sure the API helper has loaded before
+   * attempting to use authentication.
+   */
+  if (!window.nexiApi) {
     console.error(
-      "Nexi authentication could not start: required elements or nexiApi are missing."
+      "Nexi API is not available. Make sure nexi-api.js loads before auth.js."
     );
     return;
   }
 
+  /*
+   * If the user deliberately opens the registration page,
+   * remove any previous local authentication session.
+   *
+   * This prevents an old logged-in account from being
+   * treated as the current registration session.
+   */
+  if (accountMode === "register") {
+    window.nexiApi.clearToken();
+  }
+
   const showMessage = (text, isError = false) => {
+    if (!message) {
+      return;
+    }
+
     message.textContent = text;
     message.classList.toggle("is-error", isError);
   };
@@ -62,24 +76,26 @@
       accountConfirm.required = registering;
     }
 
-    accountPassword.autocomplete = registering
-      ? "new-password"
-      : "current-password";
+    if (accountPassword) {
+      accountPassword.autocomplete = registering
+        ? "new-password"
+        : "current-password";
 
-    accountPassword.minLength = registering ? 8 : 1;
+      accountPassword.minLength = registering ? 8 : 1;
+    }
 
-    const title = get("authTitle");
-    const description = get("authDescription");
+    const authTitle = get("authTitle");
+    const authDescription = get("authDescription");
     const passwordLabel = get("accountPasswordLabel");
 
-    if (title) {
-      title.textContent = registering
+    if (authTitle) {
+      authTitle.textContent = registering
         ? "Create your Nexi account"
         : "Sign in or create an account";
     }
 
-    if (description) {
-      description.textContent = registering
+    if (authDescription) {
+      authDescription.textContent = registering
         ? "Create an account to keep your profile available across devices."
         : "Sign in with your email, or choose Create account to register.";
     }
@@ -90,9 +106,11 @@
         : "Password";
     }
 
-    accountSubmit.innerHTML =
-      `${registering ? "Create account" : "Sign in"} ` +
-      `<span aria-hidden="true">→</span>`;
+    if (accountSubmit) {
+      accountSubmit.innerHTML =
+        `${registering ? "Create account" : "Sign in"} ` +
+        `<span aria-hidden="true">→</span>`;
+    }
 
     authModeButtons.forEach((button) => {
       button.setAttribute(
@@ -101,164 +119,318 @@
       );
     });
 
-    if (accountName) {
-      accountName.value = "";
+    /*
+     * Clear password fields when switching between
+     * Login and Create Account modes.
+     */
+    if (accountPassword) {
+      accountPassword.value = "";
     }
-
-    accountPassword.value = "";
 
     if (accountConfirm) {
       accountConfirm.value = "";
     }
 
+    if (accountName && registering) {
+      accountName.value = "";
+    }
+
     showMessage("");
   };
 
+  /*
+   * Login / Create Account mode buttons
+   */
   authModeButtons.forEach((button) => {
     button.addEventListener("click", () => {
-      setMode(button.dataset.authMode);
+      const mode = button.dataset.authMode;
+
+      /*
+       * When explicitly switching into registration mode,
+       * clear any existing authentication session.
+       */
+      if (mode === "register") {
+        window.nexiApi.clearToken();
+      }
+
+      setMode(mode);
     });
   });
 
-  accountForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
+  /*
+   * Form submission
+   */
+  if (accountForm) {
+    accountForm.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
 
-    const email = accountEmail.value.trim().toLowerCase();
-    const password = accountPassword.value;
-    const registering = accountMode === "register";
+        const email = accountEmail
+          ? accountEmail.value.trim().toLowerCase()
+          : "";
 
-    if (registering && accountName && !accountName.value.trim()) {
-      showMessage("Please enter your full name.", true);
-      return;
-    }
+        const password = accountPassword
+          ? accountPassword.value
+          : "";
 
-    if (
-      registering &&
-      accountConfirm &&
-      password !== accountConfirm.value
-    ) {
-      showMessage("Those passwords don't match yet.", true);
-      return;
-    }
+        const registering =
+          accountMode === "register";
 
-    accountSubmit.disabled = true;
+        /*
+         * Registration validation
+         */
+        if (registering) {
+          const fullName = accountName
+            ? accountName.value.trim()
+            : "";
 
-    showMessage(
-      registering
-        ? "Creating your account…"
-        : "Signing in…"
-    );
+          const confirmPassword = accountConfirm
+            ? accountConfirm.value
+            : "";
 
-    try {
-      const response = await window.nexiApi.request(
-        registering ? "/signup" : "/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(
-            registering
-              ? {
-                  full_name: accountName
-                    ? accountName.value.trim()
-                    : "",
-                  email,
-                  password,
-                  invite_token:
-                    inviteToken || undefined
-                }
-              : {
-                  email,
-                  password
-                }
-          )
+          if (!fullName) {
+            showMessage(
+              "Please enter your full name.",
+              true
+            );
+            return;
+          }
+
+          if (!email) {
+            showMessage(
+              "Please enter your email address.",
+              true
+            );
+            return;
+          }
+
+          if (!password) {
+            showMessage(
+              "Please create a password.",
+              true
+            );
+            return;
+          }
+
+          if (password.length < 8) {
+            showMessage(
+              "Your password must be at least 8 characters.",
+              true
+            );
+            return;
+          }
+
+          if (password !== confirmPassword) {
+            showMessage(
+              "Those passwords don't match yet.",
+              true
+            );
+            return;
+          }
         }
-      );
 
-      const data = await response.json().catch(() => ({}));
+        /*
+         * Login validation
+         */
+        if (!registering) {
+          if (!email) {
+            showMessage(
+              "Please enter your email address.",
+              true
+            );
+            return;
+          }
 
-      if (!response.ok) {
+          if (!password) {
+            showMessage(
+              "Please enter your password.",
+              true
+            );
+            return;
+          }
+        }
+
+        if (accountSubmit) {
+          accountSubmit.disabled = true;
+        }
+
         showMessage(
-          data.message ||
-            "Your request could not be completed.",
-          true
+          registering
+            ? "Creating your account…"
+            : "Signing in…"
         );
-        return;
+
+        try {
+          const endpoint = registering
+            ? "/signup"
+            : "/login";
+
+          const body = registering
+            ? {
+                full_name: accountName
+                  ? accountName.value.trim()
+                  : "",
+                email,
+                password,
+                invite_token:
+                  inviteToken || undefined
+              }
+            : {
+                email,
+                password
+              };
+
+          const response =
+            await window.nexiApi.request(
+              endpoint,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+              }
+            );
+
+          const data =
+            await response
+              .json()
+              .catch(() => ({}));
+
+          /*
+           * Backend returned an error
+           */
+          if (!response.ok) {
+            showMessage(
+              data.message ||
+                "Your request could not be completed.",
+              true
+            );
+            return;
+          }
+
+          /*
+           * Successful authentication must return
+           * a JWT token.
+           */
+          if (!data.token) {
+            console.error(
+              "No authentication token returned by backend.",
+              data
+            );
+
+            showMessage(
+              registering
+                ? "Your account was created, but the login session could not be established."
+                : "You were authenticated, but the login session could not be established.",
+              true
+            );
+
+            return;
+          }
+
+          /*
+           * SAVE THE JWT
+           *
+           * This is what allows /me and other protected
+           * endpoints to recognize the user after redirect.
+           */
+          window.nexiApi.setToken(
+            data.token
+          );
+
+          /*
+           * Determine which dashboard to open.
+           */
+          const destination =
+            data.user &&
+            data.user.role === "admin"
+              ? "admin-dashboard.html"
+              : "user-dashboard.html";
+
+          /*
+           * Use replace so the authentication page
+           * does not remain in browser history.
+           */
+          window.location.replace(
+            destination
+          );
+
+        } catch (error) {
+          console.error(
+            "Nexi authentication error:",
+            error
+          );
+
+          showMessage(
+            "Could not connect to the account service. Please try again.",
+            true
+          );
+
+        } finally {
+          if (accountSubmit) {
+            accountSubmit.disabled = false;
+          }
+        }
       }
+    );
+  }
 
-      /*
-       * IMPORTANT:
-       * The Nexi backend returns a JWT token after
-       * successful signup/login.
-       */
-      if (!data.token) {
-        console.error(
-          "Authentication response did not contain a token.",
-          data
-        );
+  /*
+   * Current year in footer
+   */
+  const authYear = get("authYear");
 
-        showMessage(
-          "The account was created, but the login session was not returned.",
-          true
-        );
-
-        return;
-      }
-
-      // Save authentication session
-      window.nexiApi.setToken(data.token);
-
-      const destination =
-        data.user?.role === "admin"
-          ? "admin-dashboard.html"
-          : "user-dashboard.html";
-
-      window.location.replace(destination);
-
-    } catch (error) {
-      console.error(
-        "Nexi authentication error:",
-        error
-      );
-
-      showMessage(
-        "Could not connect to the account service. Please try again.",
-        true
-      );
-
-    } finally {
-      accountSubmit.disabled = false;
-    }
-  });
-
-  const year = get("authYear");
-
-  if (year) {
-    year.textContent =
+  if (authYear) {
+    authYear.textContent =
       String(new Date().getFullYear());
   }
 
+  /*
+   * Set initial mode
+   */
   setMode(accountMode);
 
   /*
-   * If already authenticated, go directly
-   * to the appropriate dashboard.
+   * IMPORTANT:
+   *
+   * Only check /me when this is LOGIN mode.
+   *
+   * When the user is on:
+   * login.html?mode=register
+   *
+   * this block does NOT execute, so an existing session
+   * cannot automatically redirect the user away from
+   * the signup page.
    */
-  window.nexiApi
-    .request("/me")
-    .then(async (response) => {
-      if (!response.ok) return;
+  const isRegisterMode =
+    accountMode === "register";
 
-      const data = await response.json();
+  if (!isRegisterMode) {
+    window.nexiApi
+      .request("/me")
+      .then(async (response) => {
+        if (!response.ok) {
+          return;
+        }
 
-      if (data.user) {
-        window.location.replace(
-          data.user.role === "admin"
-            ? "admin-dashboard.html"
-            : "user-dashboard.html"
-        );
-      }
-    })
-    .catch(() => {});
+        const data =
+          await response.json();
+
+        if (data.user) {
+          window.location.replace(
+            data.user.role === "admin"
+              ? "admin-dashboard.html"
+              : "user-dashboard.html"
+          );
+        }
+      })
+      .catch(() => {
+        /*
+         * Ignore authentication-check errors.
+         * The user can still use the login page normally.
+         */
+      });
+  }
 })();
