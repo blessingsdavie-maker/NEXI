@@ -70,30 +70,23 @@
       const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        showMessage(data.message || "Your request could not be completed.", true);
-        return;
-      }
+  showMessage(data.message || "Your request could not be completed.", true);
+  return;
+}
 
-      if (inviteToken && !registering) {
-        const acceptResponse = await window.nexiApi.request("/circle/invitations/accept", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ invite_token: inviteToken })
-        });
-        const acceptance = await acceptResponse.json().catch(() => ({}));
-        if (!acceptResponse.ok) {
-          showMessage(acceptance.message || "This invitation could not be accepted.", true);
-          return;
-        }
-      }
+// Save the JWT returned by the backend
+if (!data.token) {
+  showMessage("Account created, but the login session could not be established.", true);
+  return;
+}
 
-      window.location.assign(data.user?.role === "admin" ? "admin-dashboard.html" : "user-dashboard.html");
-    } catch {
-      showMessage("Could not connect to the account service. Please try again.", true);
-    } finally {
-      accountSubmit.disabled = false;
-    }
-  });
+window.nexiApi.setToken(data.token);
+
+window.location.assign(
+  data.user?.role === "admin"
+    ? "admin-dashboard.html"
+    : "user-dashboard.html"
+);
 
   get("authYear").textContent = String(new Date().getFullYear());
   setMode(accountMode);
