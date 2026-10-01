@@ -39,6 +39,9 @@
           <span class="mobile-nav-actions">
             <a href="login.html">Login</a>
             <a class="mobile-get-started" href="login.html?mode=register">Get Started</a>
+            <a class="mobile-floating-cta" href="login.html?mode=register"> Get Started
+  <span>→</span>
+</a>
           </span>
         </nav>
 
@@ -73,8 +76,16 @@
             <li><span class="check-dot">✓</span> Designed for Kenya, first</li>
           </ul>
         </div>
-
+        <div class="hero-status">
+      <span class="hero-status-dot"></span>
+      <span>Nexi system ready</span>
+      <strong>LIVE PREVIEW</strong>
+      </div>
         <div class="hero-showcase" aria-label="Illustration of a Nexi family check-in">
+          <div class="hero-grid"></div>
+
+          <div class="floating-orb orb-one"></div>
+          <div class="floating-orb orb-two"></div>
           <div class="shape shape-one"></div>
           <div class="shape shape-two"></div>
           <div class="showcase-card family-card">
@@ -104,11 +115,28 @@
         </div>
       </section>
 
-      <section class="trust-strip" aria-label="Nexi promises">
-        <div><span class="trust-icon">◌</span> No public location tracking</div>
-        <div><span class="trust-icon">⌁</span> Your circle, your rules</div>
-        <div><span class="trust-icon">✦</span> Calm by design</div>
-      </section>
+      <section class="trust-strip futuristic-trust" aria-label="Nexi promises">
+
+  <div>
+    <span class="trust-live"></span>
+    <strong>PRIVATE BY DEFAULT</strong>
+    <small>Your data stays yours</small>
+  </div>
+
+  <div>
+    <span class="trust-live"></span>
+    <strong>CONSENT FIRST</strong>
+    <small>Your circle, your rules</small>
+  </div>
+
+  <div>
+    <span class="trust-live"></span>
+    <strong>NO LOCATION COLLECTION</strong>
+    <small>Designed without surveillance</small>
+  </div>
+
+</section>
+
 
       <section class="section intro-section" id="how-it-works">
         <div class="section-heading split-heading">
@@ -305,5 +333,149 @@
           });
         });
     </script>
+    <script>
+document.addEventListener("click", (event) => {
+  const button = event.target.closest(".btn, .filter-chip, .demo-actions button");
+
+  if (!button) return;
+
+  const rect = button.getBoundingClientRect();
+  const ripple = document.createElement("span");
+
+  ripple.className = "button-ripple";
+
+  const size = Math.max(rect.width, rect.height);
+
+  ripple.style.width = `${size}px`;
+  ripple.style.height = `${size}px`;
+  ripple.style.left = `${event.clientX - rect.left - size / 2}px`;
+  ripple.style.top = `${event.clientY - rect.top - size / 2}px`;
+
+  button.appendChild(ripple);
+
+  setTimeout(() => {
+    ripple.remove();
+  }, 650);
+});
+</script>
+<script>
+if (window.matchMedia("(pointer:fine)").matches) {
+
+  const cards = document.querySelectorAll(
+    ".family-card, .notification-card, .live-demo"
+  );
+
+  cards.forEach((card) => {
+
+    card.addEventListener("mousemove", (event) => {
+
+      const rect = card.getBoundingClientRect();
+
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      const rotateX = ((y / rect.height) - .5) * -5;
+      const rotateY = ((x / rect.width) - .5) * 5;
+
+      card.style.transform =
+        `perspective(900px)
+         rotateX(${rotateX}deg)
+         rotateY(${rotateY}deg)
+         translateY(-2px)`;
+    });
+
+    card.addEventListener("mouseleave", () => {
+
+      if (card.classList.contains("family-card")) {
+        card.style.transform = "rotate(-2deg)";
+      } else if (card.classList.contains("notification-card")) {
+        card.style.transform = "rotate(3deg)";
+      } else {
+        card.style.transform = "";
+      }
+    });
+  });
+}
+</script>
+<article class="step-card" data-reveal></article>
+<article class="step-card reveal-delay-1" data-reveal></article>
+<article class="step-card reveal-delay-1" data-reveal></article>
+<script>
+const revealItems = document.querySelectorAll("[data-reveal]");
+
+const revealObserver = new IntersectionObserver(
+  (entries, observer) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+
+      entry.target.classList.add("is-visible");
+      observer.unobserve(entry.target);
+    });
+  },
+  {
+    threshold: .12
+  }
+);
+
+revealItems.forEach((item) => {
+  revealObserver.observe(item);
+});
+</script>
+<script>
+const navLinks = [...document.querySelectorAll(".primary-nav > a")];
+
+const sections = navLinks
+  .map((link) => document.querySelector(link.getAttribute("href")))
+  .filter(Boolean);
+
+const navObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+
+      if (!entry.isIntersecting) return;
+
+      navLinks.forEach((link) => {
+        link.classList.toggle(
+          "is-active",
+          link.getAttribute("href") === `#${entry.target.id}`
+        );
+      });
+
+    });
+  },
+  {
+    rootMargin: "-35% 0px -55% 0px"
+  }
+);
+
+sections.forEach((section) => navObserver.observe(section));
+</script>
+<script>
+if (window.matchMedia("(pointer:fine)").matches) {
+  let ticking = false;
+
+  window.addEventListener("pointermove", (event) => {
+
+    if (ticking) return;
+
+    ticking = true;
+
+    requestAnimationFrame(() => {
+
+      document.documentElement.style.setProperty(
+        "--mouse-x",
+        `${event.clientX}px`
+      );
+
+      document.documentElement.style.setProperty(
+        "--mouse-y",
+        `${event.clientY}px`
+      );
+
+      ticking = false;
+    });
+  });
+}
+</script>
   </body>
 </html>
