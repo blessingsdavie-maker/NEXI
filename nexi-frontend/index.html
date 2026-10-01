@@ -279,5 +279,31 @@
     </footer>
 
     <script src="nexi-api.js"></script>
+    <script>
+      document
+        .querySelectorAll(".nav-login, .mobile-nav-actions > a:first-child")
+        .forEach((link) => {
+          link.addEventListener("click", async (event) => {
+            event.preventDefault();
+
+            if (link.dataset.loginPending) {
+              return;
+            }
+
+            link.dataset.loginPending = "true";
+
+            try {
+              await window.nexiApi.request("/logout", {
+                method: "POST"
+              });
+            } catch {
+              // Continue to login if the session is already unavailable.
+            } finally {
+              window.nexiApi.clearToken();
+              window.location.assign(link.href);
+            }
+          });
+        });
+    </script>
   </body>
 </html>
