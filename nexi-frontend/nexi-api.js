@@ -1,7 +1,9 @@
 (() => {
   "use strict";
 
-  const isLocal = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+  const isLocal =
+    window.location.protocol === "file:" ||
+    ["localhost", "127.0.0.1", ""].includes(window.location.hostname);
 
   const apiBaseUrl = (
     window.NEXI_API_BASE_URL ||

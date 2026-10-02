@@ -54,13 +54,13 @@ return result.rows[0] || null;
 }
 
 function getFrontendUrl() {
-return (
-process.env.FRONTEND_URL ||
-'http://localhost:3000'
-)
-.split(',')[0]
-.trim()
-.replace(//+$/, '');
+  return (
+    process.env.FRONTEND_URL ||
+    'http://localhost:3000'
+  )
+    .split(',')[0]
+    .trim()
+    .replace(/\/+$/, '');
 }
 
 function isTodayNairobi(column = 'created_at') {
@@ -100,7 +100,7 @@ const result = await query(
 [req.user.id]
 );
 
-```
+
 if (!result.rows.length) {
   return res.status(404).json({
     success: false,
@@ -112,7 +112,7 @@ return res.json({
   success: true,
   user: result.rows[0]
 });
-```
+
 
 }
 );
@@ -127,7 +127,7 @@ req.user.full_name ??
 ''
 ).trim();
 
-```
+
 const phone =
   req.body?.phone ?? null;
 
@@ -248,7 +248,7 @@ return res.json({
     'Profile updated successfully.',
   user: result.rows[0]
 });
-```
+
 
 }
 );
@@ -264,7 +264,7 @@ async (req, res) => {
 const circle =
 await getOrCreateCircle(req.user.id);
 
-```
+
 if (!circle) {
   return res.status(500).json({
     success: false,
@@ -436,7 +436,7 @@ return res.json({
   notifications:
     notificationsResult.rows
 });
-```
+
 
 }
 );
@@ -454,7 +454,7 @@ String(
 req.body?.status || ''
 ).trim().toLowerCase();
 
-```
+
 const note =
   req.body?.note
     ? String(req.body.note).trim().slice(0, 1000)
@@ -605,7 +605,7 @@ try {
 } finally {
   client.release();
 }
-```
+
 
 }
 );
@@ -621,7 +621,7 @@ async (req, res) => {
 const circle =
 await getOrCreateCircle(req.user.id);
 
-```
+
 if (!circle) {
   return res.status(500).json({
     success: false,
@@ -653,7 +653,7 @@ return res.json({
       ? "Today's check-in was cleared."
       : "You did not have a check-in for today."
 });
-```
+
 
 }
 );
@@ -669,7 +669,7 @@ async (req, res) => {
 const enabled =
 Boolean(req.body?.enabled);
 
-```
+
 const rawTime =
   String(
     req.body?.time || '19:00'
@@ -749,7 +749,7 @@ return res.json({
   reminder:
     result.rows[0]
 });
-```
+
 
 }
 );
@@ -767,7 +767,7 @@ String(
 req.body?.full_name || ''
 ).trim();
 
-```
+
 const email =
   String(
     req.body?.email || ''
@@ -981,7 +981,7 @@ try {
 } finally {
   client.release();
 }
-```
+
 
 }
 );
@@ -1012,13 +1012,13 @@ await query(
 [req.user.id]
 );
 
-```
+
 return res.json({
   success: true,
   notifications:
     result.rows
 });
-```
+
 
 }
 );
@@ -1043,7 +1043,7 @@ req.user.id
 ]
 );
 
-```
+
 if (!result.rows.length) {
   return res.status(404).json({
     success: false,
@@ -1058,7 +1058,7 @@ return res.json({
   notification:
     result.rows[0]
 });
-```
+
 
 }
 );
@@ -1077,13 +1077,13 @@ await query(
 [req.user.id]
 );
 
-```
+
 return res.json({
   success: true,
   updated:
     result.rowCount
 });
-```
+
 
 }
 );

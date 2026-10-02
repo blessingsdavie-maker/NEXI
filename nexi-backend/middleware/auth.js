@@ -26,14 +26,14 @@ req.get('authorization');
   .slice(7)
   .trim();
 
-```
-if (token) {
-```
 
-```
+if (token) {
+
+
+
   return token;
 }
-```
+
 
 }
 
@@ -74,7 +74,7 @@ message:
 
 try {
 
-```
+
 /* -----------------------------------------------------
    Verify JWT
    ----------------------------------------------------- */
@@ -170,11 +170,11 @@ req.auth = payload;
 
 
 return next();
-```
+
 
 } catch (error) {
 
-```
+
 if (
   error.name ===
   'TokenExpiredError'
@@ -212,7 +212,7 @@ return res.status(401).json({
   message:
     'Unable to verify your session.'
 });
-```
+
 
 }
 }

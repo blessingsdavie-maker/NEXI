@@ -29,9 +29,9 @@ CORS
 ========================================================= */
 
 const allowedOrigins = (process.env.FRONTEND_URL || '')
-.split(',')
-.map((value) => value.trim().replace(//+$/, ''))
-.filter(Boolean);
+  .split(',')
+  .map((value) => value.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
 
 app.use(
 cors({
@@ -46,7 +46,7 @@ if (!origin) {
 return callback(null, true);
 }
 
-```
+
   const normalizedOrigin = origin
     .trim()
     .replace(/\/+$/, '');
@@ -82,7 +82,7 @@ allowedHeaders: [
   'Content-Type',
   'Authorization'
 ]
-```
+
 
 })
 );
@@ -122,14 +122,14 @@ app.get('/health', async (_req, res) => {
 try {
 const databaseTime = await checkDatabase();
 
-```
+
 return res.json({
   success: true,
   message:
     'Nexi backend is connected to Neon PostgreSQL',
   databaseTime
 });
-```
+
 
 } catch (error) {
 console.error(
@@ -137,13 +137,13 @@ console.error(
 error
 );
 
-```
+
 return res.status(503).json({
   success: false,
   message:
     'Backend is online but the database connection failed.'
 });
-```
+
 
 }
 });
@@ -246,7 +246,7 @@ console.error(
 error
 );
 
-```
+
 if (
   error.message ===
   'CORS origin not allowed'
@@ -263,7 +263,7 @@ return res.status(500).json({
   message:
     'Internal server error.'
 });
-```
+
 
 }
 );
