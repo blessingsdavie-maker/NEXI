@@ -1,50 +1,593 @@
 <!doctype html>
+
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f3f5ef">
-    <meta name="description" content="Sign in to your Nexi circle or create an account.">
-    <title>Sign in — Nexi</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="portal.css">
-    <script src="nexi-api.js" defer></script>
-    <script src="auth.js" defer></script>
-  </head>
-  <body class="auth-page">
-    <a class="portal-skip" href="#authCard">Skip to sign in</a>
-    <header class="auth-header">
-      <a class="portal-brand" href="index.html" aria-label="Nexi home"><span class="portal-brandmark">N</span><span>Nexi</span></a>
-      <a class="role-switch" href="index.html">Back to home <span aria-hidden="true">↗</span></a>
-    </header>
-    <main class="auth-stage">
-      <section class="auth-intro" aria-labelledby="authIntroTitle">
-        <p class="eyebrow">A little check-in can mean a lot</p>
-        <h1 id="authIntroTitle">Your circle,<br>right where you left it.</h1>
-        <p>Sign in to share a check-in, see your circle, and manage the reminders you choose.</p>
-        <div class="auth-promise"><span aria-hidden="true">◈</span><span><strong>Your choices stay yours</strong>Location is off by default. You decide what to share and with whom.</span></div>
-      </section>
+<head>
+  <meta charset="utf-8">
 
-      <section class="auth-card" id="authCard" aria-labelledby="authTitle">
-        <div class="auth-heading"><p class="eyebrow">Welcome to Nexi</p><h2 id="authTitle">Sign in or create an account</h2><p id="authDescription">Choose an account option to continue.</p></div>
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1"
 
-        <div class="auth-mode-switch" role="group" aria-label="Account action">
-          <button class="auth-mode-button" type="button" data-auth-mode="login" aria-pressed="true">Sign in</button>
-          <button class="auth-mode-button" type="button" data-auth-mode="register" aria-pressed="false">Create account</button>
-        </div>
-        <form class="auth-form" id="accountForm" autocomplete="on">
-          <div class="auth-field"><label for="accountEmail">Email address</label><input id="accountEmail" name="email" type="email" autocomplete="username" required placeholder="you@example.com"></div>
-          <div class="auth-field" id="accountNameField" hidden><label for="accountName">Your name</label><input id="accountName" name="full_name" autocomplete="name" maxlength="70" placeholder="e.g. Amina Wanjiku"></div>
-          <div class="auth-field"><label for="accountPassword" id="accountPasswordLabel">Password</label><input id="accountPassword" name="password" type="password" autocomplete="current-password" minlength="8" required placeholder="Your password"></div>
-          <div class="auth-field" id="accountConfirmField" hidden><label for="accountConfirm">Confirm password</label><input id="accountConfirm" name="confirmPassword" type="password" autocomplete="new-password" minlength="8" placeholder="Enter it again"></div>
-          <button class="auth-submit" id="accountSubmit" type="submit">Sign in <span aria-hidden="true">→</span></button>
-        </form>
-        <p class="auth-message" id="authMessage" aria-live="polite"></p>
-        <p class="auth-disclaimer"><strong>Your account is protected.</strong> Passwords are hashed before storage, and sign-in is maintained with a secure server session.</p>
-      </section>
-    </main>
-    <footer class="auth-footer"><span>© <span id="authYear"></span> Nexi</span><span>Nexi does not provide emergency services.</span></footer>
-  </body>
+>
+
+<meta
+name="theme-color"
+content="#f3f5ef"
+
+>
+
+<meta
+name="description"
+content="Sign in to your Nexi circle or create a Nexi account."
+
+>
+
+  <title>Sign in — Nexi</title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  >
+
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  >
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link
+    rel="stylesheet"
+    href="portal.css"
+  >
+
+  <script src="nexi-api.js" defer></script>
+
+  <script src="auth.js" defer></script>
+
+</head>
+
+<body class="auth-page">
+
+<a
+class="portal-skip"
+href="#authCard"
+
+>
+
+```
+Skip to account form
+```
+
+  </a>
+
+  <!-- =====================================================
+       HEADER
+       ===================================================== -->
+
+  <header class="auth-header">
+
+```
+<a
+  class="portal-brand"
+  href="index.html"
+  aria-label="Nexi home"
+>
+  <span class="portal-brandmark">
+    N
+  </span>
+
+  <span>
+    Nexi
+  </span>
+</a>
+
+
+<a
+  class="role-switch"
+  href="index.html"
+>
+  Back to home
+  <span aria-hidden="true">
+    ↗
+  </span>
+</a>
+```
+
+  </header>
+
+  <!-- =====================================================
+       MAIN AUTH AREA
+       ===================================================== -->
+
+  <main class="auth-stage">
+
+```
+<!-- ===================================================
+     LEFT INTRO
+     =================================================== -->
+
+<section
+  class="auth-intro"
+  aria-labelledby="authIntroTitle"
+>
+
+  <p class="eyebrow">
+    A little check-in can mean a lot
+  </p>
+
+
+  <h1 id="authIntroTitle">
+    Your circle,
+    <br>
+    right where you left it.
+  </h1>
+
+
+  <p>
+    Sign in to share a check-in, see your circle,
+    manage your reminders, and keep the people you
+    trust close.
+  </p>
+
+
+  <div class="auth-promise">
+
+    <span aria-hidden="true">
+      ◈
+    </span>
+
+    <span>
+
+      <strong>
+        Your choices stay yours
+      </strong>
+
+      Location is off by default.
+      You decide what you share and with whom.
+
+    </span>
+
+  </div>
+
+
+  <div class="auth-feature-list">
+
+    <div class="auth-feature-item">
+      <span aria-hidden="true">✓</span>
+
+      <span>
+        Simple daily check-ins
+      </span>
+    </div>
+
+
+    <div class="auth-feature-item">
+      <span aria-hidden="true">◎</span>
+
+      <span>
+        A private circle of people you trust
+      </span>
+    </div>
+
+
+    <div class="auth-feature-item">
+      <span aria-hidden="true">◷</span>
+
+      <span>
+        Reminders on your terms
+      </span>
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ===================================================
+     AUTH CARD
+     =================================================== -->
+
+<section
+  class="auth-card"
+  id="authCard"
+  aria-labelledby="authTitle"
+>
+
+  <div class="auth-heading">
+
+    <p class="eyebrow">
+      Welcome to Nexi
+    </p>
+
+
+    <h2 id="authTitle">
+      Sign in or create an account
+    </h2>
+
+
+    <p id="authDescription">
+      Choose an account option to continue.
+    </p>
+
+  </div>
+
+
+  <!-- =================================================
+       INVITATION NOTICE
+       ================================================= -->
+
+  <div
+    class="notice-box"
+    id="invitationNotice"
+    hidden
+    role="status"
+    aria-live="polite"
+  >
+    <strong>
+      You've been invited to Nexi.
+    </strong>
+
+    <span id="invitationNoticeText">
+      Complete your account to join your circle.
+    </span>
+  </div>
+
+
+  <!-- =================================================
+       ACCOUNT MODE SWITCH
+       ================================================= -->
+
+  <div
+    class="auth-mode-switch"
+    role="group"
+    aria-label="Account action"
+  >
+
+    <button
+      class="auth-mode-button"
+      type="button"
+      data-auth-mode="login"
+      aria-pressed="true"
+    >
+      Sign in
+    </button>
+
+
+    <button
+      class="auth-mode-button"
+      type="button"
+      data-auth-mode="register"
+      aria-pressed="false"
+    >
+      Create account
+    </button>
+
+  </div>
+
+
+  <!-- =================================================
+       ACCOUNT FORM
+       ================================================= -->
+
+  <form
+    class="auth-form"
+    id="accountForm"
+    autocomplete="on"
+    novalidate
+  >
+
+    <!-- Invitation token is populated by auth.js
+         from ?invite=... in the URL. -->
+
+    <input
+      type="hidden"
+      id="inviteToken"
+      name="invite_token"
+      value=""
+    >
+
+
+    <!-- Email -->
+
+    <div class="auth-field">
+
+      <label for="accountEmail">
+        Email address
+      </label>
+
+      <input
+        id="accountEmail"
+        name="email"
+        type="email"
+        autocomplete="username"
+        inputmode="email"
+        autocapitalize="none"
+        spellcheck="false"
+        required
+        placeholder="you@example.com"
+      >
+
+    </div>
+
+
+    <!-- Full name -->
+
+    <div
+      class="auth-field"
+      id="accountNameField"
+      hidden
+    >
+
+      <label for="accountName">
+        Your name
+      </label>
+
+      <input
+        id="accountName"
+        name="full_name"
+        autocomplete="name"
+        maxlength="150"
+        placeholder="e.g. Amina Wanjiku"
+      >
+
+    </div>
+
+
+    <!-- Password -->
+
+    <div class="auth-field">
+
+      <div class="field-heading">
+
+        <label
+          for="accountPassword"
+          id="accountPasswordLabel"
+        >
+          Password
+        </label>
+
+        <span
+          class="password-hint"
+          id="passwordHint"
+          hidden
+        >
+          At least 8 characters
+        </span>
+
+      </div>
+
+
+      <input
+        id="accountPassword"
+        name="password"
+        type="password"
+        autocomplete="current-password"
+        minlength="8"
+        required
+        placeholder="Your password"
+      >
+
+    </div>
+
+
+    <!-- Confirm password -->
+
+    <div
+      class="auth-field"
+      id="accountConfirmField"
+      hidden
+    >
+
+      <label for="accountConfirm">
+        Confirm password
+      </label>
+
+      <input
+        id="accountConfirm"
+        name="confirmPassword"
+        type="password"
+        autocomplete="new-password"
+        minlength="8"
+        placeholder="Enter your password again"
+      >
+
+    </div>
+
+
+    <!-- Forgot password placeholder.
+         Kept hidden until backend reset routes
+         are implemented. -->
+
+    <div
+      class="auth-help-row"
+      id="forgotPasswordRow"
+      hidden
+    >
+
+      <button
+        type="button"
+        class="auth-link-button"
+        id="forgotPasswordButton"
+      >
+        Forgot your password?
+      </button>
+
+    </div>
+
+
+    <!-- Submit -->
+
+    <button
+      class="auth-submit"
+      id="accountSubmit"
+      type="submit"
+    >
+      Sign in
+
+      <span aria-hidden="true">
+        →
+      </span>
+    </button>
+
+  </form>
+
+
+  <!-- =================================================
+       AUTH FEEDBACK
+       ================================================= -->
+
+  <p
+    class="auth-message"
+    id="authMessage"
+    aria-live="polite"
+    aria-atomic="true"
+  ></p>
+
+
+  <!-- =================================================
+       SECURITY INFORMATION
+       ================================================= -->
+
+  <div class="auth-disclaimer">
+
+    <strong>
+      Your account is protected.
+    </strong>
+
+    Passwords are securely hashed before storage,
+    and your Nexi account uses protected authentication
+    to maintain your session.
+
+  </div>
+
+
+  <!-- =================================================
+       ACCOUNT FOOTER ACTION
+       ================================================= -->
+
+  <div class="auth-bottom-action">
+
+    <span id="authSwitchPrompt">
+      Don't have a Nexi account?
+    </span>
+
+    <button
+      type="button"
+      class="auth-link-button"
+      data-auth-mode="register"
+      id="authSwitchLink"
+    >
+      Create one
+    </button>
+
+  </div>
+
+</section>
+```
+
+  </main>
+
+  <!-- =====================================================
+       FOOTER
+       ===================================================== -->
+
+  <footer class="auth-footer">
+
+```
+<span>
+  ©
+  <span id="authYear"></span>
+  Nexi
+</span>
+
+<span>
+  Nexi does not provide emergency services.
+</span>
+```
+
+  </footer>
+
+  <!-- =====================================================
+       INVITATION SCRIPT
+       =====================================================
+
+       This reads ?invite=TOKEN from the invitation URL.
+       auth.js can then submit the token as invite_token.
+       ===================================================== -->
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const params =
+        new URLSearchParams(window.location.search);
+
+      const inviteToken =
+        params.get("invite") || "";
+
+      const tokenField =
+        document.getElementById("inviteToken");
+
+      const invitationNotice =
+        document.getElementById("invitationNotice");
+
+      const invitationNoticeText =
+        document.getElementById("invitationNoticeText");
+
+      const switchButton =
+        document.querySelector(
+          '[data-auth-mode="register"]'
+        );
+
+      const year =
+        document.getElementById("authYear");
+
+
+      if (year) {
+        year.textContent =
+          String(new Date().getFullYear());
+      }
+
+
+      if (inviteToken && tokenField) {
+
+        tokenField.value =
+          inviteToken;
+
+        /*
+         * An invitation should open the page in
+         * account-creation mode rather than login mode.
+         */
+
+        if (invitationNotice) {
+          invitationNotice.hidden = false;
+        }
+
+        if (invitationNoticeText) {
+          invitationNoticeText.textContent =
+            "Create your account using the invited email address to join the circle.";
+        }
+
+        /*
+         * Tell auth.js which mode should be selected.
+         */
+
+        document.documentElement.dataset.invited =
+          "true";
+
+      }
+
+      /*
+       * auth.js remains responsible for the actual
+       * mode switching and API submission.
+       */
+      void switchButton;
+    });
+  </script>
+
+</body>
 </html>

@@ -1,112 +1,1839 @@
 <!doctype html>
+
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f3f5ef">
-    <meta name="description" content="Your Nexi circle, check-ins, schedule, and trusted support contacts.">
-    <title>Your dashboard — Nexi</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="portal.css">
-    <script src="nexi-api.js" defer></script>
-    <script src="portal-live.js" defer></script>
-  </head>
-  <body data-role="user">
-    <a class="portal-skip" href="#portalMain">Skip to dashboard</a>
-    <div class="portal-shell">
-      <header class="portal-topbar">
-        <div class="portal-brand-meta"><a class="portal-brand" href="index.html" aria-label="Nexi home"><span class="portal-brandmark">N</span><span>Nexi</span></a><span class="prototype-tag">Member account</span></div>
-        <div class="topbar-actions">
-          <button class="theme-button notification-button" type="button" data-open-view="userNotifications" aria-label="Notifications"><span aria-hidden="true">🔔</span><i></i></button>
-          <button class="theme-button" id="portalTheme" type="button" aria-label="Use dark theme" title="Change colour theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-        </div>
-      </header>
-      <div class="portal-layout">
-        <aside class="portal-sidebar" id="portalSidebar">
-          <p class="sidebar-caption">Your Nexi</p>
-          <nav class="portal-nav" aria-label="User dashboard">
-            <button type="button" data-view-target="userOverview" aria-current="page"><span class="nav-glyph" aria-hidden="true">⌂</span>Dashboard</button>
-            <button type="button" data-view-target="userSupport"><span class="nav-glyph" aria-hidden="true">⌕</span>Explore</button>
-            <button type="button" data-view-target="userActivity"><span class="nav-glyph" aria-hidden="true">▤</span>Activity</button>
-            <button type="button" data-view-target="userNotifications"><span class="nav-glyph" aria-hidden="true">♧</span>Notifications</button>
-            <button type="button" data-view-target="userProfile"><span class="nav-glyph" aria-hidden="true">◉</span>Profile</button>
-            <p class="sidebar-caption sidebar-tools-caption">Your circle</p>
-            <button type="button" data-view-target="userCircle"><span class="nav-glyph" aria-hidden="true">◎</span>My circle</button>
-            <button type="button" data-view-target="userSchedule"><span class="nav-glyph" aria-hidden="true">◷</span>Check-in schedule</button>
-          </nav>
-          <div class="sidebar-note"><strong>Your information stays yours</strong>Location sharing is off. Your profile, circle, and check-ins are stored in your account.</div>
-          <div class="sidebar-profile"><span class="profile-avatar" id="userAvatar">AW</span><span><b id="userProfileName">Amina Wanjiku</b><small>Circle member</small></span><button class="button button-secondary button-small" type="button" data-user-signout>Sign out</button></div>
-        </aside>
-        <main class="portal-main" id="portalMain">
-          <section class="portal-view is-active" id="userOverview" aria-labelledby="userOverviewTitle">
-            <div class="view-heading"><div><p class="eyebrow">Your circle, your pace</p><h1 id="userOverviewTitle">Good evening, <span id="userGreetingName">Amina</span></h1><p>One small update can help your people feel close.</p></div><span class="date-label" id="portalDate"></span></div>
-            <div class="stats-grid">
-              <article class="stat-card"><div class="stat-top"><span>In your circle</span><span class="stat-icon" aria-hidden="true">◉</span></div><div class="stat-value" id="userCircleCount">5</div><div class="stat-foot">People you chose</div></article>
-              <article class="stat-card"><div class="stat-top"><span>Checked in today</span><span class="stat-icon" aria-hidden="true">✓</span></div><div class="stat-value" id="userCheckedCount">4 / 5</div><div class="stat-foot">A gentle check-in, not tracking</div></article>
-              <article class="stat-card"><div class="stat-top"><span>Next reminder</span><span class="stat-icon" aria-hidden="true">◷</span></div><div class="stat-value" id="scheduleSummary">7:00 PM</div><div class="stat-foot" id="scheduleFoot">Today · device reminder</div></article>
-              <article class="stat-card"><div class="stat-top"><span>Location sharing</span><span class="stat-icon" aria-hidden="true">⌖</span></div><div class="stat-value">Off</div><div class="stat-foot">You decide when to share</div></article>
-            </div>
-            <div class="overview-grid">
-              <section class="checkin-banner" id="userCheckinBanner" aria-labelledby="userCheckinTitle"><div><p class="eyebrow">Tonight's check-in</p><h2 id="userCheckinTitle">Have you arrived safely?</h2><p id="userCheckinText">A quick check-in lets your circle know you have arrived.</p></div><button class="button" id="userCheckinAction" type="button" data-checkin-action="safe">I'm safe</button></section>
-              <section class="panel"><div class="panel-heading"><div><h2>Circle check-in</h2><p id="userMemberCount">0 people</p></div><button class="button button-secondary button-small" type="button" data-open-view="userCircle">View circle</button></div><div class="quick-list"><div class="quick-row"><span><b>You</b><small id="userMemberStatus">Waiting for your update</small></span><span class="state-dot pending" id="userMemberStatusDot">Pending</span></div></div></section>
-            </div>
-            <div class="content-grid">
-              <section class="panel"><div class="panel-heading"><div><h2>Your people</h2><p>Only people you invited can join.</p></div><button class="button button-secondary button-small" type="button" data-open-view="userCircle">Manage circle</button></div><div class="member-list" id="userMemberList"></div></section>
-              <section class="panel"><div class="panel-heading"><div><h2>Trusted support</h2><p>Keep useful options close.</p></div><button class="button button-secondary button-small" type="button" data-open-view="userSupport">View contacts</button></div><div class="quick-list"><div class="quick-row"><span><b>Your chosen people</b><small>Support updates are saved to your circle.</small></span><span class="state-dot">Private</span></div><div class="quick-row"><span><b>Emergency services</b><small>Nexi does not dispatch emergency help.</small></span><span class="state-dot offline">Unavailable</span></div></div></section>
-            </div>
-            <p class="portal-footer">Demo only. Nexi does not contact anyone or provide emergency services.</p>
-          </section>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-          <section class="portal-view" id="userCircle" aria-labelledby="userCircleTitle">
-            <div class="view-heading"><div><p class="eyebrow">People you trust</p><h1 id="userCircleTitle">Your circle</h1><p>Manage your invited people. They cannot see your location unless you share it.</p></div><span class="role-tag" id="userCircleMembersLabel">5 people</span></div>
-            <section class="panel"><div class="panel-heading"><div><h2>Circle members</h2><p>Check-in status is shared within this circle only.</p></div></div><div class="member-list" id="userCircleMemberList"></div>
-              <form class="form-grid" id="inviteMemberForm"><div class="field"><label for="inviteMemberName">Person's name</label><input class="input-control" id="inviteMemberName" name="name" autocomplete="name" required placeholder="e.g. Nia Kamau"></div><div class="field"><label for="inviteMemberEmail">Email for invitation</label><input class="input-control" id="inviteMemberEmail" name="email" type="email" autocomplete="email" required placeholder="nia@example.com"></div><button class="button button-primary" type="submit">＋ Invite person</button></form><p class="form-message" id="inviteMemberMessage" aria-live="polite"></p>
-            </section>
-            <div class="privacy-note"><span aria-hidden="true">◈</span><span><strong>Invitations expire after seven days</strong>Email delivery requires configured mail settings; otherwise you can share the generated invitation link.</span></div>
-          </section>
+<meta
+name="theme-color"
+content="#f3f5ef"
 
-          <section class="portal-view" id="userSchedule" aria-labelledby="userScheduleTitle">
-            <div class="view-heading"><div><p class="eyebrow">A rhythm that works for you</p><h1 id="userScheduleTitle">Check-in schedule</h1><p>Choose when this device reminds you. You can pause it whenever you like.</p></div></div>
-            <section class="panel schedule-card"><div><h2>Daily check-in preference</h2><p id="scheduleSaved" aria-live="polite">Your reminder preference is saved to your account.</p></div><div class="schedule-form"><label class="toggle-label" for="userScheduleEnabled"><span>Reminder</span><input id="userScheduleEnabled" type="checkbox"><span class="toggle-ui" aria-hidden="true"></span></label><input id="userScheduleTime" type="time" aria-label="Reminder time"></div></section>
-            <div class="notice-box">The selected time is stored in your account. Reminder delivery is not configured.</div>
-          </section>
+>
 
-          <section class="portal-view" id="userActivity" aria-labelledby="userActivityTitle">
-            <div class="view-heading"><div><p class="eyebrow">Your recent updates</p><h1 id="userActivityTitle">Activity</h1><p>A simple record of your check-ins and account changes.</p></div></div>
-            <section class="panel"><div class="panel-heading"><div><h2>Recent activity</h2><p>Your saved check-in history.</p></div></div><div class="quick-list" id="userActivityList"></div></section>
-            <div class="privacy-note"><span aria-hidden="true">◈</span><span><strong>No location history</strong>This activity view records check-in actions only. Location tracking is not enabled.</span></div>
-          </section>
+<meta
+name="description"
+content="Your Nexi circle, check-ins, schedule, activity, notifications, and trusted support contacts."
 
-          <section class="portal-view" id="userNotifications" aria-labelledby="userNotificationsTitle">
-            <div class="view-heading"><div><p class="eyebrow">Your updates</p><h1 id="userNotificationsTitle">Notifications</h1><p>Helpful account and circle updates, without emergency claims.</p></div></div>
-            <section class="panel"><div class="panel-heading"><div><h2>Recent check-ins</h2><p>Your persisted account activity.</p></div></div><div class="quick-list" id="userNotificationsList"></div></section>
-          </section>
+>
 
-          <section class="portal-view" id="userProfile" aria-labelledby="userProfileTitle">
-            <div class="view-heading"><div><p class="eyebrow">Your account</p><h1 id="userProfileTitle">My profile</h1><p>Manage your details and personal check-in preferences.</p></div></div>
-            <section class="panel profile-panel"><div class="profile-large"><span class="profile-avatar" id="userProfileAvatar">AW</span><div><h2 id="userProfileDisplayName">Amina Wanjiku</h2><p id="userProfileEmail">Email address</p></div></div><div class="profile-actions"><button class="button button-secondary" type="button" data-open-view="userCircle">Manage my circle</button><button class="button button-secondary" type="button" data-open-view="userSchedule">Check-in schedule</button><button class="button button-danger" type="button" data-user-signout>Sign out</button></div></section>
-          </section>
+  <title>Your dashboard — Nexi</title>
 
-          <section class="portal-view" id="userSupport" aria-labelledby="userSupportTitle">
-            <div class="view-heading"><div><p class="eyebrow">Help, on your terms</p><h1 id="userSupportTitle">Support contacts</h1><p>Keep trusted options nearby and decide who sees a support signal.</p></div></div>
-            <div class="support-grid">
-              <article class="support-item"><span class="support-icon" aria-hidden="true">♡</span><div><h3>Your trusted circle</h3><p>Save a support check-in for people in your circle.</p><button class="button button-secondary button-small" type="button" data-request-support>Send support check-in</button></div></article>
-              <article class="support-item"><span class="support-icon" aria-hidden="true">✚</span><div><h3>Health services</h3><p>No verified service listings are available.</p><button class="button button-secondary button-small" type="button" data-open-view="userCircle">Review your circle</button></div></article>
-              <article class="support-item"><span class="support-icon" aria-hidden="true">⌖</span><div><h3>Location sharing</h3><p>Off by default. Choose to share for a specific moment.</p><span class="status-pill neutral">Currently off</span></div></article>
-              <article class="support-item"><span class="support-icon" aria-hidden="true">i</span><div><h3>Urgent help</h3><p>Nexi is not an emergency service. Contact your local emergency provider when immediate help is needed.</p></div></article>
-            </div>
-          </section>
-        </main>
-        <nav class="user-bottom-nav" aria-label="Main navigation">
-          <button type="button" data-view-target="userOverview" aria-current="page"><span aria-hidden="true">⌂</span>Dashboard</button>
-          <button type="button" data-view-target="userSupport"><span aria-hidden="true">⌕</span>Explore</button>
-          <button type="button" data-view-target="userActivity"><span aria-hidden="true">▤</span>Activity</button>
-          <button type="button" data-view-target="userProfile"><span aria-hidden="true">◉</span>Profile</button>
-        </nav>
-      </div>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <link rel="stylesheet" href="portal.css">
+
+  <script src="nexi-api.js" defer></script>
+
+  <script src="portal-live.js" defer></script>
+
+</head>
+
+<body data-role="user">
+
+  <a class="portal-skip" href="#portalMain">
+    Skip to dashboard
+  </a>
+
+  <div class="portal-shell">
+
+```
+<!-- =====================================================
+     TOP BAR
+     ===================================================== -->
+<header class="portal-topbar">
+
+  <div class="portal-brand-meta">
+
+    <a
+      class="portal-brand"
+      href="index.html"
+      aria-label="Nexi home"
+    >
+      <span class="portal-brandmark">N</span>
+      <span>Nexi</span>
+    </a>
+
+    <span class="prototype-tag">
+      Member account
+    </span>
+
+  </div>
+
+  <div class="topbar-actions">
+
+    <button
+      class="theme-button"
+      id="portalMenu"
+      type="button"
+      aria-label="Open dashboard menu"
+      aria-expanded="false"
+      title="Dashboard menu"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+
+    <button
+      class="theme-button notification-button"
+      type="button"
+      data-open-view="userNotifications"
+      aria-label="Notifications"
+      title="Notifications"
+    >
+      <span aria-hidden="true">🔔</span>
+      <i></i>
+    </button>
+
+    <button
+      class="theme-button"
+      id="portalTheme"
+      type="button"
+      aria-label="Use dark theme"
+      title="Change colour theme"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="3.6"/>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+      </svg>
+    </button>
+
+  </div>
+</header>
+
+
+<div class="portal-layout">
+
+  <!-- =====================================================
+       SIDEBAR
+       ===================================================== -->
+  <aside
+    class="portal-sidebar"
+    id="portalSidebar"
+  >
+
+    <div class="sidebar-header">
+      <p class="sidebar-caption">
+        Your Nexi
+      </p>
     </div>
-    <dialog class="dialog" id="supportConfirmDialog" aria-labelledby="supportDialogTitle"><p class="eyebrow">Support check-in</p><h2 id="supportDialogTitle">Save a support update?</h2><p>This records a support check-in for your circle. It does not share your location or contact emergency services.</p><div class="dialog-actions"><button class="button button-secondary" type="button" data-close-dialog>Go back</button><button class="button button-primary" id="confirmUserSupport" type="button">Save support check-in</button></div></dialog>
-  </body>
+
+    <nav
+      class="portal-nav"
+      aria-label="User dashboard"
+    >
+
+      <button
+        type="button"
+        data-view-target="userOverview"
+        aria-current="page"
+      >
+        <span
+          class="nav-glyph"
+          aria-hidden="true"
+        >⌂</span>
+        <span>Dashboard</span>
+      </button>
+
+      <button
+        type="button"
+        data-view-target="userCircle"
+      >
+        <span
+          class="nav-glyph"
+          aria-hidden="true"
+        >◎</span>
+        <span>My circle</span>
+      </button>
+
+      <button
+        type="button"
+        data-view-target="userSupport"
+      >
+        <span
+          class="nav-glyph"
+          aria-hidden="true"
+        >⌕</span>
+        <span>Explore</span>
+      </button>
+
+      <button
+        type="button"
+        data-view-target="userActivity"
+      >
+        <span
+          class="nav-glyph"
+          aria-hidden="true"
+        >▤</span>
+        <span>Activity</span>
+      </button>
+
+      <button
+        type="button"
+        data-view-target="userNotifications"
+      >
+        <span
+          class="nav-glyph"
+          aria-hidden="true"
+        >♧</span>
+        <span>Notifications</span>
+      </button>
+
+      <button
+        type="button"
+        data-view-target="userProfile"
+      >
+        <span
+          class="nav-glyph"
+          aria-hidden="true"
+        >◉</span>
+        <span>Profile</span>
+      </button>
+
+
+      <p class="sidebar-caption sidebar-tools-caption">
+        Your circle
+      </p>
+
+      <button
+        type="button"
+        data-view-target="userSchedule"
+      >
+        <span
+          class="nav-glyph"
+          aria-hidden="true"
+        >◷</span>
+        <span>Check-in schedule</span>
+      </button>
+
+    </nav>
+
+
+    <!-- Privacy statement -->
+    <div class="sidebar-note">
+
+      <strong>
+        Your information stays yours
+      </strong>
+
+      <span>
+        Location sharing is off. Your profile,
+        circle, and check-ins are stored in your account.
+      </span>
+
+    </div>
+
+
+    <!-- Profile / sign out -->
+    <div class="sidebar-profile">
+
+      <span
+        class="profile-avatar"
+        id="userAvatar"
+        aria-hidden="true"
+      >
+        NW
+      </span>
+
+      <span>
+        <b id="userProfileName">
+          Nexi member
+        </b>
+
+        <small>
+          Circle member
+        </small>
+      </span>
+
+      <button
+        class="button button-secondary button-small"
+        type="button"
+        data-user-signout
+      >
+        Sign out
+      </button>
+
+    </div>
+
+  </aside>
+
+
+  <!-- =====================================================
+       MAIN CONTENT
+       ===================================================== -->
+  <main
+    class="portal-main"
+    id="portalMain"
+  >
+
+    <!-- Dynamic errors inserted by portal-live.js -->
+    <div
+      id="portalStatusRegion"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
+
+    <!-- ===================================================
+         DASHBOARD OVERVIEW
+         =================================================== -->
+    <section
+      class="portal-view is-active"
+      id="userOverview"
+      aria-labelledby="userOverviewTitle"
+    >
+
+      <div class="view-heading">
+
+        <div>
+
+          <p class="eyebrow">
+            Your circle, your pace
+          </p>
+
+          <h1 id="userOverviewTitle">
+            Good evening,
+            <span id="userGreetingName">
+              Member
+            </span>
+          </h1>
+
+          <p>
+            One small update can help your people feel close.
+          </p>
+
+        </div>
+
+        <div class="view-heading-actions">
+
+          <span
+            class="date-label"
+            id="portalDate"
+          ></span>
+
+          <span
+            id="nexiConnectionState"
+            class="state-dot"
+            aria-label="Nexi connection status"
+          >
+            ● Online
+          </span>
+
+          <button
+            class="button button-secondary button-small"
+            id="dashboardRefreshButton"
+            type="button"
+            aria-label="Refresh dashboard"
+          >
+            ↻ Refresh
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- =================================================
+           CORE STATS
+           ================================================= -->
+      <div class="stats-grid">
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+            <span>In your circle</span>
+            <span
+              class="stat-icon"
+              aria-hidden="true"
+            >◉</span>
+          </div>
+
+          <div
+            class="stat-value"
+            id="userCircleCount"
+          >
+            0
+          </div>
+
+          <div class="stat-foot">
+            People you chose
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+            <span>Checked in today</span>
+
+            <span
+              class="stat-icon"
+              aria-hidden="true"
+            >✓</span>
+          </div>
+
+          <div
+            class="stat-value"
+            id="userCheckedCount"
+          >
+            0 / 0
+          </div>
+
+          <div class="stat-foot">
+            A gentle check-in, not tracking
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+            <span>Next reminder</span>
+
+            <span
+              class="stat-icon"
+              aria-hidden="true"
+            >◷</span>
+          </div>
+
+          <div
+            class="stat-value"
+            id="scheduleSummary"
+          >
+            Paused
+          </div>
+
+          <div
+            class="stat-foot"
+            id="scheduleFoot"
+          >
+            Reminder preference paused
+          </div>
+
+        </article>
+
+
+        <article class="stat-card">
+
+          <div class="stat-top">
+            <span>Location sharing</span>
+
+            <span
+              class="stat-icon"
+              aria-hidden="true"
+            >⌖</span>
+          </div>
+
+          <div class="stat-value">
+            Off
+          </div>
+
+          <div class="stat-foot">
+            You decide when to share
+          </div>
+
+        </article>
+
+      </div>
+
+
+      <!-- =================================================
+           PRIMARY CHECK-IN
+           ================================================= -->
+      <section
+        class="checkin-banner"
+        id="userCheckinBanner"
+        aria-labelledby="userCheckinTitle"
+      >
+
+        <div>
+
+          <p class="eyebrow">
+            Today's check-in
+          </p>
+
+          <h2 id="userCheckinTitle">
+            Have you arrived safely?
+          </h2>
+
+          <p id="userCheckinText">
+            A quick check-in records your update for your circle.
+          </p>
+
+        </div>
+
+        <button
+          class="button button-primary"
+          id="userCheckinAction"
+          type="button"
+          data-checkin-action="safe"
+        >
+          I'm safe
+        </button>
+
+      </section>
+
+
+      <!-- =================================================
+           TODAY AT A GLANCE
+           ================================================= -->
+      <div class="overview-grid">
+
+        <section class="panel">
+
+          <div class="panel-heading">
+
+            <div>
+              <h2>
+                Circle check-in
+              </h2>
+
+              <p id="userMemberCount">
+                0 people
+              </p>
+            </div>
+
+            <button
+              class="button button-secondary button-small"
+              type="button"
+              data-open-view="userCircle"
+            >
+              View circle
+            </button>
+
+          </div>
+
+
+          <div class="quick-list">
+
+            <div class="quick-row">
+
+              <span>
+
+                <b>
+                  You
+                </b>
+
+                <small id="userMemberStatus">
+                  Waiting for your update
+                </small>
+
+              </span>
+
+              <span
+                class="state-dot pending"
+                id="userMemberStatusDot"
+              >
+                Pending
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section class="panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <h2>
+                Next reminder
+              </h2>
+
+              <p>
+                Your personal check-in rhythm
+              </p>
+
+            </div>
+
+            <button
+              class="button button-secondary button-small"
+              type="button"
+              data-open-view="userSchedule"
+            >
+              Manage
+            </button>
+
+          </div>
+
+
+          <div class="quick-list">
+
+            <div class="quick-row">
+
+              <span>
+
+                <b id="dashboardReminderTime">
+                  Check-in reminder
+                </b>
+
+                <small>
+                  Reminders stay under your control.
+                </small>
+
+              </span>
+
+              <span class="state-dot">
+                Private
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- =================================================
+           YOUR PEOPLE + SUPPORT
+           ================================================= -->
+      <div class="content-grid">
+
+        <section class="panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <h2>
+                Your people
+              </h2>
+
+              <p>
+                Only people you invited can join.
+              </p>
+
+            </div>
+
+            <button
+              class="button button-secondary button-small"
+              type="button"
+              data-open-view="userCircle"
+            >
+              Manage circle
+            </button>
+
+          </div>
+
+
+          <div
+            class="member-list"
+            id="userMemberList"
+          >
+
+            <div class="empty-state">
+              Loading your circle…
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section class="panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <h2>
+                Trusted support
+              </h2>
+
+              <p>
+                Keep useful options close.
+              </p>
+
+            </div>
+
+            <button
+              class="button button-secondary button-small"
+              type="button"
+              data-open-view="userSupport"
+            >
+              Explore
+            </button>
+
+          </div>
+
+
+          <div class="quick-list">
+
+            <div class="quick-row">
+
+              <span>
+
+                <b>
+                  Your trusted people
+                </b>
+
+                <small>
+                  Support updates stay within your circle.
+                </small>
+
+              </span>
+
+              <span class="state-dot">
+                Private
+              </span>
+
+            </div>
+
+
+            <div class="quick-row">
+
+              <span>
+
+                <b>
+                  Location sharing
+                </b>
+
+                <small>
+                  Off by default.
+                </small>
+
+              </span>
+
+              <span class="state-dot">
+                Off
+              </span>
+
+            </div>
+
+
+            <div class="quick-row">
+
+              <span>
+
+                <b>
+                  Emergency services
+                </b>
+
+                <small>
+                  Nexi does not dispatch emergency help.
+                </small>
+
+              </span>
+
+              <span class="state-dot offline">
+                External
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- =================================================
+           RECENT ACTIVITY PREVIEW
+           ================================================= -->
+      <section class="panel">
+
+        <div class="panel-heading">
+
+          <div>
+
+            <h2>
+              Recent activity
+            </h2>
+
+            <p>
+              Your latest Nexi updates.
+            </p>
+
+          </div>
+
+          <button
+            class="button button-secondary button-small"
+            type="button"
+            data-open-view="userActivity"
+          >
+            View all
+          </button>
+
+        </div>
+
+
+        <div
+          class="quick-list"
+          id="userDashboardActivityPreview"
+        >
+
+          <div class="empty-state">
+            Your latest activity will appear here.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================================
+           SUPPORT CTA
+           ================================================= -->
+      <section class="checkin-banner">
+
+        <div>
+
+          <p class="eyebrow">
+            Need someone close?
+          </p>
+
+          <h2>
+            Send a support check-in
+          </h2>
+
+          <p>
+            Save a support update for the people in your circle.
+            Nexi does not contact emergency services.
+          </p>
+
+        </div>
+
+        <button
+          class="button button-primary"
+          type="button"
+          data-request-support
+        >
+          Request support
+        </button>
+
+      </section>
+
+
+      <p class="portal-footer">
+        Nexi helps people stay connected through simple,
+        intentional check-ins. It does not provide emergency services.
+      </p>
+
+    </section>
+
+
+    <!-- ===================================================
+         MY CIRCLE
+         =================================================== -->
+    <section
+      class="portal-view"
+      id="userCircle"
+      aria-labelledby="userCircleTitle"
+    >
+
+      <div class="view-heading">
+
+        <div>
+
+          <p class="eyebrow">
+            People you trust
+          </p>
+
+          <h1 id="userCircleTitle">
+            Your circle
+          </h1>
+
+          <p>
+            Manage the people connected to your Nexi circle.
+          </p>
+
+        </div>
+
+        <span
+          class="role-tag"
+          id="userCircleMembersLabel"
+        >
+          0 people
+        </span>
+
+      </div>
+
+
+      <section class="panel">
+
+        <div class="panel-heading">
+
+          <div>
+
+            <h2>
+              Circle members
+            </h2>
+
+            <p>
+              Check-in status is shared within this circle only.
+            </p>
+
+          </div>
+
+          <input
+            class="input-control"
+            id="circleMemberSearch"
+            type="search"
+            placeholder="Search members…"
+            aria-label="Search circle members"
+          >
+
+        </div>
+
+
+        <div
+          class="member-list"
+          id="userCircleMemberList"
+        >
+
+          <div class="empty-state">
+            Loading your circle…
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <section class="panel">
+
+        <div class="panel-heading">
+
+          <div>
+
+            <h2>
+              Invite someone
+            </h2>
+
+            <p>
+              Add a person you trust to your Nexi circle.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <form
+          class="form-grid"
+          id="inviteMemberForm"
+        >
+
+          <div class="field">
+
+            <label for="inviteMemberName">
+              Person's name
+            </label>
+
+            <input
+              class="input-control"
+              id="inviteMemberName"
+              name="name"
+              autocomplete="name"
+              required
+              placeholder="e.g. Nia Kamau"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label for="inviteMemberEmail">
+              Email for invitation
+            </label>
+
+            <input
+              class="input-control"
+              id="inviteMemberEmail"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+              placeholder="nia@example.com"
+            >
+
+          </div>
+
+
+          <button
+            class="button button-primary"
+            type="submit"
+          >
+            ＋ Invite person
+          </button>
+
+        </form>
+
+
+        <p
+          class="form-message"
+          id="inviteMemberMessage"
+          aria-live="polite"
+        ></p>
+
+      </section>
+
+
+      <div class="privacy-note">
+
+        <span aria-hidden="true">
+          ◈
+        </span>
+
+        <span>
+
+          <strong>
+            Invitations expire after seven days
+          </strong>
+
+          Email delivery requires configured mail settings.
+          Otherwise, Nexi provides a shareable invitation link.
+
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         CHECK-IN SCHEDULE
+         =================================================== -->
+    <section
+      class="portal-view"
+      id="userSchedule"
+      aria-labelledby="userScheduleTitle"
+    >
+
+      <div class="view-heading">
+
+        <div>
+
+          <p class="eyebrow">
+            A rhythm that works for you
+          </p>
+
+          <h1 id="userScheduleTitle">
+            Check-in schedule
+          </h1>
+
+          <p>
+            Choose when this device should remind you.
+            Pause it whenever you like.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <section class="panel schedule-card">
+
+        <div>
+
+          <p class="eyebrow">
+            Your preference
+          </p>
+
+          <h2>
+            Daily check-in reminder
+          </h2>
+
+          <p id="scheduleSaved" aria-live="polite">
+            Your reminder preference is saved to your account.
+          </p>
+
+        </div>
+
+
+        <div class="schedule-form">
+
+          <label
+            class="toggle-label"
+            for="userScheduleEnabled"
+          >
+
+            <span>
+              Reminder
+            </span>
+
+            <input
+              id="userScheduleEnabled"
+              type="checkbox"
+            >
+
+            <span
+              class="toggle-ui"
+              aria-hidden="true"
+            ></span>
+
+          </label>
+
+
+          <label for="userScheduleTime">
+            <span class="sr-only">
+              Reminder time
+            </span>
+
+            <input
+              id="userScheduleTime"
+              type="time"
+              aria-label="Reminder time"
+            >
+          </label>
+
+        </div>
+
+      </section>
+
+
+      <div class="notice-box">
+
+        <strong>
+          Your control stays with you.
+        </strong>
+
+        The selected time is stored in your account.
+        Reminder delivery is not yet configured.
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         ACTIVITY
+         =================================================== -->
+    <section
+      class="portal-view"
+      id="userActivity"
+      aria-labelledby="userActivityTitle"
+    >
+
+      <div class="view-heading">
+
+        <div>
+
+          <p class="eyebrow">
+            Your recent updates
+          </p>
+
+          <h1 id="userActivityTitle">
+            Activity
+          </h1>
+
+          <p>
+            A simple record of your saved check-ins and account activity.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <section class="panel">
+
+        <div class="panel-heading">
+
+          <div>
+
+            <h2>
+              Recent activity
+            </h2>
+
+            <p>
+              Your saved check-in history.
+            </p>
+
+          </div>
+
+        </div>
+
+
+        <div
+          class="quick-list"
+          id="userActivityList"
+        >
+
+          <div class="empty-state">
+            Your check-in activity will appear here.
+          </div>
+
+        </div>
+
+      </section>
+
+
+      <div class="privacy-note">
+
+        <span aria-hidden="true">
+          ◈
+        </span>
+
+        <span>
+
+          <strong>
+            No location history
+          </strong>
+
+          This activity view records check-in actions only.
+          Location tracking is not enabled.
+
+        </span>
+
+      </div>
+
+    </section>
+
+
+    <!-- ===================================================
+         NOTIFICATIONS
+         =================================================== -->
+    <section
+      class="portal-view"
+      id="userNotifications"
+      aria-labelledby="userNotificationsTitle"
+    >
+
+      <div class="view-heading">
+
+        <div>
+
+          <p class="eyebrow">
+            Your updates
+          </p>
+
+          <h1 id="userNotificationsTitle">
+            Notifications
+          </h1>
+
+          <p>
+            Helpful account and circle updates, without emergency claims.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <section class="panel">
+
+        <div class="panel-heading">
+
+          <div>
+
+            <h2>
+              Your notifications
+            </h2>
+
+            <p>
+              Invitations, check-ins, and important account updates.
+            </p>
+
+          </div>
+
+          <button
+            class="button button-secondary button-small"
+            id="markAllNotificationsRead"
+            type="button"
+          >
+            Mark all as read
+          </button>
+
+        </div>
+
+
+        <div
+          class="quick-list"
+          id="userNotificationsList"
+        >
+
+          <div class="empty-state">
+            You have no new notifications.
+          </div>
+
+        </div>
+
+      </section>
+
+    </section>
+
+
+    <!-- ===================================================
+         PROFILE
+         =================================================== -->
+    <section
+      class="portal-view"
+      id="userProfile"
+      aria-labelledby="userProfileTitle"
+    >
+
+      <div class="view-heading">
+
+        <div>
+
+          <p class="eyebrow">
+            Your account
+          </p>
+
+          <h1 id="userProfileTitle">
+            My profile
+          </h1>
+
+          <p>
+            Review your account information and personal preferences.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <section class="panel profile-panel">
+
+        <div class="profile-large">
+
+          <span
+            class="profile-avatar"
+            id="userProfileAvatar"
+            aria-hidden="true"
+          >
+            NW
+          </span>
+
+          <div>
+
+            <h2 id="userProfileDisplayName">
+              Nexi member
+            </h2>
+
+            <p id="userProfileEmail">
+              Email address
+            </p>
+
+            <span class="status-pill">
+              Active member
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="profile-actions">
+
+          <button
+            class="button button-secondary"
+            type="button"
+            data-open-view="userCircle"
+          >
+            Manage my circle
+          </button>
+
+
+          <button
+            class="button button-secondary"
+            type="button"
+            data-open-view="userSchedule"
+          >
+            Check-in schedule
+          </button>
+
+
+          <button
+            class="button button-secondary"
+            type="button"
+            data-open-view="userNotifications"
+          >
+            View notifications
+          </button>
+
+
+          <button
+            class="button button-danger"
+            type="button"
+            data-user-signout
+          >
+            Sign out
+          </button>
+
+        </div>
+
+      </section>
+
+
+      <section class="content-grid">
+
+        <section class="panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <h2>
+                Privacy
+              </h2>
+
+              <p>
+                Nexi keeps your check-ins intentional.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="quick-list">
+
+            <div class="quick-row">
+
+              <span>
+
+                <b>
+                  Location sharing
+                </b>
+
+                <small>
+                  Not enabled by default.
+                </small>
+
+              </span>
+
+              <span class="state-dot">
+                Off
+              </span>
+
+            </div>
+
+
+            <div class="quick-row">
+
+              <span>
+
+                <b>
+                  Circle visibility
+                </b>
+
+                <small>
+                  Your circle is limited to invited members.
+                </small>
+
+              </span>
+
+              <span class="state-dot">
+                Private
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section class="panel">
+
+          <div class="panel-heading">
+
+            <div>
+
+              <h2>
+                Account
+              </h2>
+
+              <p>
+                Basic account information.
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="quick-list">
+
+            <div class="quick-row">
+
+              <span>
+
+                <b>
+                  Email
+                </b>
+
+                <small id="profileAccountEmail">
+                  Your registered email
+                </small>
+
+              </span>
+
+            </div>
+
+
+            <div class="quick-row">
+
+              <span>
+
+                <b>
+                  Account status
+                </b>
+
+                <small>
+                  Your Nexi account is active.
+                </small>
+
+              </span>
+
+              <span class="state-dot">
+                Active
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </section>
+
+    </section>
+
+
+    <!-- ===================================================
+         EXPLORE / SUPPORT
+         =================================================== -->
+    <section
+      class="portal-view"
+      id="userSupport"
+      aria-labelledby="userSupportTitle"
+    >
+
+      <div class="view-heading">
+
+        <div>
+
+          <p class="eyebrow">
+            Help, on your terms
+          </p>
+
+          <h1 id="userSupportTitle">
+            Explore support
+          </h1>
+
+          <p>
+            Keep trusted people and useful support options nearby.
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div class="support-grid">
+
+        <article class="support-item">
+
+          <span
+            class="support-icon"
+            aria-hidden="true"
+          >♡</span>
+
+          <div>
+
+            <h3>
+              Your trusted circle
+            </h3>
+
+            <p>
+              Save a support check-in for people in your circle.
+            </p>
+
+            <button
+              class="button button-primary button-small"
+              type="button"
+              data-request-support
+            >
+              Send support check-in
+            </button>
+
+          </div>
+
+        </article>
+
+
+        <article class="support-item">
+
+          <span
+            class="support-icon"
+            aria-hidden="true"
+          >✚</span>
+
+          <div>
+
+            <h3>
+              Health services
+            </h3>
+
+            <p>
+              Verified service listings will appear here when available.
+            </p>
+
+            <span class="status-pill neutral">
+              Directory
+            </span>
+
+          </div>
+
+        </article>
+
+
+        <article class="support-item">
+
+          <span
+            class="support-icon"
+            aria-hidden="true"
+          >⌖</span>
+
+          <div>
+
+            <h3>
+              Location sharing
+            </h3>
+
+            <p>
+              Location sharing is currently off.
+              Nexi does not track your location.
+            </p>
+
+            <span class="status-pill neutral">
+              Currently off
+            </span>
+
+          </div>
+
+        </article>
+
+
+        <article class="support-item">
+
+          <span
+            class="support-icon"
+            aria-hidden="true"
+          >i</span>
+
+          <div>
+
+            <h3>
+              Urgent help
+            </h3>
+
+            <p>
+              Nexi is not an emergency service.
+              Contact your local emergency provider when immediate
+              help is needed.
+            </p>
+
+          </div>
+
+        </article>
+
+      </div>
+
+
+      <section class="panel">
+
+        <div class="panel-heading">
+
+          <div>
+
+            <h2>
+              Keep your circle close
+            </h2>
+
+            <p>
+              Add people you trust so simple updates can stay connected.
+            </p>
+
+          </div>
+
+          <button
+            class="button button-secondary button-small"
+            type="button"
+            data-open-view="userCircle"
+          >
+            Manage circle
+          </button>
+
+        </div>
+
+      </section>
+
+    </section>
+
+  </main>
+
+
+  <!-- =====================================================
+       MOBILE BOTTOM NAVIGATION
+       ===================================================== -->
+  <nav
+    class="user-bottom-nav"
+    aria-label="Main navigation"
+  >
+
+    <button
+      type="button"
+      data-view-target="userOverview"
+      aria-current="page"
+    >
+      <span aria-hidden="true">⌂</span>
+      <span>Dashboard</span>
+    </button>
+
+
+    <button
+      type="button"
+      data-view-target="userCircle"
+    >
+      <span aria-hidden="true">◎</span>
+      <span>Circle</span>
+    </button>
+
+
+    <button
+      type="button"
+      data-view-target="userSupport"
+    >
+      <span aria-hidden="true">⌕</span>
+      <span>Explore</span>
+    </button>
+
+
+    <button
+      type="button"
+      data-view-target="userNotifications"
+    >
+      <span aria-hidden="true">♧</span>
+      <span>Updates</span>
+    </button>
+
+
+    <button
+      type="button"
+      data-view-target="userProfile"
+    >
+      <span aria-hidden="true">◉</span>
+      <span>Profile</span>
+    </button>
+
+  </nav>
+
+</div>
+```
+
+  </div>
+
+  <!-- =======================================================
+       SUPPORT CONFIRMATION DIALOG
+       ======================================================= -->
+
+  <dialog
+    class="dialog"
+    id="supportConfirmDialog"
+    aria-labelledby="supportDialogTitle"
+  >
+
+```
+<p class="eyebrow">
+  Support check-in
+</p>
+
+<h2 id="supportDialogTitle">
+  Save a support update?
+</h2>
+
+<p>
+  This records a support check-in for your circle.
+  It does not share your location or contact emergency services.
+</p>
+
+<div class="dialog-actions">
+
+  <button
+    class="button button-secondary"
+    type="button"
+    data-close-dialog
+  >
+    Go back
+  </button>
+
+  <button
+    class="button button-primary"
+    id="confirmUserSupport"
+    type="button"
+  >
+    Save support check-in
+  </button>
+
+</div>
+```
+
+  </dialog>
+
+  <!-- =======================================================
+       ACCESSIBILITY / SCREEN-READER HELP
+       ======================================================= -->
+
+<span
+class="sr-only"
+id="portalLiveRegion"
+aria-live="polite"
+aria-atomic="true"
+
+> </span>
+
+  <script>
+    /*
+     * Small dashboard-only enhancement:
+     * Keep the account email synchronized anywhere
+     * the page exposes it.
+     */
+    window.addEventListener("DOMContentLoaded", () => {
+      const source = document.getElementById("userProfileEmail");
+      const target = document.getElementById("profileAccountEmail");
+
+      if (source && target) {
+        const observer = new MutationObserver(() => {
+          target.textContent = source.textContent;
+        });
+
+        observer.observe(source, {
+          childList: true,
+          characterData: true,
+          subtree: true
+        });
+
+        target.textContent = source.textContent;
+      }
+    });
+  </script>
+
+</body>
 </html>
