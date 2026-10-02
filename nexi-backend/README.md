@@ -27,9 +27,9 @@ FRONTEND_URL=http://localhost:3000
 COOKIE_NAME=nexi_token
 ```
 
-## 3. Create the Neon schema
+## 3. Database schema
 
-Run `db/schema.sql` in the Neon SQL Editor.
+The server runs `db/schema.sql` before accepting requests. To initialize or inspect the schema manually, run that file in the Neon SQL Editor.
 
 ## 4. Start
 
@@ -113,6 +113,8 @@ UPDATE users
 SET role = 'admin'
 WHERE email = 'your-admin-email@example.com';
 ```
+
+Admin dashboard endpoints are protected by the administrator role and are available under `/api/admin`: `/overview`, `/members`, `/members/:id/status`, `/invitations`, `/checkins`, and `/directory`.
 
 ## Deployment on Render
 

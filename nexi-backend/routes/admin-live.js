@@ -17,11 +17,11 @@ router.get('/overview', async (_req, res) => {
   const [members, circles, checkins, pending, directory] = await Promise.all([
     query("SELECT count(*)::int AS total, count(*) FILTER (WHERE status = 'active')::int AS active FROM users WHERE role = 'user'"),
     query('SELECT count(*)::int AS total FROM circles'),
-    query("SELECT count(*)::int AS today FROM check_ins WHERE created_at >= date_trunc('day', NOW())"),
+    query("SELECT count(*)::int AS today FROM checkins WHERE created_at >= date_trunc('day', NOW())"),
     query(
       `SELECT count(*)::int AS pending FROM circle_members cm
         WHERE cm.status = 'active' AND cm.user_id IS NOT NULL
-          AND NOT EXISTS (SELECT 1 FROM check_ins ci WHERE ci.user_id = cm.user_id AND ci.circle_id = cm.circle_id AND ci.created_at >= date_trunc('day', NOW()))`
+          AND NOT EXISTS (SELECT 1 FROM checkins ci WHERE ci.user_id = cm.user_id AND ci.circle_id = cm.circle_id AND ci.created_at >= date_trunc('day', NOW()))`
     ),
     query('SELECT count(*)::int AS pending FROM directory_services WHERE verified = FALSE')
   ]);
@@ -71,15 +71,15 @@ router.post('/invitations', async (req, res) => {
   }
   const token = crypto.randomBytes(32).toString('base64url');
   const result = await query(
-    `INSERT INTO circle_invitations (invited_by, email, full_name, token_hash, expires_at)
-     VALUES ($1, $2, $3, $4, NOW() + INTERVAL '7 days') RETURNING id`,
-    [req.user.id, email, fullName, crypto.createHash('sha256').update(token).digest('hex')]
+    `INSERT INTO invite_tokens (token, role, max_uses, expires_at, active, invited_name, invited_email)
+     VALUES ($1, 'user', 1, NOW() + INTERVAL '7 days', TRUE, $2, $3) RETURNING id`,
+    [token, fullName, email]
   );
   await audit(req.user.id, 'member.invited', result.rows[0].id, { email });
   const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:4173').split(',')[0].trim().replace(/\/$/, '');
   return res.status(201).json({
     success: true,
-    invitation: { id: result.rows[0].id, email_sent: false, invite_url: `${frontendUrl}/login.html?mode=register&invite=${encodeURIComponent(token)}` }
+    invitation: { id: result.rows[0].id, email_sent: false, invite_url: `${frontendUrl}/login.html?mode=signup&invite=${encodeURIComponent(token)}` }
   });
 });
 
@@ -90,7 +90,7 @@ router.get('/checkins', async (_req, res) => {
             greatest(count(DISTINCT cm.user_id) - count(DISTINCT ci.user_id), 0)::int AS pending,
             max(ci.created_at) AS last_update
        FROM circles c LEFT JOIN circle_members cm ON cm.circle_id = c.id AND cm.status = 'active'
-       LEFT JOIN check_ins ci ON ci.circle_id = c.id AND ci.created_at >= date_trunc('day', NOW())
+      LEFT JOIN checkins ci ON ci.circle_id = c.id AND ci.created_at >= date_trunc('day', NOW())
       GROUP BY c.id, c.name ORDER BY c.name LIMIT 300`
   );
   return res.json({ success: true, circles: result.rows });

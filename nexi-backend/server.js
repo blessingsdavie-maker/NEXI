@@ -4,11 +4,12 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
-const { checkDatabase } = require('./db');
+const { checkDatabase, initializeSchema } = require('./db');
 
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const adminRoutes = require('./routes/admin');
+const adminDashboardRoutes = require('./routes/admin-live');
 
 /* =========================================================
 ENVIRONMENT VALIDATION
@@ -222,6 +223,7 @@ ADMIN ROUTES
 ========================================================= */
 
 app.use('/api/admin', adminRoutes);
+app.use('/api/admin', adminDashboardRoutes);
 
 /* =========================================================
 API 404 HANDLER
@@ -272,22 +274,31 @@ return res.status(500).json({
 START SERVER
 ========================================================= */
 
-app.listen(port, () => {
-console.log(
-`Nexi backend listening on port ${port}`
-);
+(async () => {
+  try {
+    await initializeSchema();
 
-console.log(
-`API base URL: http://localhost:${port}/api`
-);
+    app.listen(port, () => {
+      console.log(
+        `Nexi backend listening on port ${port}`
+      );
 
-if (allowedOrigins.length) {
-console.log(
-`Allowed frontend origins: ${allowedOrigins.join(', ')}`
-);
-} else {
-console.log(
-'FRONTEND_URL is not configured; cross-origin requests are currently unrestricted.'
-);
-}
-});
+      console.log(
+        `API base URL: http://localhost:${port}/api`
+      );
+
+      if (allowedOrigins.length) {
+        console.log(
+          `Allowed frontend origins: ${allowedOrigins.join(', ')}`
+        );
+      } else {
+        console.log(
+          'FRONTEND_URL is not configured; cross-origin requests are currently unrestricted.'
+        );
+      }
+    });
+  } catch (error) {
+    console.error('Database schema initialization failed before startup:', error);
+    process.exit(1);
+  }
+})();
