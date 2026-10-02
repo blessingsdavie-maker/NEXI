@@ -6,7 +6,12 @@
   const themeToggle = byId("themeToggle");
   const navToggle = byId("navToggle");
   const primaryNav = byId("primaryNav");
-  let theme = localStorage.getItem(storageKey);
+  const getDefaultTheme = () => {
+    const hour = new Date().getHours();
+    return hour >= 18 || hour < 6 ? "dark" : "light";
+  };
+  let theme = localStorage.getItem(storageKey) || getDefaultTheme();
+  if (!localStorage.getItem(storageKey)) localStorage.setItem(storageKey, theme);
   const setTheme = () => {
     if (theme === "dark") document.documentElement.dataset.theme = "dark";
     else delete document.documentElement.dataset.theme;
