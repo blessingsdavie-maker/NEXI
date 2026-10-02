@@ -734,3 +734,392 @@ body::before {
     font-size: 1.25rem;
   }
 }
+/* =========================================================
+   NEXI — FLOATING GLASS NAVBAR
+   ========================================================= */
+
+.navbar {
+  position: fixed;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  width: min(94%, 1180px);
+  height: 68px;
+  padding: 0 12px 0 24px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  /* Glass effect */
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.035)
+    );
+
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 24px;
+
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+
+  /* Floating appearance */
+  box-shadow:
+    0 20px 55px rgba(0, 0, 0, 0.26),
+    0 5px 18px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+  transition:
+    width 0.35s ease,
+    background 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
+}
+
+/* Subtle floating animation */
+.navbar {
+  animation: navbarFloat 5s ease-in-out infinite;
+}
+
+@keyframes navbarFloat {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-4px);
+  }
+}
+
+/* Soft glass highlight */
+.navbar::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0.13),
+      transparent 28%,
+      transparent 70%,
+      rgba(255, 255, 255, 0.05)
+    );
+
+  pointer-events: none;
+}
+
+/* Very subtle bottom glow */
+.navbar::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -12px;
+  height: 16px;
+
+  background: rgba(198, 95, 67, 0.16);
+  filter: blur(18px);
+  border-radius: 50%;
+
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.navbar .logo,
+.navbar .brand {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+
+/* =========================================================
+   NAVIGATION LINKS
+   ========================================================= */
+
+.nav-links {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.nav-links a {
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+
+  position: relative;
+  overflow: hidden;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+  padding: 0 15px;
+
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
+
+  font-size: 0.91rem;
+  font-weight: 500;
+
+  border-radius: 14px;
+
+  transition:
+    color 0.35s ease,
+    transform 0.35s cubic-bezier(.2,.8,.2,1),
+    background 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+
+/* Shiny moving reflection */
+.nav-links a::before {
+  content: "";
+  position: absolute;
+  top: -80%;
+  left: -120%;
+
+  width: 55%;
+  height: 260%;
+
+  transform: rotate(25deg);
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    rgba(255, 255, 255, 0.42),
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+
+  filter: blur(4px);
+  opacity: 0;
+
+  transition:
+    left 0.7s cubic-bezier(.2,.8,.2,1),
+    opacity 0.25s ease;
+}
+
+
+/* Inner glow */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  border-radius: inherit;
+
+  background:
+    radial-gradient(
+      circle at var(--mouse-x) var(--mouse-y),
+      rgba(198, 95, 67, 0.23),
+      transparent 60%
+    );
+
+  opacity: 0;
+  transition: opacity 0.35s ease;
+
+  pointer-events: none;
+}
+
+
+/* Hover state */
+.nav-links a:hover {
+  color: #ffffff;
+
+  transform: translateY(-3px);
+
+  background: rgba(255, 255, 255, 0.075);
+
+  border: 1px solid rgba(255, 255, 255, 0.10);
+
+  box-shadow:
+    0 7px 20px rgba(0, 0, 0, 0.17),
+    0 0 22px rgba(198, 95, 67, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.nav-links a:hover::before {
+  left: 150%;
+  opacity: 1;
+}
+
+.nav-links a:hover::after {
+  opacity: 1;
+}
+
+
+/* =========================================================
+   REVEALING TEXT EFFECT
+   ========================================================= */
+
+/*
+   The JavaScript below converts each nav label into:
+   <span class="nav-letter">H</span>
+   <span class="nav-letter">o</span>
+   ...
+*/
+
+.nav-links a .nav-letter {
+  display: inline-block;
+
+  transform: translateY(0);
+  opacity: 0.82;
+
+  transition:
+    transform 0.38s cubic-bezier(.2,.8,.2,1),
+    opacity 0.28s ease,
+    text-shadow 0.35s ease;
+}
+
+
+/* Each letter reveals at a slightly different time */
+.nav-links a:hover .nav-letter {
+  opacity: 1;
+
+  transform: translateY(-1px);
+
+  text-shadow:
+    0 0 7px rgba(255, 255, 255, 0.65),
+    0 0 18px rgba(198, 95, 67, 0.55),
+    0 0 32px rgba(198, 95, 67, 0.20);
+}
+
+
+/* =========================================================
+   NAV ACTIONS / BUTTONS
+   ========================================================= */
+
+.nav-actions {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-actions button,
+.nav-actions a {
+  position: relative;
+  overflow: hidden;
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  background: rgba(255, 255, 255, 0.06);
+
+  color: #ffffff;
+
+  border-radius: 14px;
+
+  min-height: 42px;
+  padding: 0 17px;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.3s ease,
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.nav-actions button:hover,
+.nav-actions a:hover {
+  transform: translateY(-3px);
+
+  background: rgba(255, 255, 255, 0.10);
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.20),
+    0 0 22px rgba(198, 95, 67, 0.17);
+}
+
+
+/* =========================================================
+   LOGIN / PRIMARY BUTTON
+   ========================================================= */
+
+.nav-actions .primary,
+.navbar .btn-primary {
+  background:
+    linear-gradient(
+      135deg,
+      rgba(198, 95, 67, 0.95),
+      rgba(153, 63, 44, 0.95)
+    );
+
+  border-color: rgba(255, 255, 255, 0.16);
+
+  box-shadow:
+    0 7px 20px rgba(0, 0, 0, 0.20),
+    0 0 20px rgba(198, 95, 67, 0.18);
+}
+
+.nav-actions .primary:hover,
+.navbar .btn-primary:hover {
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.24),
+    0 0 30px rgba(198, 95, 67, 0.36);
+}
+
+
+/* =========================================================
+   MOBILE NAVBAR
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .navbar {
+    width: calc(100% - 24px);
+    top: 12px;
+    padding: 0 12px 0 18px;
+    border-radius: 20px;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .nav-actions {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 520px) {
+  .navbar {
+    height: 60px;
+  }
+
+  .nav-actions button,
+  .nav-actions a {
+    min-height: 38px;
+    padding: 0 13px;
+    font-size: 0.82rem;
+  }
+}

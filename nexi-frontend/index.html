@@ -14,7 +14,7 @@
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="site-header">
+    <header class="site-header navbar">
       <div class="nav-shell">
         <a class="brand" href="#home" aria-label="Nexi home">
           <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
@@ -29,7 +29,7 @@
           <span></span><span></span>
         </button>
 
-        <nav class="primary-nav" id="primaryNav" aria-label="Primary navigation">
+        <nav class="primary-nav nav-links" id="primaryNav" aria-label="Primary navigation">
           <a href="#home">Home</a>
           <a href="#safety">Discover</a>
           <a href="#services">Services</a>
@@ -472,6 +472,53 @@ if (window.matchMedia("(pointer:fine)").matches) {
     });
   });
 }
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const navLinks = document.querySelectorAll(".nav-links a");
+
+  navLinks.forEach((link) => {
+
+    // Preserve the original label
+    const text = link.textContent.trim();
+
+    // Clear current text
+    link.textContent = "";
+
+    // Create a span for every character
+    [...text].forEach((character, index) => {
+
+      const letter = document.createElement("span");
+
+      letter.className = "nav-letter";
+      letter.textContent = character === " " ? "\u00A0" : character;
+
+      // Stagger the reveal
+      letter.style.transitionDelay = `${index * 0.025}s`;
+
+      link.appendChild(letter);
+    });
+
+
+    /* Dynamic glow follows the mouse */
+    link.addEventListener("mousemove", (event) => {
+
+      const rect = link.getBoundingClientRect();
+
+      const x =
+        ((event.clientX - rect.left) / rect.width) * 100;
+
+      const y =
+        ((event.clientY - rect.top) / rect.height) * 100;
+
+      link.style.setProperty("--mouse-x", `${x}%`);
+      link.style.setProperty("--mouse-y", `${y}%`);
+    });
+
+  });
+
+});
 </script>
   </body>
 </html>
