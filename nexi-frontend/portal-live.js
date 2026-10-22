@@ -4,7 +4,7 @@
   const get = (id) => document.getElementById(id);
   const role = document.body.dataset.role;
   const api = async (path, options = {}) => {
-    const response = await window.nexiApi.request(path, {
+    const response = await window.nalsafeApi.request(path, {
       ...options,
       headers: { ...(options.body ? { "Content-Type": "application/json" } : {}), ...options.headers }
     });
@@ -47,9 +47,14 @@
     return;
   }
 
-  const themeKey = "nexi-theme";
+  const themeKey = "nalsafe-theme";
+  const legacyThemeKey = "nexi-theme";
   const themeButton = get("portalTheme");
-  let theme = localStorage.getItem(themeKey);
+  let theme = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey);
+  if (!localStorage.getItem(themeKey) && theme) {
+    localStorage.setItem(themeKey, theme);
+    localStorage.removeItem(legacyThemeKey);
+  }
   const setTheme = () => {
     if (theme === "dark") document.documentElement.dataset.theme = "dark";
     else delete document.documentElement.dataset.theme;
@@ -87,7 +92,7 @@
     button.disabled = true;
     try {
       await api("/logout", { method: "POST" });
-      window.nexiApi.clearToken();
+      window.nalsafeApi.clearToken();
       window.location.replace("login.html?mode=login");
     } catch (error) {
       button.disabled = false;
@@ -99,7 +104,7 @@
   if (role === "admin") await setupAdmin();
 
   async function setupUser() {
-  const profileName = String(userSession.full_name || "Nexi member").trim();
+  const profileName = String(userSession.full_name || "NALSAFE member").trim();
 
   const initials = profileName
     .split(/\s+/)
@@ -135,7 +140,14 @@
   }
 
   const NOTIFICATION_READ_KEY =
+    `nalsafe-read-notifications-${userSession.id}`;
+  const legacyNotificationReadKey =
     `nexi-read-notifications-${userSession.id}`;
+  const legacyNotificationReads = localStorage.getItem(legacyNotificationReadKey);
+  if (!localStorage.getItem(NOTIFICATION_READ_KEY) && legacyNotificationReads) {
+    localStorage.setItem(NOTIFICATION_READ_KEY, legacyNotificationReads);
+  }
+  localStorage.removeItem(legacyNotificationReadKey);
 
   const notificationReadState = new Set(
     JSON.parse(localStorage.getItem(NOTIFICATION_READ_KEY) || "[]")
@@ -272,11 +284,11 @@
       )[0] || null;
 
   const renderConnectionState = () => {
-    let indicator = get("nexiConnectionState");
+    let indicator = get("nalsafeConnectionState");
 
     if (!indicator) {
       indicator = document.createElement("span");
-      indicator.id = "nexiConnectionState";
+      indicator.id = "nalsafeConnectionState";
       indicator.className = "state-dot";
       indicator.style.marginLeft = "auto";
       indicator.style.whiteSpace = "nowrap";
@@ -652,7 +664,7 @@
             ? "Support check-in saved"
             : "Safe check-in saved",
         description:
-          "Your check-in activity has been saved to your Nexi account.",
+          "Your check-in activity has been saved to your NALSAFE account.",
         time:
           `${formatDate(item.created_at)} · ${formatTime(item.created_at)}`,
         unread: !notificationReadState.has(id)
@@ -814,7 +826,7 @@
     }
 
     try {
-      new Notification("Nexi", {
+      new Notification("NALSAFE", {
         body: message,
         icon: "favicon.ico"
       });
@@ -842,7 +854,7 @@
         notify &&
         activity().length > previousActivityLength
       ) {
-        maybeNotify("Your Nexi dashboard has a new update.");
+        maybeNotify("Your NALSAFE dashboard has a new update.");
       }
 
       return dashboard;
@@ -882,9 +894,9 @@
    * Central authentication expiration handler.
    */
   window.addEventListener(
-    "nexi:auth-expired",
+    "nalsafe:auth-expired",
     () => {
-      window.nexiApi.clearToken();
+      window.nalsafeApi.clearToken();
       window.location.replace("login.html?mode=login");
     },
     { once: true }
@@ -933,7 +945,7 @@
 
         if (permission === "granted") {
           maybeNotify(
-            "Your Nexi reminder preference was updated."
+            "Your NALSAFE reminder preference was updated."
           );
         }
       } catch (error) {
@@ -1306,7 +1318,7 @@
 
   /*
    * Refresh dashboard automatically every 30 seconds.
-   * This gives Nexi a near-live experience without
+   * This gives NALSAFE a near-live experience without
    * requiring WebSockets yet.
    */
   const refreshInterval =
@@ -1455,7 +1467,7 @@
         const csv = rows.map((row) => row.map((cell) => `"${String(cell).replaceAll('"', '""')}"`).join(",")).join("\r\n");
         const link = document.createElement("a");
         link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-        link.download = "nexi-check-in-summary.csv";
+        link.download = "nalsafe-check-in-summary.csv";
         link.click();
         URL.revokeObjectURL(link.href);
       } catch (error) { showError(error); }

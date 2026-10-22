@@ -28,14 +28,14 @@
    * Make sure the API helper has loaded before
    * attempting to use authentication.
    */
-  if (!window.nexiApi) {
+  if (!window.nalsafeApi) {
     console.error(
-      "Nexi API is not available. Make sure nexi-api.js loads before auth.js."
+      "NALSAFE API is not available. Make sure nalsafe-api.js loads before auth.js."
     );
     return;
   }
 
-  window.nexiApi.clearToken();
+  window.nalsafeApi.clearToken();
 
   const showMessage = (text, isError = false) => {
     if (!message) {
@@ -81,7 +81,7 @@
 
     if (authTitle) {
       authTitle.textContent = registering
-        ? "Create your Nexi account"
+        ? "Create your NALSAFE account"
         : "Sign in or create an account";
     }
 
@@ -141,7 +141,7 @@
        * clear any existing authentication session.
        */
       if (mode === "register") {
-        window.nexiApi.clearToken();
+        window.nalsafeApi.clearToken();
       }
 
       setMode(mode);
@@ -273,7 +273,7 @@
               };
 
           const response =
-            await window.nexiApi.request(
+            await window.nalsafeApi.request(
               endpoint,
               {
                 method: "POST",
@@ -327,7 +327,7 @@
            * This is what allows /me and other protected
            * endpoints to recognize the user after redirect.
            */
-          window.nexiApi.setToken(
+          window.nalsafeApi.setToken(
             data.token
           );
 
@@ -350,7 +350,7 @@
 
         } catch (error) {
           console.error(
-            "Nexi authentication error:",
+            "NALSAFE authentication error:",
             error
           );
 

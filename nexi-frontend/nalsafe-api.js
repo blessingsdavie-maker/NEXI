@@ -6,13 +6,20 @@
     ["localhost", "127.0.0.1", ""].includes(window.location.hostname);
 
   const apiBaseUrl = (
-    window.NEXI_API_BASE_URL ||
+    window.NALSAFE_API_BASE_URL ||
     (isLocal
       ? "http://localhost:5000/api"
       : "https://nexi-6qk9.onrender.com/api")
   ).replace(/\/+$/, "");
 
-  const TOKEN_KEY = "nexi_token";
+  const TOKEN_KEY = "nalsafe_token";
+  const LEGACY_TOKEN_KEY = "nexi_token";
+
+  if (!localStorage.getItem(TOKEN_KEY)) {
+    const legacyToken = localStorage.getItem(LEGACY_TOKEN_KEY);
+    if (legacyToken) localStorage.setItem(TOKEN_KEY, legacyToken);
+  }
+  localStorage.removeItem(LEGACY_TOKEN_KEY);
 
   const redirectToLogin = () => {
     const current = window.location.pathname.toLowerCase();
@@ -26,7 +33,7 @@
       return;
     }
 
-    window.nexiApi.clearToken();
+    window.nalsafeApi.clearToken();
     window.location.replace("login.html?mode=login");
   };
 
@@ -83,7 +90,7 @@
 
       if (response.status === 401) {
         window.dispatchEvent(
-          new CustomEvent("nexi:auth-expired", {
+          new CustomEvent("nalsafe:auth-expired", {
             detail: { path }
           })
         );
@@ -134,7 +141,7 @@
     return data;
   };
 
-  window.nexiApi = {
+  window.nalsafeApi = {
     apiBaseUrl,
 
     getToken() {
@@ -162,7 +169,7 @@
     redirectToLogin
   };
 
-  window.addEventListener("nexi:auth-expired", () => {
-    window.nexiApi.clearToken();
+  window.addEventListener("nalsafe:auth-expired", () => {
+    window.nalsafeApi.clearToken();
   });
 })();

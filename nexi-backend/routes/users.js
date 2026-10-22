@@ -269,7 +269,7 @@ if (!circle) {
   return res.status(500).json({
     success: false,
     message:
-      'Your Nexi circle could not be created.'
+      'Your NALSAFE circle could not be created.'
   });
 }
 
@@ -477,7 +477,7 @@ if (!circle) {
   return res.status(500).json({
     success: false,
     message:
-      'Your Nexi circle could not be found.'
+      'Your NALSAFE circle could not be found.'
   });
 }
 
@@ -626,7 +626,7 @@ if (!circle) {
   return res.status(500).json({
     success: false,
     message:
-      'Your Nexi circle could not be found.'
+      'Your NALSAFE circle could not be found.'
   });
 }
 
@@ -816,7 +816,7 @@ if (!circle) {
   return res.status(500).json({
     success: false,
     message:
-      'Your Nexi circle could not be found.'
+      'Your NALSAFE circle could not be found.'
   });
 }
 

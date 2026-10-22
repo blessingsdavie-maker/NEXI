@@ -44,7 +44,7 @@ if (token) {
   */
   const cookieName =
   process.env.COOKIE_NAME ||
-  'nexi_token';
+  'nalsafe_token';
 
 return (
 req.cookies?.[cookieName] ||

@@ -52,7 +52,7 @@ function setAuthCookie(res, token) {
     process.env.NODE_ENV === 'production';
 
   res.cookie(
-    process.env.COOKIE_NAME || 'nexi_token',
+    process.env.COOKIE_NAME || 'nalsafe_token',
     token,
     {
       httpOnly: true,
@@ -603,7 +603,7 @@ router.post(
               [
                 ownerId,
                 user.id,
-                `${fullName} joined your Nexi circle.`,
+                `${fullName} joined your NALSAFE circle.`,
                 invitation.id
               ]
             );
@@ -638,7 +638,7 @@ router.post(
 
       /* ---------------------------------------------------
          Normal signup:
-         create a personal Nexi circle.
+         create a personal NALSAFE circle.
          --------------------------------------------------- */
 
       if (
@@ -1112,7 +1112,7 @@ router.post(
 
     const cookieName =
       process.env.COOKIE_NAME ||
-      'nexi_token';
+      'nalsafe_token';
 
 
     res.clearCookie(

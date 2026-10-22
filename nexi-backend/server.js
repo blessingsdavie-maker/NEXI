@@ -114,7 +114,7 @@ BASIC SERVICE ROUTES
 app.get('/', (_req, res) => {
 return res.json({
 success: true,
-service: 'Nexi backend',
+service: 'NALSAFE backend',
 status: 'online'
 });
 });
@@ -127,7 +127,7 @@ const databaseTime = await checkDatabase();
 return res.json({
   success: true,
   message:
-    'Nexi backend is connected to Neon PostgreSQL',
+    'NALSAFE backend is connected to Neon PostgreSQL',
   databaseTime
 });
 
@@ -280,7 +280,7 @@ START SERVER
 
     app.listen(port, () => {
       console.log(
-        `Nexi backend listening on port ${port}`
+        `NALSAFE backend listening on port ${port}`
       );
 
       console.log(

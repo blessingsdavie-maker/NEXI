@@ -1,7 +1,7 @@
 {
-  "name": "nexi-backend",
+  "name": "nalsafe-backend",
   "version": "1.0.0",
-  "description": "Nexi backend API for Neon PostgreSQL",
+  "description": "NALSAFE backend API for Neon PostgreSQL",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

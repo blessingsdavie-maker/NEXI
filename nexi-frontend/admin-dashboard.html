@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f3f5ef">
-    <meta name="description" content="Nexi operations for membership, check-in summaries, and service directory review.">
-    <title>Admin dashboard — Nexi</title>
+    <meta name="description" content="NALSAFE operations for membership, check-in summaries, and service directory review.">
+    <title>Admin dashboard — NALSAFE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
     <a class="portal-skip" href="#portalMain">Skip to dashboard</a>
     <div class="portal-shell">
       <header class="portal-topbar">
-        <div class="portal-brand-meta"><a class="portal-brand" href="index.html" aria-label="Nexi home"><span class="portal-brandmark">N</span><span>Nexi</span></a><span class="prototype-tag">Operations</span></div>
+        <div class="portal-brand-meta"><a class="portal-brand" href="index.html" aria-label="NALSAFE home"><span class="portal-brandmark">N</span><span>NALSAFE</span></a><span class="prototype-tag">Operations</span></div>
         <div class="topbar-actions">
           <a class="role-switch" href="admin.html">Admin home <span aria-hidden="true">↗</span></a>
           <button class="theme-button" id="portalTheme" type="button" aria-label="Use dark theme" title="Change colour theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
@@ -33,11 +33,11 @@
             <button type="button" data-view-target="adminDirectory"><span class="nav-glyph" aria-hidden="true">⌖</span>Directory review</button>
           </nav>
           <div class="sidebar-note"><strong>Privacy boundary</strong>Operations views show circle-level summaries only, never location histories or private support messages.</div>
-          <div class="sidebar-profile"><span class="profile-avatar admin-avatar">NX</span><span><b id="adminProfileName">Nexi Operations</b><small id="adminProfileRole">Administrator</small></span></div>
+          <div class="sidebar-profile"><span class="profile-avatar admin-avatar">NX</span><span><b id="adminProfileName">NALSAFE Operations</b><small id="adminProfileRole">Administrator</small></span></div>
         </aside>
         <main class="portal-main" id="portalMain">
           <section class="portal-view is-active" id="adminOverview" aria-labelledby="adminOverviewTitle">
-            <div class="view-heading"><div><p class="eyebrow">Operations overview</p><h1 id="adminOverviewTitle">Good evening, admin</h1><p>A high-level view of today's Nexi activity.</p></div><span class="date-label" id="portalDate"></span></div>
+            <div class="view-heading"><div><p class="eyebrow">Operations overview</p><h1 id="adminOverviewTitle">Good evening, admin</h1><p>A high-level view of today's NALSAFE activity.</p></div><span class="date-label" id="portalDate"></span></div>
             <div class="stats-grid">
               <article class="stat-card"><div class="stat-top"><span>Active members</span><span class="stat-icon" aria-hidden="true">◉</span></div><div class="stat-value" id="adminActiveCount">0</div><div class="stat-foot">Across all circles</div></article>
               <article class="stat-card"><div class="stat-top"><span>Circles</span><span class="stat-icon" aria-hidden="true">⌂</span></div><div class="stat-value" id="adminCircleCount">0</div><div class="stat-foot">No private circle content</div></article>
@@ -49,7 +49,7 @@
               <section class="panel"><div class="panel-heading"><div><h2>Needs attention</h2><p>Operational tasks, not emergency alerts.</p></div></div><div class="quick-list"><div class="quick-row"><span><b>Directory verification</b><small><span id="adminReviewCountSummary">2</span> listings awaiting review</small></span><button class="button button-secondary button-small" type="button" data-open-view="adminDirectory">Review</button></div><div class="quick-row"><span><b>Member access</b><small>Review active and paused accounts</small></span><button class="button button-secondary button-small" type="button" data-open-view="adminMembers">Manage</button></div></div></section>
             </div>
             <div class="privacy-note"><span aria-hidden="true">◈</span><span><strong>Admin visibility is intentionally limited</strong>No live location, direct messages, or personal support details are shown in this dashboard.</span></div>
-            <p class="portal-footer">Nexi is not an emergency service and does not dispatch assistance.</p>
+            <p class="portal-footer">NALSAFE is not an emergency service and does not dispatch assistance.</p>
           </section>
 
           <section class="portal-view" id="adminMembers" aria-labelledby="adminMembersTitle">

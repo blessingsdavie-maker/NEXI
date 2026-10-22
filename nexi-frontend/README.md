@@ -1,6 +1,6 @@
-# Nexi
+# NALSAFE
 
-Nexi uses a static frontend, an Express API, and Neon PostgreSQL. Accounts, circles, invitations, check-ins, reminder preferences, and verified service listings are stored server-side.
+NALSAFE uses a static frontend, an Express API, and Neon PostgreSQL. Accounts, circles, invitations, check-ins, reminder preferences, and verified service listings are stored server-side.
 
 ## Local setup
 
@@ -32,6 +32,6 @@ UPDATE users SET role = 'admin' WHERE email = 'admin@example.com';
 
 ## Production
 
-Deploy the frontend as a static site and `nexi-backend` as a Node.js service. Configure `DATABASE_URL`, a random `JWT_SECRET` with at least 32 characters, `NODE_ENV=production`, and the exact HTTPS frontend origin in `FRONTEND_URL`. The production frontend and API must both use HTTPS for secure cookies. Configure `window.NEXI_API_BASE_URL` before `nexi-api.js` loads if the API is not at the current default host.
+Deploy the frontend as a static site and `nexi-backend` as a Node.js service. Configure `DATABASE_URL`, a random `JWT_SECRET` with at least 32 characters, `NODE_ENV=production`, and the exact HTTPS frontend origin in `FRONTEND_URL`. The production frontend and API must both use HTTPS for secure cookies. The current API default still points to the legacy Render host `https://nexi-6qk9.onrender.com/api`; configure `window.NALSAFE_API_BASE_URL` before `nalsafe-api.js` loads when the new NALSAFE API host is deployed.
 
-Invitations are persisted and return a seven-day registration link for sharing; email delivery is not configured. Reminder time preferences persist, but no scheduled notification service exists. Nexi does not collect location, dispatch emergency alerts, or replace emergency services. The public service directory returns only listings administrators have verified.
+Invitations are persisted and return a seven-day registration link for sharing; email delivery is not configured. Reminder time preferences persist, but no scheduled notification service exists. NALSAFE does not collect location, dispatch emergency alerts, or replace emergency services. The public service directory returns only listings administrators have verified.

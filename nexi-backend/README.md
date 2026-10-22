@@ -1,6 +1,6 @@
-# Nexi Backend
+# NALSAFE Backend
 
-Node.js + Express + Neon PostgreSQL backend for the Nexi frontend.
+Node.js + Express + Neon PostgreSQL backend for the NALSAFE frontend.
 
 ## 1. Install
 
@@ -14,7 +14,7 @@ Copy `.env.example` to `.env` and set:
 
 - `DATABASE_URL` = Neon PostgreSQL connection string
 - `JWT_SECRET` = long random secret
-- `FRONTEND_URL` = exact URL where the Nexi frontend is hosted (for example `https://your-frontend.onrender.com`). Do not include `/api` here.
+- `FRONTEND_URL` = exact URL where the NALSAFE frontend is hosted (for example `https://your-frontend.onrender.com`). Do not include `/api` here.
 
 For local development, for example:
 
@@ -24,7 +24,7 @@ NODE_ENV=development
 DATABASE_URL=postgresql://...
 JWT_SECRET=change-me-to-a-long-random-secret
 FRONTEND_URL=http://localhost:3000
-COOKIE_NAME=nexi_token
+COOKIE_NAME=nalsafe_token
 ```
 
 ## 3. Database schema
@@ -54,14 +54,14 @@ A healthy database returns:
 ```json
 {
   "success": true,
-  "message": "Nexi backend is connected to Neon PostgreSQL",
+  "message": "NALSAFE backend is connected to Neon PostgreSQL",
   "databaseTime": "..."
 }
 ```
 
 ## Authentication API
 
-The Nexi frontend currently uses `https://nexi-6qk9.onrender.com/api` as its production API base, so these exact production endpoints are supported:
+The existing production API is still hosted at the legacy Render address `https://nexi-6qk9.onrender.com/api`; the NALSAFE frontend uses this address until a new NALSAFE API host is deployed. Keep this URL until the replacement is live, then update the frontend API base. These exact production endpoints are supported:
 
 - `POST /api/signup`
 - `POST /api/login`
@@ -98,7 +98,7 @@ The backend also keeps `/signup`, `/login`, `/me`, `/logout` and `/api/auth/*` a
 
 `GET /api/me`
 
-The API supports authentication through the `nexi_token` HttpOnly cookie. It also accepts a bearer token through `Authorization: Bearer <token>` for frontend/API integrations.
+The API supports authentication through the `nalsafe_token` HttpOnly cookie. It also accepts a bearer token through `Authorization: Bearer <token>` for frontend/API integrations.
 
 ### Logout
 

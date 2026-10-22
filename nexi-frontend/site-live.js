@@ -2,7 +2,8 @@
   "use strict";
 
   const byId = (id) => document.getElementById(id);
-  const storageKey = "nexi-theme";
+  const storageKey = "nalsafe-theme";
+  const legacyStorageKey = "nexi-theme";
   const themeToggle = byId("themeToggle");
   const navToggle = byId("navToggle");
   const primaryNav = byId("primaryNav");
@@ -10,8 +11,11 @@
     const hour = new Date().getHours();
     return hour >= 18 || hour < 6 ? "dark" : "light";
   };
-  let theme = localStorage.getItem(storageKey) || getDefaultTheme();
-  if (!localStorage.getItem(storageKey)) localStorage.setItem(storageKey, theme);
+  let theme = localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey) || getDefaultTheme();
+  if (!localStorage.getItem(storageKey)) {
+    localStorage.setItem(storageKey, theme);
+    localStorage.removeItem(legacyStorageKey);
+  }
   const setTheme = () => {
     if (theme === "dark") document.documentElement.dataset.theme = "dark";
     else delete document.documentElement.dataset.theme;
@@ -37,24 +41,46 @@
     document.querySelector(".site-header")?.classList.toggle("is-scrolled", window.scrollY > 8);
   }, { passive: true });
 
-  const heroVideo = document.querySelector(".hero-background-video");
+  const backgroundVideo = document.querySelector(".landing-background-video");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const mobileHero = window.matchMedia("(max-width: 700px)");
-  const syncHero = () => {
-    if (!heroVideo) return;
-    const source = mobileHero.matches ? heroVideo.dataset.mobileSrc : heroVideo.dataset.desktopSrc;
-    if (source && heroVideo.getAttribute("src") !== source) {
-      heroVideo.src = source;
-      heroVideo.load();
+  const mobileViewport = window.matchMedia("(max-width: 700px)");
+  const syncBackgroundVideo = () => {
+    if (!backgroundVideo) return;
+    const source = mobileViewport.matches
+      ? backgroundVideo.dataset.mobileSrc
+      : backgroundVideo.dataset.desktopSrc;
+
+    if (source && backgroundVideo.getAttribute("src") !== source) {
+      backgroundVideo.classList.add("is-loading");
+      backgroundVideo.src = source;
+      backgroundVideo.load();
     }
-    if (reducedMotion.matches) heroVideo.pause();
-    else heroVideo.play().catch(() => {});
+
+    if (reducedMotion.matches) {
+      backgroundVideo.pause();
+      return;
+    }
+
+    backgroundVideo.play().catch((error) => {
+      console.error("NALSAFE background video could not start:", error);
+    });
   };
-  syncHero();
-  mobileHero.addEventListener("change", syncHero);
-  reducedMotion.addEventListener("change", syncHero);
-  heroVideo?.addEventListener("timeupdate", () => {
-    if (mobileHero.matches && heroVideo.currentTime >= 8) heroVideo.currentTime = 0;
+  syncBackgroundVideo();
+  mobileViewport.addEventListener("change", syncBackgroundVideo);
+  reducedMotion.addEventListener("change", syncBackgroundVideo);
+  backgroundVideo?.addEventListener("loadeddata", () => {
+    backgroundVideo.classList.remove("is-loading");
+  });
+  backgroundVideo?.addEventListener("timeupdate", () => {
+    if (!backgroundVideo.duration) return;
+    if (backgroundVideo.currentTime >= backgroundVideo.duration - 0.7) {
+      backgroundVideo.classList.add("is-loop-fade");
+    } else if (backgroundVideo.currentTime < 0.45) {
+      backgroundVideo.classList.remove("is-loop-fade");
+    }
+  });
+  backgroundVideo?.addEventListener("error", () => {
+    console.error("NALSAFE background video failed to load:", backgroundVideo.error);
   });
 
   const results = byId("serviceResults");
@@ -66,13 +92,14 @@
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   })[character]);
   const renderServices = async () => {
+    if (!results || !search) return;
     controller?.abort();
     controller = new AbortController();
     const parameters = new URLSearchParams({ search: search.value.trim() });
     if (activeCategory !== "all") parameters.set("category", activeCategory);
     results.setAttribute("aria-busy", "true");
     try {
-      const response = await window.nexiApi.request(`/directory?${parameters}`, { signal: controller.signal });
+      const response = await window.nalsafeApi.request(`/directory?${parameters}`, { signal: controller.signal });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || "The service directory is unavailable.");
       if (!data.listings.length) {

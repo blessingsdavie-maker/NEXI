@@ -1,4 +1,4 @@
--- Nexi initial Neon PostgreSQL schema
+-- NALSAFE initial Neon PostgreSQL schema
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGSERIAL PRIMARY KEY,
