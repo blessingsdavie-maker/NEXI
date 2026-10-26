@@ -12,6 +12,7 @@
   const accountNameField = get("accountNameField");
   const accountConfirmField = get("accountConfirmField");
   const accountSubmit = get("accountSubmit");
+
   const authModeButtons = [
     ...document.querySelectorAll("[data-auth-mode]")
   ];
@@ -25,8 +26,7 @@
       : "login";
 
   /*
-   * Make sure the API helper has loaded before
-   * attempting to use authentication.
+   * Verify that the NALSAFE API helper has loaded.
    */
   if (!window.nalsafeApi) {
     console.error(
@@ -35,17 +35,23 @@
     return;
   }
 
-  window.nalsafeApi.clearToken();
+  /*
+   * IMPORTANT:
+   * Do not clear the authentication token here.
+   * Clearing it whenever this page loads can interfere
+   * with the existing login session.
+   */
 
   const showMessage = (text, isError = false) => {
-    if (!message) {
-      return;
-    }
+    if (!message) return;
 
     message.textContent = text;
     message.classList.toggle("is-error", isError);
   };
 
+  /*
+   * Switch between Login and Create Account.
+   */
   const setMode = (mode) => {
     accountMode = mode;
 
@@ -111,8 +117,7 @@
     });
 
     /*
-     * Clear password fields when switching between
-     * Login and Create Account modes.
+     * Clear password fields when switching modes.
      */
     if (accountPassword) {
       accountPassword.value = "";
@@ -130,18 +135,14 @@
   };
 
   /*
-   * Login / Create Account mode buttons
+   * Login / Create Account buttons.
    */
   authModeButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const mode = button.dataset.authMode;
 
-      /*
-       * When explicitly switching into registration mode,
-       * clear any existing authentication session.
-       */
-      if (mode === "register") {
-        window.nalsafeApi.clearToken();
+      if (!["login", "register"].includes(mode)) {
+        return;
       }
 
       setMode(mode);
@@ -149,237 +150,190 @@
   });
 
   /*
-   * Form submission
+   * Form submission.
    */
   if (accountForm) {
-    accountForm.addEventListener(
-      "submit",
-      async (event) => {
-        event.preventDefault();
+    accountForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
 
-        const email = accountEmail
-          ? accountEmail.value.trim().toLowerCase()
+      const email = accountEmail
+        ? accountEmail.value.trim().toLowerCase()
+        : "";
+
+      const password = accountPassword
+        ? accountPassword.value
+        : "";
+
+      const registering = accountMode === "register";
+
+      /*
+       * Validate registration fields.
+       */
+      if (registering) {
+        const fullName = accountName
+          ? accountName.value.trim()
           : "";
 
-        const password = accountPassword
-          ? accountPassword.value
+        const confirmPassword = accountConfirm
+          ? accountConfirm.value
           : "";
 
-        const registering =
-          accountMode === "register";
-
-        /*
-         * Registration validation
-         */
-        if (registering) {
-          const fullName = accountName
-            ? accountName.value.trim()
-            : "";
-
-          const confirmPassword = accountConfirm
-            ? accountConfirm.value
-            : "";
-
-          if (!fullName) {
-            showMessage(
-              "Please enter your full name.",
-              true
-            );
-            return;
-          }
-
-          if (!email) {
-            showMessage(
-              "Please enter your email address.",
-              true
-            );
-            return;
-          }
-
-          if (!password) {
-            showMessage(
-              "Please create a password.",
-              true
-            );
-            return;
-          }
-
-          if (password.length < 8) {
-            showMessage(
-              "Your password must be at least 8 characters.",
-              true
-            );
-            return;
-          }
-
-          if (password !== confirmPassword) {
-            showMessage(
-              "Those passwords don't match yet.",
-              true
-            );
-            return;
-          }
+        if (!fullName) {
+          showMessage("Please enter your full name.", true);
+          return;
         }
 
-        /*
-         * Login validation
-         */
-        if (!registering) {
-          if (!email) {
-            showMessage(
-              "Please enter your email address.",
-              true
-            );
-            return;
-          }
-
-          if (!password) {
-            showMessage(
-              "Please enter your password.",
-              true
-            );
-            return;
-          }
+        if (!email) {
+          showMessage("Please enter your email address.", true);
+          return;
         }
 
-        if (accountSubmit) {
-          accountSubmit.disabled = true;
+        if (!password || password.length < 8) {
+          showMessage(
+            "Your password must be at least 8 characters.",
+            true
+          );
+          return;
         }
 
-        showMessage(
-          registering
-            ? "Creating your account…"
-            : "Signing in…"
+        if (password !== confirmPassword) {
+          showMessage("Those passwords don't match yet.", true);
+          return;
+        }
+      }
+
+      /*
+       * Validate login fields.
+       */
+      if (!registering) {
+        if (!email) {
+          showMessage("Please enter your email address.", true);
+          return;
+        }
+
+        if (!password) {
+          showMessage("Please enter your password.", true);
+          return;
+        }
+      }
+
+      if (accountSubmit) {
+        accountSubmit.disabled = true;
+      }
+
+      showMessage(
+        registering ? "Creating your account…" : "Signing in…"
+      );
+
+      try {
+        const endpoint = registering ? "/signup" : "/login";
+
+        const body = registering
+          ? {
+              full_name: accountName
+                ? accountName.value.trim()
+                : "",
+              email,
+              password,
+              invite_token: inviteToken || undefined
+            }
+          : {
+              email,
+              password
+            };
+
+        const response = await window.nalsafeApi.request(
+          endpoint,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(body)
+          }
         );
 
-        try {
-          const endpoint = registering
-            ? "/signup"
-            : "/login";
+        const data = await response.json().catch(() => ({}));
 
-          const body = registering
-            ? {
-                full_name: accountName
-                  ? accountName.value.trim()
-                  : "",
-                email,
-                password,
-                invite_token:
-                  inviteToken || undefined
-              }
-            : {
-                email,
-                password
-              };
-
-          const response =
-            await window.nalsafeApi.request(
-              endpoint,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json"
-                },
-                body: JSON.stringify(body)
-              }
-            );
-
-          const data =
-            await response
-              .json()
-              .catch(() => ({}));
-
-          /*
-           * Backend returned an error
-           */
-          if (!response.ok) {
-            showMessage(
-              data.message ||
-                "Your request could not be completed.",
-              true
-            );
-            return;
-          }
-
-          /*
-           * Successful authentication must return
-           * a JWT token.
-           */
-          if (!data.token) {
-            console.error(
-              "No authentication token returned by backend.",
-              data
-            );
-
-            showMessage(
-              registering
-                ? "Your account was created, but the login session could not be established."
-                : "You were authenticated, but the login session could not be established.",
-              true
-            );
-
-            return;
-          }
-
-          /*
-           * SAVE THE JWT
-           *
-           * This is what allows /me and other protected
-           * endpoints to recognize the user after redirect.
-           */
-          window.nalsafeApi.setToken(
-            data.token
+        /*
+         * Handle API errors.
+         */
+        if (!response.ok) {
+          showMessage(
+            data.message || "Your request could not be completed.",
+            true
           );
+          return;
+        }
 
-          /*
-           * Determine which dashboard to open.
-           */
-          const destination =
-            data.user &&
-            ["admin", "support_admin"].includes(data.user.role)
-              ? "admin-dashboard.html"
-              : "user-dashboard.html";
-
-          /*
-           * Use replace so the authentication page
-           * does not remain in browser history.
-           */
-          window.location.replace(
-            destination
-          );
-
-        } catch (error) {
+        /*
+         * Confirm that the backend returned a user.
+         */
+        if (!data.user || !data.user.role) {
           console.error(
-            "NALSAFE authentication error:",
-            error
+            "The backend response did not include a valid user role.",
+            data
           );
 
           showMessage(
-            "Could not connect to the account service. Please try again.",
+            "Your account response is missing role information. Please check the backend.",
             true
           );
+          return;
+        }
 
-        } finally {
-          if (accountSubmit) {
-            accountSubmit.disabled = false;
-          }
+        /*
+         * Save the JWT if the backend returns one.
+         * Do not reject cookie-based sessions solely because
+         * the backend does not return a JWT in the response.
+         */
+        if (data.token) {
+          window.nalsafeApi.setToken(data.token);
+        }
+
+        /*
+         * Redirect according to the account role.
+         */
+        const role = data.user.role;
+
+        if (role === "admin" || role === "support_admin") {
+          window.location.replace("admin-dashboard.html");
+        } else if (role === "user") {
+          window.location.replace("user-dashboard.html");
+        } else {
+          console.error("Unexpected account role:", role);
+
+          showMessage(
+            "Your account role is not recognized. Please contact support.",
+            true
+          );
+        }
+      } catch (error) {
+        console.error("NALSAFE authentication error:", error);
+
+        showMessage(
+          "Could not connect to the account service. Please try again.",
+          true
+        );
+      } finally {
+        if (accountSubmit) {
+          accountSubmit.disabled = false;
         }
       }
-    );
+    });
   }
 
   /*
-   * Current year in footer
+   * Update the footer year.
    */
   const authYear = get("authYear");
 
   if (authYear) {
-    authYear.textContent =
-      String(new Date().getFullYear());
+    authYear.textContent = String(new Date().getFullYear());
   }
 
   /*
-   * Set initial mode
+   * Initialize the page.
    */
   setMode(accountMode);
 
