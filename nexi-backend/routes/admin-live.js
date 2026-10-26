@@ -1,7 +1,7 @@
 const crypto = require('node:crypto');
 const express = require('express');
 const { query } = require('../db');
-const { requireAuth, requireAdmin } = require('../middleware/auth');
+const { requireAuth, requireAdmin, requireFullAdmin, requireSuperAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 router.use(requireAuth, requireAdmin);
@@ -15,9 +15,19 @@ async function audit(adminId, action, targetId, details = {}) {
 
 router.get('/overview', async (_req, res) => {
   const [members, circles, checkins, pending, directory] = await Promise.all([
-    query("SELECT count(*)::int AS total, count(*) FILTER (WHERE status = 'active')::int AS active FROM users WHERE role = 'user'"),
+    query(
+      `SELECT count(*)::int AS total,
+              count(*) FILTER (WHERE status = 'active')::int AS active,
+              count(*) FILTER (WHERE status = 'suspended')::int AS suspended,
+              count(*) FILTER (WHERE created_at >= NOW() - INTERVAL '7 days')::int AS recent
+         FROM users WHERE role = 'user'`
+    ),
     query('SELECT count(*)::int AS total FROM circles'),
-    query("SELECT count(*)::int AS today FROM checkins WHERE created_at >= date_trunc('day', NOW())"),
+    query(
+      `SELECT count(*)::int AS today,
+              count(*) FILTER (WHERE status = 'support')::int AS support_today
+         FROM checkins WHERE created_at >= date_trunc('day', NOW())`
+    ),
     query(
       `SELECT count(*)::int AS pending FROM circle_members cm
         WHERE cm.status = 'active' AND cm.user_id IS NOT NULL
@@ -30,6 +40,7 @@ router.get('/overview', async (_req, res) => {
     members: members.rows[0],
     circles: circles.rows[0].total,
     checkins_today: checkins.rows[0].today,
+    support_signals_today: checkins.rows[0].support_today,
     checkins_pending: pending.rows[0].pending,
     directory_pending: directory.rows[0].pending
   });
@@ -83,7 +94,41 @@ router.post('/invitations', async (req, res) => {
   });
 });
 
-router.get('/checkins', async (_req, res) => {
+router.get('/invitations', async (_req, res) => {
+  const result = await query(
+    `SELECT id, invited_name, invited_email, created_at, expires_at,
+            used_count, max_uses, active,
+            CASE
+              WHEN active = FALSE THEN 'revoked'
+              WHEN expires_at IS NOT NULL AND expires_at <= NOW() THEN 'expired'
+              WHEN used_count >= max_uses THEN 'used'
+              ELSE 'pending'
+            END AS status
+       FROM invite_tokens
+      WHERE role = 'user'
+      ORDER BY created_at DESC
+      LIMIT 200`
+  );
+  return res.json({ success: true, invitations: result.rows });
+});
+
+router.delete('/invitations/:id', async (req, res) => {
+  const result = await query(
+    `UPDATE invite_tokens SET active = FALSE
+      WHERE id = $1 AND role = 'user' AND active = TRUE
+      RETURNING id, invited_email`,
+    [req.params.id]
+  );
+  if (!result.rowCount) {
+    return res.status(404).json({ success: false, message: 'Active invitation was not found.' });
+  }
+  await audit(req.user.id, 'invitation.revoked', result.rows[0].id, {
+    email: result.rows[0].invited_email
+  });
+  return res.json({ success: true, message: 'Invitation revoked.' });
+});
+
+router.get('/checkins', requireFullAdmin, async (_req, res) => {
   const result = await query(
     `SELECT c.id, c.name, count(DISTINCT cm.user_id)::int AS members,
             count(DISTINCT ci.user_id)::int AS checked_in,
@@ -96,12 +141,12 @@ router.get('/checkins', async (_req, res) => {
   return res.json({ success: true, circles: result.rows });
 });
 
-router.get('/directory', async (_req, res) => {
+router.get('/directory', requireFullAdmin, async (_req, res) => {
   const result = await query('SELECT id, name, category, area, contact, verified FROM directory_services ORDER BY name LIMIT 500');
   return res.json({ success: true, listings: result.rows });
 });
 
-router.post('/directory', async (req, res) => {
+router.post('/directory', requireFullAdmin, async (req, res) => {
   const { name, category, area, contact = null } = req.body || {};
   if (![name, category, area].every((value) => typeof value === 'string' && value.trim())) {
     return res.status(400).json({ success: false, message: 'Name, category, and area are required.' });
@@ -114,15 +159,112 @@ router.post('/directory', async (req, res) => {
   return res.status(201).json({ success: true, listing: result.rows[0] });
 });
 
-router.patch('/directory/:id', async (req, res) => {
-  if (typeof req.body?.verified !== 'boolean') return res.status(400).json({ success: false, message: 'Provide a verified boolean.' });
+router.patch('/directory/:id', requireFullAdmin, async (req, res) => {
+  const allowedFields = {
+    name: { max: 120 },
+    category: { max: 60 },
+    area: { max: 120 },
+    contact: { max: 300 }
+  };
+  const assignments = [];
+  const values = [];
+  const details = {};
+  for (const [field, constraints] of Object.entries(allowedFields)) {
+    if (Object.prototype.hasOwnProperty.call(req.body || {}, field)) {
+      const value = req.body[field];
+      if (field === 'contact' && (value === null || value === '')) {
+        values.push(null);
+      } else if (typeof value === 'string' && value.trim()) {
+        values.push(value.trim().slice(0, constraints.max));
+      } else {
+        return res.status(400).json({ success: false, message: `${field} must be a non-empty string.` });
+      }
+      assignments.push(`${field} = $${values.length}`);
+      details[field] = values[values.length - 1];
+    }
+  }
+  if (typeof req.body?.verified === 'boolean') {
+    values.push(req.body.verified);
+    assignments.push(`verified = $${values.length}`);
+    details.verified = req.body.verified;
+  } else if (Object.prototype.hasOwnProperty.call(req.body || {}, 'verified')) {
+    return res.status(400).json({ success: false, message: 'Verified must be a boolean.' });
+  }
+  if (!assignments.length) {
+    return res.status(400).json({ success: false, message: 'Provide fields to update.' });
+  }
+  assignments.push('updated_at = NOW()');
+  values.push(req.params.id);
   const result = await query(
-    'UPDATE directory_services SET verified = $1, updated_at = NOW() WHERE id = $2 RETURNING id, verified',
-    [req.body.verified, req.params.id]
+    `UPDATE directory_services SET ${assignments.join(', ')}
+      WHERE id = $${values.length}
+      RETURNING id, name, category, area, contact, verified`,
+    values
   );
   if (!result.rowCount) return res.status(404).json({ success: false, message: 'Directory listing was not found.' });
-  await audit(req.user.id, 'directory.verification_changed', req.params.id, { verified: req.body.verified });
+  await audit(req.user.id, 'directory.updated', req.params.id, details);
   return res.json({ success: true, listing: result.rows[0] });
+});
+
+router.delete('/directory/:id', requireFullAdmin, async (req, res) => {
+  const result = await query(
+    'DELETE FROM directory_services WHERE id = $1 AND verified = FALSE RETURNING id, name',
+    [req.params.id]
+  );
+  if (!result.rowCount) {
+    return res.status(404).json({ success: false, message: 'Unverified directory listing was not found.' });
+  }
+  await audit(req.user.id, 'directory.removed', req.params.id, { name: result.rows[0].name });
+  return res.json({ success: true, message: 'Unverified directory listing removed.' });
+});
+
+router.get('/audit', requireFullAdmin, async (_req, res) => {
+  const result = await query(
+    `SELECT l.id, l.action, l.target_id, l.details, l.created_at,
+            u.full_name AS admin_name, u.email AS admin_email
+       FROM admin_audit_log l
+       LEFT JOIN users u ON u.id = l.admin_user_id
+      ORDER BY l.created_at DESC
+      LIMIT 100`
+  );
+  return res.json({ success: true, entries: result.rows });
+});
+
+router.get('/admins', requireSuperAdmin, async (_req, res) => {
+  const result = await query(
+    `SELECT id, full_name, email, role, is_super_admin, status, created_at, last_login_at
+       FROM users
+      WHERE role IN ('admin', 'support_admin')
+      ORDER BY is_super_admin DESC, created_at ASC`
+  );
+  return res.json({ success: true, admins: result.rows });
+});
+
+router.patch('/users/:id/role', requireSuperAdmin, async (req, res) => {
+  const role = req.body?.role;
+  if (!['user', 'admin', 'support_admin'].includes(role)) {
+    return res.status(400).json({ success: false, message: 'Role must be user, support_admin, or admin.' });
+  }
+  if (String(req.params.id) === String(req.user.id)) {
+    return res.status(400).json({ success: false, message: 'You cannot change your own administrator role.' });
+  }
+
+  const result = await query(
+    `UPDATE users
+        SET role = $1
+      WHERE id = $2 AND is_super_admin = FALSE AND role <> $1
+      RETURNING id, full_name, email, role, status`,
+    [role, req.params.id]
+  );
+  if (!result.rowCount) {
+    return res.status(404).json({
+      success: false,
+      message: 'Account was not found, is protected, or already has that role.'
+    });
+  }
+
+  await audit(req.user.id, 'account.role_changed', result.rows[0].id, { role });
+  return res.json({ success: true, user: result.rows[0] });
 });
 
 module.exports = router;

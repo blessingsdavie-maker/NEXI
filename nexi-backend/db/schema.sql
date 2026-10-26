@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
     full_name VARCHAR(150) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    role VARCHAR(20) NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin', 'support_admin')),
     status VARCHAR(20) NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'suspended')),
     invite_token_used VARCHAR(255),
     last_login_at TIMESTAMPTZ,
@@ -13,9 +13,21 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS is_super_admin BOOLEAN NOT NULL DEFAULT FALSE;
+
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_role_check;
+ALTER TABLE users ADD CONSTRAINT users_role_check
+    CHECK (role IN ('user', 'admin', 'support_admin'));
+ALTER TABLE users DROP CONSTRAINT IF EXISTS users_super_admin_role_check;
+ALTER TABLE users ADD CONSTRAINT users_super_admin_role_check
+    CHECK (is_super_admin = FALSE OR role = 'admin');
+
 CREATE INDEX IF NOT EXISTS idx_users_role ON users(role);
 CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
 CREATE INDEX IF NOT EXISTS idx_users_created_at ON users(created_at);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_single_super_admin
+    ON users(is_super_admin) WHERE is_super_admin = TRUE;
 
 CREATE TABLE IF NOT EXISTS invite_tokens (
     id BIGSERIAL PRIMARY KEY,
@@ -123,6 +135,7 @@ CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON notifications(user_
 CREATE INDEX IF NOT EXISTS idx_reminders_user ON reminders(user_id);
 CREATE INDEX IF NOT EXISTS idx_directory_services_verified ON directory_services(verified);
 CREATE INDEX IF NOT EXISTS idx_admin_audit_log_created ON admin_audit_log(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_invite_tokens_created ON invite_tokens(created_at DESC);
 
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$
@@ -162,5 +175,5 @@ CREATE TRIGGER directory_services_set_updated_at
 BEFORE UPDATE ON directory_services
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
--- After the first administrator account is registered, promote it with:
--- UPDATE users SET role = 'admin' WHERE email = 'your-admin-email@example.com';
+-- After registering the designated owner account, make it the sole super administrator:
+-- UPDATE users SET role = 'admin', is_super_admin = TRUE WHERE email = 'your-owner-email@example.com';

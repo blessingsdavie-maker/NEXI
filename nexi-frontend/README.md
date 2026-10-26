@@ -24,11 +24,15 @@ python -m http.server 4173
 
 Open `http://localhost:4173`. The frontend uses `http://localhost:5000/api` on localhost. `GET http://localhost:5000/health` checks the Neon connection.
 
-To grant administrator access, first create the account, then set its role in Neon:
+To designate the initial super administrator, first create the account, then run this once in Neon using that account's email:
 
 ```sql
-UPDATE users SET role = 'admin' WHERE email = 'admin@example.com';
+UPDATE users
+SET role = 'admin', is_super_admin = TRUE
+WHERE email = 'owner@example.com';
 ```
+
+The super administrator can assign limited support-admin access or full administrator access from the Permissions section. Support administrators can manage member status and invitations; full administrators can also access check-ins, the service directory, and the audit log. Sign out and back in after a role change; the API checks the current database role for every protected request.
 
 ## Production
 

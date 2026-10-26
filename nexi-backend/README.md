@@ -106,15 +106,15 @@ The API supports authentication through the `nalsafe_token` HttpOnly cookie. It 
 
 ## Create the first admin
 
-Register normally, then in Neon run:
+Register normally, then in Neon run the following with the designated owner's email. This sets the account as the one super administrator. The database allows only one super administrator; that owner can grant or revoke regular administrator access in the dashboard.
 
 ```sql
 UPDATE users
-SET role = 'admin'
-WHERE email = 'your-admin-email@example.com';
+SET role = 'admin', is_super_admin = TRUE
+WHERE email = 'your-owner-email@example.com';
 ```
 
-Admin dashboard endpoints are protected by the administrator role and are available under `/api/admin`: `/overview`, `/members`, `/members/:id/status`, `/invitations`, `/checkins`, and `/directory`.
+The schema adds the super-administrator flag and `support_admin` role automatically on startup. The owner can assign support administrators for member status and invitation work, or full administrators for all operational functions. Check-ins, directory management, and audit records are restricted to full administrators; only the designated super administrator can grant or revoke administrator roles. Sign out and back in after changing a role; the API checks current database roles on every protected request. Administrative changes are recorded in the audit log.
 
 ## Deployment on Render
 

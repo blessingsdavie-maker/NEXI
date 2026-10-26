@@ -336,7 +336,7 @@
            */
           const destination =
             data.user &&
-            data.user.role === "admin"
+            ["admin", "support_admin"].includes(data.user.role)
               ? "admin-dashboard.html"
               : "user-dashboard.html";
 

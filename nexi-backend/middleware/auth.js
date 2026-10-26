@@ -107,6 +107,7 @@ const result =
         full_name,
         email,
         role,
+        is_super_admin,
         status,
         created_at,
         updated_at,
@@ -228,12 +229,51 @@ next
 ) {
 if (
 !req.user ||
-req.user.role !== 'admin'
+!['admin', 'support_admin'].includes(req.user.role)
 ) {
 return res.status(403).json({
 success: false,
 message:
 'Administrator access required.'
+});
+}
+
+return next();
+}
+
+function requireFullAdmin(
+req,
+res,
+next
+) {
+if (
+!req.user ||
+req.user.role !== 'admin'
+) {
+return res.status(403).json({
+success: false,
+message:
+'Full administrator access required.'
+});
+}
+
+return next();
+}
+
+function requireSuperAdmin(
+req,
+res,
+next
+) {
+if (
+!req.user ||
+req.user.role !== 'admin' ||
+!req.user.is_super_admin
+) {
+return res.status(403).json({
+success: false,
+message:
+'Super administrator access required.'
 });
 }
 
@@ -247,5 +287,7 @@ EXPORTS
 module.exports = {
 getToken,
 requireAuth,
-requireAdmin
+requireAdmin,
+requireFullAdmin,
+requireSuperAdmin
 };

@@ -38,8 +38,9 @@
   try {
     const session = await api("/me");
     userSession = session.user;
-    if ((role === "admin") !== (userSession.role === "admin")) {
-      window.location.replace(userSession.role === "admin" ? "admin-dashboard.html" : "user-dashboard.html");
+    const hasAdminAccess = ["admin", "support_admin"].includes(userSession.role);
+    if ((role === "admin") !== hasAdminAccess) {
+      window.location.replace(hasAdminAccess ? "admin-dashboard.html" : "user-dashboard.html");
       return;
     }
   } catch {
@@ -1379,6 +1380,24 @@
 
   async function setupAdmin() {
     const memberRows = get("adminMemberRows");
+    const canManageFullAdmin = userSession.role === "admin";
+    const canManageAdmins = Boolean(userSession.is_super_admin);
+    get("adminProfileRole").textContent = canManageAdmins
+      ? "Super administrator"
+      : canManageFullAdmin ? "Administrator" : "Support administrator";
+    get("adminPermissionsNav").hidden = !canManageAdmins;
+    document.querySelectorAll("[data-full-admin-only]").forEach((element) => {
+      element.hidden = !canManageFullAdmin;
+    });
+
+    const changeRole = async (userId, role) => {
+      await api(`/admin/users/${encodeURIComponent(userId)}/role`, {
+        method: "PATCH",
+        body: JSON.stringify({ role })
+      });
+      await Promise.all([renderMembers(), renderAdmins(), loadOverview(), renderAudit()]);
+    };
+
     const renderMembers = async () => {
       const query = get("adminMemberSearch").value.trim();
       const status = get("adminMemberFilter").value.toLowerCase();
@@ -1386,7 +1405,7 @@
       memberRows.innerHTML = members.map((member, index) => {
         const paused = member.status === "paused";
         const initials = member.full_name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
-        return `<tr><td><div class="member-detail"><span class="member-avatar ${index % 2 ? "blue" : "teal"}">${escapeHtml(initials)}</span><span><b>${escapeHtml(member.full_name)}</b><small>${escapeHtml(member.email)}</small></span></div></td><td>${escapeHtml(member.circle || "No circle")}</td><td>${escapeHtml(formatDate(member.created_at))}</td><td><span class="status-pill ${paused ? "paused" : ""}">${paused ? "Paused" : "Active"}</span></td><td><div class="table-actions"><button class="button button-secondary button-small" type="button" data-member-id="${escapeHtml(member.id)}" data-next-status="${paused ? "active" : "paused"}">${paused ? "Restore" : "Pause"}</button></div></td></tr>`;
+        return `<tr><td><div class="member-detail"><span class="member-avatar ${index % 2 ? "blue" : "teal"}">${escapeHtml(initials)}</span><span><b>${escapeHtml(member.full_name)}</b><small>${escapeHtml(member.email)}</small></span></div></td><td>${escapeHtml(member.circle || "No circle")}</td><td>${escapeHtml(formatDate(member.created_at))}</td><td><span class="status-pill ${paused ? "paused" : ""}">${paused ? "Paused" : "Active"}</span></td><td><div class="table-actions"><button class="button button-secondary button-small" type="button" data-member-id="${escapeHtml(member.id)}" data-next-status="${paused ? "active" : "paused"}">${paused ? "Restore" : "Pause"}</button>${canManageAdmins ? `<button class="button button-secondary button-small" type="button" data-promote-id="${escapeHtml(member.id)}" data-role="support_admin">Grant support admin</button><button class="button button-secondary button-small" type="button" data-promote-id="${escapeHtml(member.id)}" data-role="admin">Grant full admin</button>` : ""}</div></td></tr>`;
       }).join("");
       get("adminMemberEmpty").hidden = members.length > 0;
       memberRows.querySelectorAll("[data-member-id]").forEach((button) => button.addEventListener("click", async () => {
@@ -1397,24 +1416,39 @@
           await loadOverview();
         } catch (error) { showError(error); }
       }));
+      memberRows.querySelectorAll("[data-promote-id]").forEach((button) => button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          await changeRole(button.dataset.promoteId, button.dataset.role);
+        } catch (error) { showError(error); button.disabled = false; }
+      }));
     };
 
     const loadOverview = async () => {
-      const [overview, checkins] = await Promise.all([api("/admin/overview"), api("/admin/checkins")]);
+      const [overview, checkins] = await Promise.all([
+        api("/admin/overview"),
+        canManageFullAdmin ? api("/admin/checkins") : Promise.resolve({ circles: [] })
+      ]);
       get("adminActiveCount").textContent = String(overview.members.active);
       get("adminCircleCount").textContent = String(overview.circles);
       get("adminCheckinsPending").textContent = String(overview.checkins_pending);
       get("adminReviewCount").textContent = String(overview.directory_pending);
       get("adminReviewCountLabel").textContent = String(overview.directory_pending);
       get("adminReviewCountSummary").textContent = String(overview.directory_pending);
-      const rows = checkins.circles.map((circle) => `<div class="quick-row"><span><b>${escapeHtml(circle.name)}</b><small>${circle.members} active members${circle.last_update ? ` · updated ${escapeHtml(formatTime(circle.last_update))}` : ""}</small></span><span class="state-dot ${circle.pending ? "pending" : ""}">${circle.checked_in} / ${circle.members} checked in</span></div>`);
-      get("adminTodayCheckins").innerHTML = rows.length ? rows.join("") : '<div class="empty-state">No circles have been created yet.</div>';
-      get("adminCheckinsTableRows").innerHTML = checkins.circles.length ? checkins.circles.map((circle) => `<tr><td><b>${escapeHtml(circle.name)}</b></td><td>${circle.members}</td><td>${circle.checked_in} / ${circle.members}</td><td>${circle.last_update ? escapeHtml(formatTime(circle.last_update)) : "No updates"}</td><td><span class="status-pill ${circle.pending ? "review" : ""}">${circle.pending ? `${circle.pending} pending` : "Complete"}</span></td></tr>`).join("") : '<tr><td colspan="5">No circles have been created yet.</td></tr>';
+      get("adminRegisteredCount").textContent = String(overview.members.total);
+      get("adminRecentRegistrations").textContent = String(overview.members.recent);
+      get("adminSuspendedCount").textContent = String(overview.members.suspended);
+      get("adminSupportSignals").textContent = String(overview.support_signals_today);
+      if (canManageFullAdmin) {
+        const rows = checkins.circles.map((circle) => `<div class="quick-row"><span><b>${escapeHtml(circle.name)}</b><small>${circle.members} active members${circle.last_update ? ` · updated ${escapeHtml(formatTime(circle.last_update))}` : ""}</small></span><span class="state-dot ${circle.pending ? "pending" : ""}">${circle.checked_in} / ${circle.members} checked in</span></div>`);
+        get("adminTodayCheckins").innerHTML = rows.length ? rows.join("") : '<div class="empty-state">No circles have been created yet.</div>';
+        get("adminCheckinsTableRows").innerHTML = checkins.circles.length ? checkins.circles.map((circle) => `<tr><td><b>${escapeHtml(circle.name)}</b></td><td>${circle.members}</td><td>${circle.checked_in} / ${circle.members}</td><td>${circle.last_update ? escapeHtml(formatTime(circle.last_update)) : "No updates"}</td><td><span class="status-pill ${circle.pending ? "review" : ""}">${circle.pending ? `${circle.pending} pending` : "Complete"}</span></td></tr>`).join("") : '<tr><td colspan="5">No circles have been created yet.</td></tr>';
+      }
     };
 
     const renderDirectory = async () => {
       const { listings } = await api("/admin/directory");
-      get("adminDirectoryRows").innerHTML = listings.map((listing) => `<tr><td><b>${escapeHtml(listing.name)}</b></td><td>${escapeHtml(listing.category)}</td><td>${escapeHtml(listing.area)}</td><td><span class="status-pill ${listing.verified ? "" : "review"}">${listing.verified ? "Verified" : "Review"}</span></td><td><div class="table-actions"><button class="button ${listing.verified ? "button-secondary" : "button-primary"} button-small" type="button" data-listing-id="${escapeHtml(listing.id)}" data-verified="${!listing.verified}">${listing.verified ? "Mark for review" : "Verify listing"}</button></div></td></tr>`).join("");
+      get("adminDirectoryRows").innerHTML = listings.map((listing) => `<tr><td><b>${escapeHtml(listing.name)}</b></td><td>${escapeHtml(listing.category)}</td><td>${escapeHtml(listing.area)}</td><td><span class="status-pill ${listing.verified ? "" : "review"}">${listing.verified ? "Verified" : "Review"}</span></td><td><div class="table-actions"><button class="button ${listing.verified ? "button-secondary" : "button-primary"} button-small" type="button" data-listing-id="${escapeHtml(listing.id)}" data-verified="${!listing.verified}">${listing.verified ? "Mark for review" : "Verify listing"}</button><button class="button button-secondary button-small" type="button" data-edit-listing="${escapeHtml(listing.id)}">Edit</button>${listing.verified ? "" : `<button class="button button-secondary button-small" type="button" data-remove-listing="${escapeHtml(listing.id)}">Remove</button>`}</div></td></tr>`).join("");
       if (!listings.length) get("adminDirectoryRows").innerHTML = '<tr><td colspan="5">No service listings have been added.</td></tr>';
       get("adminReviewCount").textContent = String(listings.filter((listing) => !listing.verified).length);
       get("adminReviewCountLabel").textContent = get("adminReviewCount").textContent;
@@ -1426,6 +1460,76 @@
           await renderDirectory();
           await loadOverview();
         } catch (error) { showError(error); }
+      }));
+      get("adminDirectoryRows").querySelectorAll("[data-edit-listing]").forEach((button) => button.addEventListener("click", () => {
+        const listing = listings.find((item) => String(item.id) === button.dataset.editListing);
+        if (!listing) return;
+        get("listingId").value = String(listing.id);
+        get("listingName").value = listing.name;
+        get("listingCategory").value = listing.category;
+        get("listingArea").value = listing.area;
+        get("listingContact").value = listing.contact || "";
+        get("adminDirectorySubmit").textContent = "Save changes";
+        get("adminDirectoryCancel").hidden = false;
+        get("listingName").scrollIntoView({ behavior: "smooth", block: "center" });
+        get("listingName").focus();
+      }));
+      get("adminDirectoryRows").querySelectorAll("[data-remove-listing]").forEach((button) => button.addEventListener("click", async () => {
+        if (!window.confirm("Remove this unverified service listing?")) return;
+        button.disabled = true;
+        try {
+          await api(`/admin/directory/${encodeURIComponent(button.dataset.removeListing)}`, { method: "DELETE" });
+          await Promise.all([renderDirectory(), renderAudit(), loadOverview()]);
+        } catch (error) { showError(error); button.disabled = false; }
+      }));
+    };
+
+    const renderInvitations = async () => {
+      const { invitations } = await api("/admin/invitations");
+      get("adminInvitationRows").innerHTML = invitations.length
+        ? invitations.map((invitation) => {
+          const canRevoke = invitation.status === "pending";
+          return `<tr><td>${escapeHtml(invitation.invited_name || "Member")}</td><td>${escapeHtml(invitation.invited_email || "")}</td><td>${escapeHtml(formatDate(invitation.created_at))}</td><td>${invitation.expires_at ? escapeHtml(formatDate(invitation.expires_at)) : "No expiry"}</td><td><span class="status-pill ${canRevoke ? "review" : ""}">${escapeHtml(invitation.status)}</span></td><td>${canRevoke ? `<button class="button button-secondary button-small" type="button" data-revoke-invitation="${escapeHtml(invitation.id)}">Revoke</button>` : ""}</td></tr>`;
+        }).join("")
+        : '<tr><td colspan="6">No invitations have been created.</td></tr>';
+      get("adminInvitationRows").querySelectorAll("[data-revoke-invitation]").forEach((button) => button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          await api(`/admin/invitations/${encodeURIComponent(button.dataset.revokeInvitation)}`, { method: "DELETE" });
+          await Promise.all([renderInvitations(), renderAudit()]);
+        } catch (error) { showError(error); button.disabled = false; }
+      }));
+    };
+
+    const renderAudit = async () => {
+      const { entries } = await api("/admin/audit");
+      get("adminAuditRows").innerHTML = entries.length
+        ? entries.map((entry) => `<tr><td>${escapeHtml(new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(entry.created_at)))}</td><td>${escapeHtml(entry.admin_name || entry.admin_email || "Former administrator")}</td><td>${escapeHtml(entry.action)}</td><td>${escapeHtml(JSON.stringify(entry.details || {}))}</td></tr>`).join("")
+        : '<tr><td colspan="4">No administrative actions have been recorded.</td></tr>';
+    };
+
+    const renderAdmins = async () => {
+      if (!canManageAdmins) return;
+      const { admins } = await api("/admin/admins");
+      get("adminRoleRows").innerHTML = admins.map((admin) => {
+        const protectedAdmin = admin.is_super_admin;
+        const roleName = admin.role === "support_admin" ? "Support administrator" : protectedAdmin ? "Super administrator" : "Full administrator";
+        const changeRoleButton = protectedAdmin
+          ? ""
+          : `<button class="button button-secondary button-small" type="button" data-change-role-id="${escapeHtml(admin.id)}" data-next-role="${admin.role === "support_admin" ? "admin" : "support_admin"}">Make ${admin.role === "support_admin" ? "full" : "support"} admin</button><button class="button button-secondary button-small" type="button" data-demote-id="${escapeHtml(admin.id)}">Revoke admin</button>`;
+        return `<tr><td><b>${escapeHtml(admin.full_name)}</b><small>${escapeHtml(admin.email)}</small></td><td><span class="status-pill ${admin.status === "active" ? "" : "paused"}">${escapeHtml(admin.status)}</span></td><td>${roleName}</td><td>${changeRoleButton}</td></tr>`;
+      }).join("") || '<tr><td colspan="4">No administrators have been assigned.</td></tr>';
+      get("adminRoleRows").querySelectorAll("[data-change-role-id]").forEach((button) => button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          await changeRole(button.dataset.changeRoleId, button.dataset.nextRole);
+        } catch (error) { showError(error); button.disabled = false; }
+      }));
+      get("adminRoleRows").querySelectorAll("[data-demote-id]").forEach((button) => button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          await changeRole(button.dataset.demoteId, "user");
+        } catch (error) { showError(error); button.disabled = false; }
       }));
     };
 
@@ -1454,6 +1558,10 @@
           link.textContent = " Open invitation";
           message.append(link);
         }
+        await Promise.all([
+          renderInvitations(),
+          canManageFullAdmin ? renderAudit() : Promise.resolve()
+        ]);
       } catch (error) { showMessage(message, error.message, true); }
       finally { submit.disabled = false; }
     });
@@ -1473,6 +1581,14 @@
       } catch (error) { showError(error); }
     });
 
+    const resetDirectoryForm = () => {
+      get("adminDirectoryForm").reset();
+      get("listingId").value = "";
+      get("adminDirectorySubmit").textContent = "Add for review";
+      get("adminDirectoryCancel").hidden = true;
+    };
+    get("adminDirectoryCancel").addEventListener("click", resetDirectoryForm);
+
     get("adminDirectoryForm").addEventListener("submit", async (event) => {
       event.preventDefault();
       const form = event.currentTarget;
@@ -1480,8 +1596,9 @@
       const message = get("adminDirectoryMessage");
       submit.disabled = true;
       try {
-        await api("/admin/directory", {
-          method: "POST",
+        const listingId = get("listingId").value;
+        await api(listingId ? `/admin/directory/${encodeURIComponent(listingId)}` : "/admin/directory", {
+          method: listingId ? "PATCH" : "POST",
           body: JSON.stringify({
             name: get("listingName").value.trim(),
             category: get("listingCategory").value.trim(),
@@ -1489,15 +1606,22 @@
             contact: get("listingContact").value.trim() || null
           })
         });
-        form.reset();
-        showMessage(message, "Listing saved and added to the review queue.");
-        await Promise.all([renderDirectory(), loadOverview()]);
+        resetDirectoryForm();
+        showMessage(message, listingId ? "Listing changes saved." : "Listing saved and added to the review queue.");
+        await Promise.all([renderDirectory(), loadOverview(), renderAudit()]);
       } catch (error) { showMessage(message, error.message, true); }
       finally { submit.disabled = false; }
     });
 
     get("adminProfileName").textContent = userSession.full_name;
 
-    await Promise.all([loadOverview(), renderMembers(), renderDirectory()]);
+    await Promise.all([
+      loadOverview(),
+      renderMembers(),
+      canManageFullAdmin ? renderDirectory() : Promise.resolve(),
+      renderInvitations(),
+      canManageFullAdmin ? renderAudit() : Promise.resolve(),
+      renderAdmins()
+    ]);
   }
 })();

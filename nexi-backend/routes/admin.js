@@ -16,11 +16,8 @@ router.get('/users', async (_req, res) => {
 
 router.get('/users/:id', async (req, res) => {
   const result = await query(
-    `SELECT u.id, u.full_name, u.email, u.role, u.status, u.created_at, u.updated_at,
-            u.last_login_at, p.phone, p.country, p.date_of_birth, p.bio, p.avatar_url
-     FROM users u
-     LEFT JOIN user_profiles p ON p.user_id = u.id
-     WHERE u.id = $1 LIMIT 1`,
+    `SELECT id, full_name, email, role, status, created_at, updated_at, last_login_at
+     FROM users WHERE id = $1 LIMIT 1`,
     [req.params.id]
   );
 
@@ -38,15 +35,20 @@ router.patch('/users/:id/status', async (req, res) => {
   }
 
   const result = await query(
-    `UPDATE users SET status = $1 WHERE id = $2
+    `UPDATE users SET status = $1 WHERE id = $2 AND role = 'user'
      RETURNING id, full_name, email, role, status, created_at, last_login_at`,
     [status, req.params.id]
   );
 
   if (!result.rowCount) {
-    return res.status(404).json({ success: false, message: 'User not found.' });
+    return res.status(404).json({ success: false, message: 'Member account was not found.' });
   }
 
+  await query(
+    `INSERT INTO admin_audit_log (admin_user_id, action, target_id, details)
+     VALUES ($1, 'member.status_changed', $2, $3)`,
+    [req.user.id, req.params.id, { status }]
+  );
   return res.json({ success: true, message: 'User status updated.', user: result.rows[0] });
 });
 
