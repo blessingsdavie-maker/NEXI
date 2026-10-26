@@ -3,103 +3,163 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f3f5ef">
-    <meta name="description" content="NALSAFE operations for membership, check-in summaries, and service directory review.">
+    <meta name="theme-color" content="#173f2d">
+    <meta name="description" content="NALSAFE operations dashboard for membership, check-in summaries, invitations and service directory review.">
     <title>Admin dashboard — NALSAFE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="portal.css">
+    <link rel="stylesheet" href="admin-dashboard.css">
     <script src="nalsafe-api.js" defer></script>
-<script src="portal-live.js" defer></script>
+    <script src="portal-live.js" defer></script>
   </head>
   <body data-role="admin">
     <a class="portal-skip" href="#portalMain">Skip to dashboard</a>
     <div class="portal-shell">
       <header class="portal-topbar">
-        <div class="portal-brand-meta"><a class="portal-brand" href="index.html" aria-label="NALSAFE home"><span class="portal-brandmark">N</span><span>NALSAFE</span></a><span class="prototype-tag">Operations</span></div>
+        <div class="portal-brand-meta">
+          <a class="portal-brand" href="index.html" aria-label="NALSAFE home">
+            <span class="portal-brandmark" aria-hidden="true">N</span>
+            <span>NALSAFE</span>
+          </a>
+          <span class="prototype-tag"><span class="brand-status-dot" aria-hidden="true"></span> Operations centre</span>
+        </div>
         <div class="topbar-actions">
+          <span class="topbar-context">Safety · Community · Support</span>
           <a class="role-switch" href="admin.html">Admin home <span aria-hidden="true">↗</span></a>
-          <button class="theme-button" id="portalTheme" type="button" aria-label="Use dark theme" title="Change colour theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
-          <button class="button button-secondary button-small" type="button" data-user-signout>Sign out</button>
+          <button class="theme-button" id="portalTheme" type="button" aria-label="Use dark theme" title="Change colour theme">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.6"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          </button>
+          <button class="button button-secondary button-small signout-button" type="button" data-user-signout>Sign out <span aria-hidden="true">↗</span></button>
           <button class="mobile-menu-button" id="portalMenu" type="button" aria-expanded="false" aria-controls="portalSidebar" aria-label="Open dashboard menu">☰</button>
         </div>
       </header>
+
       <div class="portal-layout">
         <aside class="portal-sidebar" id="portalSidebar">
-          <p class="sidebar-caption">Operations</p>
+          <div class="sidebar-heading">
+            <span class="sidebar-heading-icon" aria-hidden="true">◈</span>
+            <span><strong>Workspace</strong><small>Manage NALSAFE</small></span>
+          </div>
+          <p class="sidebar-caption">WORKSPACE</p>
           <nav class="portal-nav" aria-label="Admin dashboard">
-            <button type="button" data-view-target="adminOverview" aria-current="page"><span class="nav-glyph" aria-hidden="true">⌂</span>Overview</button>
-            <button type="button" data-view-target="adminMembers"><span class="nav-glyph" aria-hidden="true">◉</span>Members</button>
-            <button type="button" data-view-target="adminCheckins" data-full-admin-only><span class="nav-glyph" aria-hidden="true">✓</span>Check-ins</button>
-            <button type="button" data-view-target="adminDirectory" data-full-admin-only><span class="nav-glyph" aria-hidden="true">⌖</span>Directory review</button>
-            <button type="button" data-view-target="adminInvitations"><span class="nav-glyph" aria-hidden="true">✉</span>Invitations</button>
-            <button type="button" data-view-target="adminAudit" data-full-admin-only><span class="nav-glyph" aria-hidden="true">≡</span>Audit log</button>
-            <button type="button" data-view-target="adminPermissions" id="adminPermissionsNav" hidden><span class="nav-glyph" aria-hidden="true">⚿</span>Permissions</button>
+            <button type="button" data-view-target="adminOverview" aria-current="page"><span class="nav-glyph" aria-hidden="true">⌂</span><span>Overview</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+            <button type="button" data-view-target="adminMembers"><span class="nav-glyph" aria-hidden="true">◉</span><span>Members</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+            <button type="button" data-view-target="adminCheckins" data-full-admin-only><span class="nav-glyph" aria-hidden="true">✓</span><span>Check-ins</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+            <button type="button" data-view-target="adminDirectory" data-full-admin-only><span class="nav-glyph" aria-hidden="true">⌖</span><span>Directory review</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+            <button type="button" data-view-target="adminInvitations"><span class="nav-glyph" aria-hidden="true">✉</span><span>Invitations</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+            <button type="button" data-view-target="adminAudit" data-full-admin-only><span class="nav-glyph" aria-hidden="true">≡</span><span>Audit log</span><span class="nav-arrow" aria-hidden="true">›</span></button>
+            <button type="button" data-view-target="adminPermissions" id="adminPermissionsNav" hidden><span class="nav-glyph" aria-hidden="true">⚿</span><span>Permissions</span><span class="nav-arrow" aria-hidden="true">›</span></button>
           </nav>
-          <div class="sidebar-note"><strong>Privacy boundary</strong>Operations views show circle-level summaries only, never location histories or private support messages.</div>
-          <div class="sidebar-profile"><span class="profile-avatar admin-avatar">NX</span><span><b id="adminProfileName">NALSAFE Operations</b><small id="adminProfileRole">Administrator</small></span></div>
+          <div class="sidebar-note">
+            <span class="sidebar-note-mark" aria-hidden="true">✦</span>
+            <div><strong>Privacy comes first</strong><p>Operations views show circle-level summaries only, never location histories or private support messages.</p></div>
+          </div>
+          <div class="sidebar-profile">
+            <span class="profile-avatar admin-avatar">NS</span>
+            <span class="sidebar-profile-copy"><b id="adminProfileName">NALSAFE Operations</b><small id="adminProfileRole">Administrator</small></span>
+            <span class="profile-online-dot" title="Account status" aria-label="Account status indicator"></span>
+          </div>
         </aside>
+
         <main class="portal-main" id="portalMain">
           <section class="portal-view is-active" id="adminOverview" aria-labelledby="adminOverviewTitle">
-            <div class="view-heading"><div><p class="eyebrow">Operations overview</p><h1 id="adminOverviewTitle">Good evening, admin</h1><p>A high-level view of today's NALSAFE activity.</p></div><span class="date-label" id="portalDate"></span></div>
+            <div class="dashboard-welcome">
+              <div class="view-heading">
+                <div>
+                  <p class="eyebrow"><span class="eyebrow-line" aria-hidden="true"></span> NALSAFE OPERATIONS</p>
+                  <h1 id="adminOverviewTitle">Good evening, admin<span class="heading-period">.</span></h1>
+                  <p>Your operations snapshot, community activity and items that need attention.</p>
+                </div>
+                <span class="date-label" id="portalDate"></span>
+              </div>
+              <div class="welcome-bottom"><span class="welcome-live"><span aria-hidden="true"></span> Operations overview</span><span class="welcome-caption">A clearer view of the whole circle.</span></div>
+            </div>
+
+            <div class="section-heading"><div><p class="eyebrow">AT A GLANCE</p><h2>Platform overview</h2></div><span class="section-note">Numbers update from connected services</span></div>
             <div class="stats-grid">
-              <article class="stat-card"><div class="stat-top"><span>Active members</span><span class="stat-icon" aria-hidden="true">◉</span></div><div class="stat-value" id="adminActiveCount">0</div><div class="stat-foot">Across all circles</div></article>
-              <article class="stat-card"><div class="stat-top"><span>Circles</span><span class="stat-icon" aria-hidden="true">⌂</span></div><div class="stat-value" id="adminCircleCount">0</div><div class="stat-foot">No private circle content</div></article>
-              <article class="stat-card"><div class="stat-top"><span>Check-ins pending</span><span class="stat-icon" aria-hidden="true">◷</span></div><div class="stat-value" id="adminCheckinsPending">0</div><div class="stat-foot">Aggregated operational count</div></article>
-              <article class="stat-card"><div class="stat-top"><span>Listings to review</span><span class="stat-icon" aria-hidden="true">!</span></div><div class="stat-value" id="adminReviewCount">0</div><div class="stat-foot">Unverified directory entries</div></article>
-              <article class="stat-card"><div class="stat-top"><span>Registered members</span><span class="stat-icon" aria-hidden="true">＋</span></div><div class="stat-value" id="adminRegisteredCount">0</div><div class="stat-foot">Member accounts</div></article>
+              <article class="stat-card stat-card-primary"><div class="stat-top"><span>Active members</span><span class="stat-icon" aria-hidden="true">◉</span></div><div class="stat-value" id="adminActiveCount">0</div><div class="stat-foot">Across all circles</div><span class="stat-decoration" aria-hidden="true">◉</span></article>
+              <article class="stat-card"><div class="stat-top"><span>Circles</span><span class="stat-icon" aria-hidden="true">⌂</span></div><div class="stat-value" id="adminCircleCount">0</div><div class="stat-foot">Community groups</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Check-ins pending</span><span class="stat-icon stat-icon-warm" aria-hidden="true">◷</span></div><div class="stat-value" id="adminCheckinsPending">0</div><div class="stat-foot">Aggregated operational count</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Listings to review</span><span class="stat-icon stat-icon-warm" aria-hidden="true">!</span></div><div class="stat-value" id="adminReviewCount">0</div><div class="stat-foot">Unverified directory entries</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Registered members</span><span class="stat-icon" aria-hidden="true">＋</span></div><div class="stat-value" id="adminRegisteredCount">0</div><div class="stat-foot">All member accounts</div></article>
               <article class="stat-card"><div class="stat-top"><span>New this week</span><span class="stat-icon" aria-hidden="true">↗</span></div><div class="stat-value" id="adminRecentRegistrations">0</div><div class="stat-foot">Registrations in the last 7 days</div></article>
-              <article class="stat-card"><div class="stat-top"><span>Suspended accounts</span><span class="stat-icon" aria-hidden="true">⊘</span></div><div class="stat-value" id="adminSuspendedCount">0</div><div class="stat-foot">Member accounts paused</div></article>
-              <article class="stat-card"><div class="stat-top"><span>Support signals today</span><span class="stat-icon" aria-hidden="true">!</span></div><div class="stat-value" id="adminSupportSignals">0</div><div class="stat-foot">Aggregate check-in count</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Suspended accounts</span><span class="stat-icon stat-icon-muted" aria-hidden="true">⊘</span></div><div class="stat-value" id="adminSuspendedCount">0</div><div class="stat-foot">Member accounts paused</div></article>
+              <article class="stat-card"><div class="stat-top"><span>Support signals today</span><span class="stat-icon stat-icon-warm" aria-hidden="true">!</span></div><div class="stat-value" id="adminSupportSignals">0</div><div class="stat-foot">Aggregate check-in count</div></article>
             </div>
+
             <div class="overview-grid" data-full-admin-only>
-              <section class="panel"><div class="panel-heading"><div><h2>Today's check-in activity</h2><p>Circle-level totals only</p></div><button class="button button-secondary button-small" type="button" data-open-view="adminCheckins">View activity</button></div><div class="quick-list" id="adminTodayCheckins"></div></section>
-              <section class="panel"><div class="panel-heading"><div><h2>Needs attention</h2><p>Operational tasks, not emergency alerts.</p></div></div><div class="quick-list"><div class="quick-row"><span><b>Directory verification</b><small><span id="adminReviewCountSummary">2</span> listings awaiting review</small></span><button class="button button-secondary button-small" type="button" data-open-view="adminDirectory">Review</button></div><div class="quick-row"><span><b>Member access</b><small>Review active and paused accounts</small></span><button class="button button-secondary button-small" type="button" data-open-view="adminMembers">Manage</button></div></div></section>
+              <section class="panel activity-panel">
+                <div class="panel-heading"><div><p class="eyebrow">COMMUNITY PULSE</p><h2>Today's check-in activity</h2><p>Circle-level totals only</p></div><button class="button button-secondary button-small" type="button" data-open-view="adminCheckins">View activity <span aria-hidden="true">→</span></button></div>
+                <div class="quick-list" id="adminTodayCheckins"></div>
+              </section>
+              <section class="panel attention-panel">
+                <div class="panel-heading"><div><p class="eyebrow">NEXT STEPS</p><h2>Needs attention</h2><p>Keep key operations moving</p></div><span class="attention-icon" aria-hidden="true">✦</span></div>
+                <div class="quick-list">
+                  <div class="quick-row"><span class="task-icon task-icon-warm" aria-hidden="true">⌖</span><span class="task-copy"><b>Directory verification</b><small><span id="adminReviewCountSummary">2</span> listings awaiting review</small></span><button class="button button-secondary button-small" type="button" data-open-view="adminDirectory">Review <span aria-hidden="true">→</span></button></div>
+                  <div class="quick-row"><span class="task-icon" aria-hidden="true">◉</span><span class="task-copy"><b>Member access</b><small>Review active and paused accounts</small></span><button class="button button-secondary button-small" type="button" data-open-view="adminMembers">Manage <span aria-hidden="true">→</span></button></div>
+                </div>
+              </section>
             </div>
-            <div class="privacy-note"><span aria-hidden="true">◈</span><span><strong>Admin visibility is intentionally limited</strong>No live location, direct messages, or personal support details are shown in this dashboard.</span></div>
+
+            <div class="privacy-note"><span class="privacy-note-icon" aria-hidden="true">◈</span><span><strong>Admin visibility is intentionally limited</strong><small>No live location, direct messages or personal support details are shown in this dashboard.</small></span></div>
             <p class="portal-footer">NALSAFE is not an emergency service and does not dispatch assistance.</p>
           </section>
 
           <section class="portal-view" id="adminMembers" aria-labelledby="adminMembersTitle">
-            <div class="view-heading"><div><p class="eyebrow">Account operations</p><h1 id="adminMembersTitle">Members</h1><p>Search member accounts and pause or restore access.</p></div><button class="button button-primary" type="button" data-focus-invite>＋ Invite member</button></div>
-            <section class="panel"><div class="toolbar"><div class="toolbar-group"><input class="input-control" id="adminMemberSearch" type="search" placeholder="Search name or email" aria-label="Search members"><select class="select-control" id="adminMemberFilter" aria-label="Filter members"><option>All</option><option>Active</option><option>Paused</option></select></div></div>
-              <div class="table-wrap"><table class="data-table"><thead><tr><th>Member</th><th>Circle</th><th>Joined</th><th>Access</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="adminMemberRows"></tbody></table></div><div class="empty-state" id="adminMemberEmpty" hidden>No member accounts match that search.</div>
-              <form class="form-grid" id="adminInviteForm"><div class="field"><label for="adminInviteName">Name</label><input class="input-control" id="adminInviteName" name="name" required placeholder="New member"></div><div class="field"><label for="adminInviteEmail">Email</label><input class="input-control" id="adminInviteEmail" name="email" type="email" required placeholder="name@example.com"></div><button class="button button-primary" type="submit">Send invitation</button></form><p class="form-message" id="adminInviteMessage" aria-live="polite"></p>
+            <div class="view-heading page-heading"><div><p class="eyebrow">ACCOUNT OPERATIONS</p><h1 id="adminMembersTitle">Members<span class="heading-period">.</span></h1><p>Search member accounts and pause or restore access.</p></div><button class="button button-primary" type="button" data-focus-invite>＋ Invite member</button></div>
+            <section class="panel">
+              <div class="panel-heading"><div><h2>Member directory</h2><p>Find an account by name or email address.</p></div></div>
+              <div class="toolbar"><div class="toolbar-group"><input class="input-control" id="adminMemberSearch" type="search" placeholder="Search name or email" aria-label="Search members"><select class="select-control" id="adminMemberFilter" aria-label="Filter members"><option>All</option><option>Active</option><option>Paused</option></select></div></div>
+              <div class="table-wrap"><table class="data-table"><thead><tr><th>Member</th><th>Circle</th><th>Joined</th><th>Access</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="adminMemberRows"></tbody></table></div>
+              <div class="empty-state" id="adminMemberEmpty" hidden>No member accounts match that search.</div>
+              <div class="form-divider"><span>Invite someone to NALSAFE</span></div>
+              <form class="form-grid" id="adminInviteForm"><div class="field"><label for="adminInviteName">Full name</label><input class="input-control" id="adminInviteName" name="name" required placeholder="Enter member's name"></div><div class="field"><label for="adminInviteEmail">Email address</label><input class="input-control" id="adminInviteEmail" name="email" type="email" required placeholder="name@example.com"></div><button class="button button-primary" type="submit">Send invitation <span aria-hidden="true">→</span></button></form>
+              <p class="form-message" id="adminInviteMessage" aria-live="polite"></p>
             </section>
-              <div class="notice-box">Member access changes are recorded in the operations audit log.</div>
+            <div class="notice-box">Member access changes are recorded in the operations audit log.</div>
           </section>
 
           <section class="portal-view" id="adminCheckins" aria-labelledby="adminCheckinsTitle">
-            <div class="view-heading"><div><p class="eyebrow">Circle-level activity</p><h1 id="adminCheckinsTitle">Check-ins</h1><p>Operational summaries only. No location trails or message contents.</p></div><button class="button button-secondary" id="adminExport" type="button">↓ Export summary</button></div>
+            <div class="view-heading page-heading"><div><p class="eyebrow">CIRCLE-LEVEL ACTIVITY</p><h1 id="adminCheckinsTitle">Check-ins<span class="heading-period">.</span></h1><p>Operational summaries only. No location trails or message contents.</p></div><button class="button button-secondary" id="adminExport" type="button">↓ Export summary</button></div>
             <section class="panel"><div class="panel-heading"><div><h2>Today's circles</h2><p>Circle-level summaries only</p></div><span class="status-pill neutral">Current data</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Circle</th><th>Members</th><th>Checked in</th><th>Last update</th><th>Summary</th></tr></thead><tbody id="adminCheckinsTableRows"></tbody></table></div></section>
-            <div class="privacy-note"><span aria-hidden="true">◈</span><span><strong>Members control their own signals</strong>Pending check-ins are not proof of an emergency. This dashboard does not show real-time location or trigger escalation.</span></div>
+            <div class="privacy-note"><span class="privacy-note-icon" aria-hidden="true">◈</span><span><strong>Members control their own signals</strong><small>Pending check-ins are not proof of an emergency. This dashboard does not show real-time location or trigger escalation.</small></span></div>
           </section>
 
           <section class="portal-view" id="adminDirectory" aria-labelledby="adminDirectoryTitle">
-            <div class="view-heading"><div><p class="eyebrow">Service quality</p><h1 id="adminDirectoryTitle">Directory review</h1><p>Review illustrative support listings before a future launch.</p></div><span class="role-tag"><span id="adminReviewCountLabel">2</span>&nbsp; awaiting review</span></div>
+            <div class="view-heading page-heading"><div><p class="eyebrow">SERVICE QUALITY</p><h1 id="adminDirectoryTitle">Directory review<span class="heading-period">.</span></h1><p>Review listings before they are presented as verified services.</p></div><span class="role-tag"><span id="adminReviewCountLabel">2</span>&nbsp; awaiting review</span></div>
             <section class="panel"><div class="panel-heading"><div><h2>Service listings</h2><p>Only add listings that have been independently checked.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Service</th><th>Category</th><th>Area</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="adminDirectoryRows"></tbody></table></div>
-              <form class="form-grid" id="adminDirectoryForm"><input type="hidden" id="listingId"><div class="field"><label for="listingName">Service name</label><input class="input-control" id="listingName" required maxlength="120"></div><div class="field"><label for="listingCategory">Category</label><input class="input-control" id="listingCategory" required maxlength="60"></div><div class="field"><label for="listingArea">Area</label><input class="input-control" id="listingArea" required maxlength="120"></div><div class="field"><label for="listingContact">Contact details</label><input class="input-control" id="listingContact" maxlength="300"></div><button class="button button-primary" id="adminDirectorySubmit" type="submit">Add for review</button><button class="button button-secondary" id="adminDirectoryCancel" type="button" hidden>Cancel edit</button></form><p class="form-message" id="adminDirectoryMessage" aria-live="polite"></p></section>
+              <div class="form-divider"><span>Add or update a listing</span></div>
+              <form class="form-grid directory-form" id="adminDirectoryForm"><input type="hidden" id="listingId"><div class="field"><label for="listingName">Service name</label><input class="input-control" id="listingName" required maxlength="120" placeholder="Service provider name"></div><div class="field"><label for="listingCategory">Category</label><input class="input-control" id="listingCategory" required maxlength="60" placeholder="e.g. Health service"></div><div class="field"><label for="listingArea">Area</label><input class="input-control" id="listingArea" required maxlength="120" placeholder="Town or neighbourhood"></div><div class="field"><label for="listingContact">Contact details</label><input class="input-control" id="listingContact" maxlength="300" placeholder="Public contact details"></div><div class="form-actions"><button class="button button-primary" id="adminDirectorySubmit" type="submit">Add for review <span aria-hidden="true">→</span></button><button class="button button-secondary" id="adminDirectoryCancel" type="button" hidden>Cancel edit</button></div></form><p class="form-message" id="adminDirectoryMessage" aria-live="polite"></p></section>
             <div class="notice-box">Listings are not recommendations until an administrator independently verifies their source and details.</div>
           </section>
 
           <section class="portal-view" id="adminInvitations" aria-labelledby="adminInvitationsTitle">
-            <div class="view-heading"><div><p class="eyebrow">Onboarding</p><h1 id="adminInvitationsTitle">Invitations</h1><p>Review member invitations and revoke unused links.</p></div></div>
-            <section class="panel"><div class="table-wrap"><table class="data-table"><thead><tr><th>Invitee</th><th>Email</th><th>Created</th><th>Expires</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="adminInvitationRows"></tbody></table></div></section>
+            <div class="view-heading page-heading"><div><p class="eyebrow">ONBOARDING</p><h1 id="adminInvitationsTitle">Invitations<span class="heading-period">.</span></h1><p>Review member invitations and revoke unused links.</p></div></div>
+            <section class="panel"><div class="panel-heading"><div><h2>Invitation activity</h2><p>Track onboarding links and their current status.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Invitee</th><th>Email</th><th>Created</th><th>Expires</th><th>Status</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="adminInvitationRows"></tbody></table></div></section>
           </section>
 
           <section class="portal-view" id="adminAudit" aria-labelledby="adminAuditTitle">
-            <div class="view-heading"><div><p class="eyebrow">Accountability</p><h1 id="adminAuditTitle">Administrative activity</h1><p>Recent changes made by administrators.</p></div></div>
-            <section class="panel"><div class="table-wrap"><table class="data-table"><thead><tr><th>Time</th><th>Administrator</th><th>Action</th><th>Details</th></tr></thead><tbody id="adminAuditRows"></tbody></table></div></section>
+            <div class="view-heading page-heading"><div><p class="eyebrow">ACCOUNTABILITY</p><h1 id="adminAuditTitle">Administrative activity<span class="heading-period">.</span></h1><p>Review recorded changes made by administrators.</p></div></div>
+            <section class="panel"><div class="panel-heading"><div><h2>Audit log</h2><p>Administrative actions and related details.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Time</th><th>Administrator</th><th>Action</th><th>Details</th></tr></thead><tbody id="adminAuditRows"></tbody></table></div></section>
           </section>
 
           <section class="portal-view" id="adminPermissions" aria-labelledby="adminPermissionsTitle">
-            <div class="view-heading"><div><p class="eyebrow">Owner controls</p><h1 id="adminPermissionsTitle">Administrator access</h1><p>Only the designated super administrator can grant or revoke admin access.</p></div></div>
-            <section class="panel"><div class="table-wrap"><table class="data-table"><thead><tr><th>Administrator</th><th>Status</th><th>Access</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="adminRoleRows"></tbody></table></div></section>
+            <div class="view-heading page-heading"><div><p class="eyebrow">OWNER CONTROLS</p><h1 id="adminPermissionsTitle">Administrator access<span class="heading-period">.</span></h1><p>Manage which accounts can access operational controls.</p></div></div>
+            <section class="panel"><div class="panel-heading"><div><h2>Administrator roles</h2><p>Grant access only to trusted, authorised staff.</p></div></div><div class="table-wrap"><table class="data-table"><thead><tr><th>Administrator</th><th>Status</th><th>Access</th><th><span class="sr-only">Actions</span></th></tr></thead><tbody id="adminRoleRows"></tbody></table></div></section>
             <div class="notice-box">The super administrator cannot change their own role. Other administrators cannot grant or revoke administrator access.</div>
           </section>
+
+          <footer class="dashboard-bottom"><span>© <span id="adminFooterYear">2026</span> NALSAFE</span><span>Designed around privacy, trust and community.</span></footer>
         </main>
       </div>
     </div>
+    <script>
+      (() => {
+        const year = document.getElementById("adminFooterYear");
+        if (year) year.textContent = String(new Date().getFullYear());
+      })();
+    </script>
   </body>
 </html>
