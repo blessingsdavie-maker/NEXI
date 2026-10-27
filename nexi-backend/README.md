@@ -25,7 +25,12 @@ DATABASE_URL=postgresql://...
 JWT_SECRET=change-me-to-a-long-random-secret
 FRONTEND_URL=http://localhost:4173
 COOKIE_NAME=nalsafe_token
+RESEND_API_KEY=re_...
+EMAIL_FROM=NALSAFE <accounts@example.com>
 ```
+
+Password recovery email requires a Resend API key and a verified sender address. Set
+`RESEND_API_KEY` and `EMAIL_FROM` in the backend environment before enabling recovery.
 
 ## 3. Database schema
 
@@ -65,8 +70,11 @@ The existing production API is still hosted at the legacy Render address `https:
 
 - `POST /api/signup`
 - `POST /api/login`
+- `POST /api/forgot-password`
+- `POST /api/reset-password`
 - `GET /api/me`
 - `POST /api/logout`
+- `PUT /api/users/email` (authenticated; requires the current password)
 
 The backend also keeps `/signup`, `/login`, `/me`, `/logout` and `/api/auth/*` aliases for compatibility.
 
@@ -124,3 +132,4 @@ Use:
 - Start command: `npm start`
 
 Add `DATABASE_URL`, `JWT_SECRET`, `FRONTEND_URL`, and `NODE_ENV=production` as Render environment variables.
+Also add `RESEND_API_KEY` and `EMAIL_FROM` to enable password reset emails.

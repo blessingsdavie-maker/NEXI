@@ -189,6 +189,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .profile-large h2 { margin: 0 0 3px; font: 600 1.15rem/1.2 var(--portal-display); }
 .profile-large p { margin: 0; color: var(--portal-muted); font-size: .78rem; }
 .profile-actions { display: flex; flex-wrap: wrap; gap: 9px; padding-top: 16px; }
+.account-form { display: grid; gap: 10px; margin-top: 14px; border-top: 1px solid var(--portal-line); padding-top: 14px; }
+.account-form .field { max-width: 420px; }
+.account-form .button { justify-self: start; }
+.account-form .form-message { margin: 0; }
 .user-bottom-nav { display: none; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: 9px; margin-top: 15px; border-top: 1px solid var(--portal-line); padding-top: 14px; }
 .field { display: grid; gap: 5px; }.field label { color: var(--portal-muted); font-size: .68rem; font-weight: 700; }
@@ -241,6 +245,10 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-reset:hover { color: var(--portal-coral); }
 .auth-message { min-height: 1.3em; margin: 10px 0 0; color: var(--portal-green); font-size: .74rem; }
 .auth-message.is-error { color: var(--portal-red); }
+.auth-help-row { display: flex; justify-content: flex-end; }
+.auth-link-button { width: fit-content; border: 0; background: transparent; padding: 3px 0; color: var(--portal-green); font-size: .75rem; font-weight: 700; text-align: left; }
+.auth-link-button:hover { color: var(--portal-coral); }
+.auth-link-button:disabled { cursor: wait; opacity: .7; }
 .auth-disclaimer { margin: 10px 0 0; border-top: 1px solid var(--portal-line); padding-top: 12px; color: var(--portal-muted); font-size: .68rem; }
 .auth-disclaimer strong { color: var(--portal-ink); }
 .auth-entry-copy { margin: 0 0 18px; color: var(--portal-muted); font-size: .82rem; }

@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const {
   query,
@@ -78,11 +79,43 @@ function isValidEmail(email) {
 function getFrontendUrl() {
   return (
     process.env.FRONTEND_URL ||
-    'http://localhost:3000'
+    'http://localhost:4173'
   )
     .split(',')[0]
     .trim()
     .replace(/\/+$/, '');
+}
+
+async function sendPasswordResetEmail(email, token) {
+  if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+    const error = new Error('Password recovery email is not configured.');
+    error.code = 'EMAIL_NOT_CONFIGURED';
+    throw error;
+  }
+
+  const resetUrl =
+    `${getFrontendUrl()}/login.html?reset=${encodeURIComponent(token)}`;
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM,
+      to: [email],
+      subject: 'Reset your NALSAFE password',
+      text: `Use this link to reset your NALSAFE password. It expires in one hour:\n\n${resetUrl}\n\nIf you did not request this, you can ignore this email.`,
+      html: `<p>Use this link to reset your NALSAFE password. It expires in one hour:</p><p><a href="${resetUrl}">Reset your password</a></p><p>If you did not request this, you can ignore this email.</p>`
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Password recovery email delivery failed:', response.status, errorText);
+    throw new Error('Password recovery email could not be delivered.');
+  }
 }
 
 
@@ -737,6 +770,154 @@ router.post(
 /* =========================================================
    LOGIN
    ========================================================= */
+
+router.post(
+  '/forgot-password',
+  async (req, res) => {
+    const email = String(req.body?.email || '').trim().toLowerCase();
+
+    if (!isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address.'
+      });
+    }
+
+    if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM) {
+      return res.status(503).json({
+        success: false,
+        message: 'Password recovery is temporarily unavailable. Please contact support.'
+      });
+    }
+
+    const userResult = await query(
+      'SELECT id, email FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1',
+      [email]
+    );
+
+    if (!userResult.rowCount) {
+      return res.json({
+        success: true,
+        message: 'If an account exists for that email, a password reset link will be sent.'
+      });
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    try {
+      await query(
+        `INSERT INTO password_reset_tokens (token_hash, user_id, expires_at)
+         VALUES ($1, $2, NOW() + INTERVAL '1 hour')`,
+        [tokenHash, userResult.rows[0].id]
+      );
+      await sendPasswordResetEmail(userResult.rows[0].email, token);
+      await query(
+        `UPDATE password_reset_tokens
+         SET used_at = NOW()
+         WHERE user_id = $1 AND token_hash <> $2 AND used_at IS NULL`,
+        [userResult.rows[0].id, tokenHash]
+      );
+
+      return res.json({
+        success: true,
+        message: 'If an account exists for that email, a password reset link will be sent.'
+      });
+    } catch (error) {
+      await query(
+        'DELETE FROM password_reset_tokens WHERE token_hash = $1 AND used_at IS NULL',
+        [tokenHash]
+      );
+
+      if (error.code === 'EMAIL_NOT_CONFIGURED') {
+        return res.status(503).json({
+          success: false,
+          message: 'Password recovery is temporarily unavailable. Please contact support.'
+        });
+      }
+
+      console.error('Password recovery request error:', error);
+      return res.status(502).json({
+        success: false,
+        message: 'We could not send a password reset email. Please try again later.'
+      });
+    }
+  }
+);
+
+router.post(
+  '/reset-password',
+  async (req, res) => {
+    const token = String(req.body?.token || '').trim();
+    const password = String(req.body?.password || '');
+
+    if (!token || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'A reset link and new password are required.'
+      });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters.'
+      });
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const passwordHash = await bcrypt.hash(password, 12);
+    const client = await pool.connect();
+
+    try {
+      await client.query('BEGIN');
+
+      const tokenResult = await client.query(
+        `UPDATE password_reset_tokens
+         SET used_at = NOW()
+         WHERE token_hash = $1
+           AND used_at IS NULL
+           AND expires_at > NOW()
+         RETURNING user_id`,
+        [tokenHash]
+      );
+
+      if (!tokenResult.rowCount) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({
+          success: false,
+          message: 'This password reset link is invalid or has expired. Request a new one.'
+        });
+      }
+
+      await client.query(
+        'UPDATE users SET password_hash = $1 WHERE id = $2',
+        [passwordHash, tokenResult.rows[0].user_id]
+      );
+      await client.query(
+        `UPDATE password_reset_tokens
+         SET used_at = COALESCE(used_at, NOW())
+         WHERE user_id = $1 AND used_at IS NULL`,
+        [tokenResult.rows[0].user_id]
+      );
+
+      await client.query('COMMIT');
+      return res.json({
+        success: true,
+        message: 'Your password has been changed. You can now sign in.'
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Password reset error:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Unable to reset your password right now.'
+      });
+    } finally {
+      client.release();
+    }
+  }
+);
 
 router.post(
   '/login',

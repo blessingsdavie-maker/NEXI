@@ -4,6 +4,8 @@
   const get = (id) => document.getElementById(id);
 
   const accountForm = get("accountForm");
+  const forgotPasswordForm = get("forgotPasswordForm");
+  const resetPasswordForm = get("resetPasswordForm");
   const message = get("authMessage");
   const accountEmail = get("accountEmail");
   const accountName = get("accountName");
@@ -12,6 +14,9 @@
   const accountNameField = get("accountNameField");
   const accountConfirmField = get("accountConfirmField");
   const accountSubmit = get("accountSubmit");
+  const forgotPasswordRow = get("forgotPasswordRow");
+  const authModeSwitch = document.querySelector(".auth-mode-switch");
+  const authBottomAction = document.querySelector(".auth-bottom-action");
 
   const authModeButtons = [
     ...document.querySelectorAll("[data-auth-mode]")
@@ -19,6 +24,10 @@
 
   const query = new URLSearchParams(window.location.search);
   const inviteToken = query.get("invite") || "";
+  const resetToken = query.get("reset") || "";
+  if (resetToken) {
+    window.history.replaceState({}, "", window.location.pathname);
+  }
 
   let accountMode =
     ["register", "signup"].includes(query.get("mode")) || inviteToken
@@ -49,6 +58,39 @@
     message.classList.toggle("is-error", isError);
   };
 
+  const setRecoveryView = (view) => {
+    const isAccount = view === "account";
+    const isForgot = view === "forgot";
+    const isReset = view === "reset";
+
+    accountForm.hidden = !isAccount;
+    forgotPasswordForm.hidden = !isForgot;
+    resetPasswordForm.hidden = !isReset;
+    authModeSwitch.hidden = !isAccount;
+    authBottomAction.hidden = !isAccount;
+
+    const title = get("authTitle");
+    const description = get("authDescription");
+    if (title && description) {
+      if (isForgot) {
+        title.textContent = "Reset your password";
+        description.textContent = "Enter the email address linked to your account.";
+      } else if (isReset) {
+        title.textContent = "Choose a new password";
+        description.textContent = "Your new password must be at least 8 characters.";
+      } else {
+        title.textContent = accountMode === "register"
+          ? "Create your NALSAFE account"
+          : "Sign in or create an account";
+        description.textContent = accountMode === "register"
+          ? "Create an account to keep your profile available across devices."
+          : "Sign in with your email, or choose Create account to register.";
+      }
+    }
+
+    showMessage("");
+  };
+
   /*
    * Switch between Login and Create Account.
    */
@@ -56,6 +98,7 @@
     accountMode = mode;
 
     const registering = mode === "register";
+    setRecoveryView("account");
 
     if (accountNameField) {
       accountNameField.hidden = !registering;
@@ -109,6 +152,10 @@
         `<span aria-hidden="true">→</span>`;
     }
 
+    if (forgotPasswordRow) {
+      forgotPasswordRow.hidden = registering;
+    }
+
     authModeButtons.forEach((button) => {
       button.setAttribute(
         "aria-pressed",
@@ -147,6 +194,82 @@
 
       setMode(mode);
     });
+  });
+
+  get("forgotPasswordButton")?.addEventListener("click", () => {
+    get("recoveryEmail").value = accountEmail.value.trim();
+    setRecoveryView("forgot");
+  });
+
+  document.querySelectorAll("[data-auth-back]").forEach((button) => {
+    button.addEventListener("click", () => setMode("login"));
+  });
+
+  forgotPasswordForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const submit = get("recoverySubmit");
+    submit.disabled = true;
+    showMessage("Requesting a password reset link…");
+
+    try {
+      const response = await window.nalsafeApi.request("/forgot-password", {
+        method: "POST",
+        body: JSON.stringify({
+          email: get("recoveryEmail").value.trim().toLowerCase()
+        })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        showMessage(data.message || "We could not request a reset link.", true);
+        return;
+      }
+      showMessage(data.message || "If an account exists for that email, a reset link will be sent.");
+    } catch (error) {
+      console.error("Password recovery request error:", error);
+      showMessage("Could not connect to the account service. Please try again.", true);
+    } finally {
+      submit.disabled = false;
+    }
+  });
+
+  resetPasswordForm?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const password = get("newPassword").value;
+    const confirmation = get("newPasswordConfirm").value;
+    const submit = get("resetSubmit");
+
+    if (password.length < 8) {
+      showMessage("Your password must be at least 8 characters.", true);
+      return;
+    }
+    if (password !== confirmation) {
+      showMessage("Those passwords don't match yet.", true);
+      return;
+    }
+
+    submit.disabled = true;
+    showMessage("Updating your password…");
+    try {
+      const response = await window.nalsafeApi.request("/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ token: resetToken, password })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        showMessage(data.message || "We could not reset your password.", true);
+        return;
+      }
+
+      window.history.replaceState({}, "", `${window.location.pathname}`);
+      resetPasswordForm.reset();
+      setMode("login");
+      showMessage(data.message || "Your password has been changed. You can now sign in.");
+    } catch (error) {
+      console.error("Password reset error:", error);
+      showMessage("Could not connect to the account service. Please try again.", true);
+    } finally {
+      submit.disabled = false;
+    }
   });
 
   /*
@@ -336,5 +459,8 @@
    * Initialize the page.
    */
   setMode(accountMode);
+  if (resetToken) {
+    setRecoveryView("reset");
+  }
 
 })();

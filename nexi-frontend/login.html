@@ -22,6 +22,8 @@ content="Sign in to your NALSAFE circle or create a NALSAFE account."
 
 >
 
+<meta name="referrer" content="no-referrer">
+
   <title>Sign in — NALSAFE</title>
 
   <link
@@ -399,14 +401,9 @@ Skip to account form
     </div>
 
 
-    <!-- Forgot password placeholder.
-         Kept hidden until backend reset routes
-         are implemented. -->
-
     <div
       class="auth-help-row"
       id="forgotPasswordRow"
-      hidden
     >
 
       <button
@@ -434,6 +431,70 @@ Skip to account form
       </span>
     </button>
 
+  </form>
+
+  <form
+    class="auth-form"
+    id="forgotPasswordForm"
+    hidden
+  >
+    <div class="auth-field">
+      <label for="recoveryEmail">Email address</label>
+      <input
+        id="recoveryEmail"
+        name="email"
+        type="email"
+        autocomplete="email"
+        required
+        placeholder="you@example.com"
+      >
+    </div>
+
+    <button class="auth-submit" type="submit" id="recoverySubmit">
+      Send reset link <span aria-hidden="true">→</span>
+    </button>
+    <button class="auth-link-button" type="button" data-auth-back>
+      Back to sign in
+    </button>
+  </form>
+
+  <form
+    class="auth-form"
+    id="resetPasswordForm"
+    hidden
+  >
+    <div class="auth-field">
+      <label for="newPassword">New password</label>
+      <input
+        id="newPassword"
+        name="password"
+        type="password"
+        autocomplete="new-password"
+        minlength="8"
+        required
+        placeholder="At least 8 characters"
+      >
+    </div>
+
+    <div class="auth-field">
+      <label for="newPasswordConfirm">Confirm new password</label>
+      <input
+        id="newPasswordConfirm"
+        name="confirm_password"
+        type="password"
+        autocomplete="new-password"
+        minlength="8"
+        required
+        placeholder="Enter your password again"
+      >
+    </div>
+
+    <button class="auth-submit" type="submit" id="resetSubmit">
+      Change password <span aria-hidden="true">→</span>
+    </button>
+    <button class="auth-link-button" type="button" data-auth-back>
+      Back to sign in
+    </button>
   </form>
 
 

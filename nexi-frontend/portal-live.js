@@ -122,7 +122,36 @@
   get("userAvatar").textContent = initials;
   get("userProfileDisplayName").textContent = profileName;
   get("userProfileEmail").textContent = userSession.email || "Email unavailable";
+  get("profileAccountEmail").textContent = userSession.email || "Email unavailable";
   get("userProfileAvatar").textContent = initials;
+
+  get("emailChangeForm")?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const submit = get("emailChangeSubmit");
+    const message = get("emailChangeMessage");
+    submit.disabled = true;
+
+    try {
+      const result = await api("/users/email", {
+        method: "PUT",
+        body: JSON.stringify({
+          email: get("newAccountEmail").value.trim().toLowerCase(),
+          current_password: get("emailCurrentPassword").value
+        })
+      });
+
+      userSession.email = result.user.email;
+      get("userProfileEmail").textContent = userSession.email;
+      get("profileAccountEmail").textContent = userSession.email;
+      form.reset();
+      showMessage(message, result.message || "Your email address has been updated.");
+    } catch (error) {
+      showMessage(message, error.message, true);
+    } finally {
+      submit.disabled = false;
+    }
+  });
 
   let dashboard = {
     members: [],

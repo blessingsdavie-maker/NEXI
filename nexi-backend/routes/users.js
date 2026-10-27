@@ -1,5 +1,6 @@
 const express = require('express');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 const {
 query,
@@ -74,6 +75,109 @@ return `     (
 /* =========================================================
 PROFILE
 ========================================================= */
+
+router.put(
+'/email',
+requireAuth,
+async (req, res) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  const currentPassword = String(req.body?.current_password || '');
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Please provide a valid email address.'
+    });
+  }
+
+  if (!currentPassword) {
+    return res.status(400).json({
+      success: false,
+      message: 'Enter your current password to change your email.'
+    });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const userResult = await client.query(
+      'SELECT email, password_hash FROM users WHERE id = $1 FOR UPDATE',
+      [req.user.id]
+    );
+    const user = userResult.rows[0];
+
+    if (!user || !(await bcrypt.compare(currentPassword, user.password_hash))) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({
+        success: false,
+        message: 'Your current password is incorrect.'
+      });
+    }
+
+    if (email === String(user.email).toLowerCase()) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        success: false,
+        message: 'That is already your current email address.'
+      });
+    }
+
+    const existing = await client.query(
+      'SELECT id FROM users WHERE LOWER(email) = $1 AND id <> $2 LIMIT 1',
+      [email, req.user.id]
+    );
+
+    if (existing.rowCount) {
+      await client.query('ROLLBACK');
+      return res.status(409).json({
+        success: false,
+        message: 'An account with that email address already exists.'
+      });
+    }
+
+    const result = await client.query(
+      `UPDATE users
+       SET email = $1
+       WHERE id = $2
+       RETURNING id, full_name, email, role, status`,
+      [email, req.user.id]
+    );
+
+    await client.query(
+      `UPDATE password_reset_tokens
+       SET used_at = NOW()
+       WHERE user_id = $1 AND used_at IS NULL`,
+      [req.user.id]
+    );
+
+    await client.query('COMMIT');
+    return res.json({
+      success: true,
+      message: 'Your email address has been updated.',
+      user: result.rows[0]
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+
+    if (error.code === '23505') {
+      return res.status(409).json({
+        success: false,
+        message: 'An account with that email address already exists.'
+      });
+    }
+
+    console.error('Email address update error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Unable to update your email address right now.'
+    });
+  } finally {
+    client.release();
+  }
+}
+);
 
 router.get(
 '/profile',

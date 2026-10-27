@@ -1509,6 +1509,39 @@ content="Your NALSAFE circle, check-ins, schedule, activity, notifications, and 
 
           </div>
 
+          <form class="account-form" id="emailChangeForm">
+            <div class="field">
+              <label for="newAccountEmail">New email address</label>
+              <input
+                class="input-control"
+                id="newAccountEmail"
+                name="email"
+                type="email"
+                autocomplete="email"
+                required
+                placeholder="you@example.com"
+              >
+            </div>
+
+            <div class="field">
+              <label for="emailCurrentPassword">Current password</label>
+              <input
+                class="input-control"
+                id="emailCurrentPassword"
+                name="current_password"
+                type="password"
+                autocomplete="current-password"
+                required
+                placeholder="Confirm your identity"
+              >
+            </div>
+
+            <button class="button button-secondary" id="emailChangeSubmit" type="submit">
+              Update email
+            </button>
+            <p class="form-message" id="emailChangeMessage" aria-live="polite"></p>
+          </form>
+
         </section>
 
       </section>
