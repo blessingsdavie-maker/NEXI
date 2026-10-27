@@ -245,6 +245,7 @@ content="Your NALSAFE circle, check-ins, schedule, activity, notifications, and 
         id="userAvatar"
         aria-hidden="true"
       >
+        <img class="profile-avatar-image" id="userAvatarImage" alt="" hidden>
         NW
       </span>
 
@@ -1316,6 +1317,7 @@ content="Your NALSAFE circle, check-ins, schedule, activity, notifications, and 
             id="userProfileAvatar"
             aria-hidden="true"
           >
+            <img class="profile-avatar-image" id="userProfileAvatarImage" alt="" hidden>
             NW
           </span>
 
@@ -1328,6 +1330,32 @@ content="Your NALSAFE circle, check-ins, schedule, activity, notifications, and 
             <p id="userProfileEmail">
               Email address
             </p>
+
+            <div class="profile-photo-controls">
+              <input
+                class="sr-only"
+                id="profilePhotoInput"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                aria-label="Choose a profile photo"
+              >
+              <button
+                class="button button-secondary button-small"
+                id="profilePhotoButton"
+                type="button"
+              >
+                Add profile photo
+              </button>
+              <button
+                class="button button-secondary button-small"
+                id="removeProfilePhotoButton"
+                type="button"
+                hidden
+              >
+                Remove photo
+              </button>
+            </div>
+            <p class="form-message profile-photo-message" id="profilePhotoMessage" role="status" aria-live="polite"></p>
 
             <span class="status-pill">
               Active member

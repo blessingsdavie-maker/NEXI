@@ -125,6 +125,108 @@
   get("profileAccountEmail").textContent = userSession.email || "Email unavailable";
   get("userProfileAvatar").textContent = initials;
 
+  const avatarImageIds = ["userAvatarImage", "userProfileAvatarImage"];
+  const photoMessage = get("profilePhotoMessage");
+  const photoInput = get("profilePhotoInput");
+  const photoButton = get("profilePhotoButton");
+  const removePhotoButton = get("removeProfilePhotoButton");
+  let avatarUrl = null;
+  const updateAvatarDisplay = (value) => {
+    avatarUrl = typeof value === "string" && /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(value)
+      ? value
+      : null;
+    avatarImageIds.forEach((id) => {
+      const image = get(id);
+      image.hidden = !avatarUrl;
+      if (avatarUrl) image.src = avatarUrl;
+      else image.removeAttribute("src");
+    });
+    photoButton.textContent = avatarUrl ? "Change photo" : "Add profile photo";
+    removePhotoButton.hidden = !avatarUrl;
+  };
+
+  try {
+    const profile = await api("/users/profile");
+    updateAvatarDisplay(profile.user?.avatar_url);
+  } catch (error) {
+    showMessage(photoMessage, `Your saved profile photo could not be loaded. ${error.message}`, true);
+  }
+
+  photoButton.addEventListener("click", () => photoInput.click());
+  photoInput.addEventListener("change", async () => {
+    const file = photoInput.files?.[0];
+    if (!file) return;
+    photoInput.value = "";
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 10 * 1024 * 1024) {
+      showMessage(photoMessage, "Choose a JPEG, PNG, or WebP image smaller than 10 MB.", true);
+      return;
+    }
+
+    photoButton.disabled = true;
+    removePhotoButton.disabled = true;
+    showMessage(photoMessage, "Saving your profile photo…");
+    let imageUrl;
+    try {
+      imageUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.src = imageUrl;
+      await image.decode();
+
+      const scale = Math.min(1, 512 / Math.max(image.naturalWidth, image.naturalHeight));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+
+      let blob;
+      for (const quality of [0.85, 0.75, 0.65, 0.55]) {
+        blob = await new Promise((resolve, reject) => {
+          canvas.toBlob((result) => result ? resolve(result) : reject(new Error("This photo could not be processed.")), "image/jpeg", quality);
+        });
+        if (blob.size <= 450000) break;
+      }
+      if (blob.size > 450000) throw new Error("This photo is too large to save. Choose a smaller image.");
+
+      const reader = new FileReader();
+      const photoData = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("This photo could not be read."));
+        reader.readAsDataURL(blob);
+      });
+      await api("/users/profile/avatar", {
+        method: "PUT",
+        body: JSON.stringify({ avatar_url: photoData })
+      });
+      updateAvatarDisplay(photoData);
+      showMessage(photoMessage, "Your profile photo has been updated.");
+    } catch (error) {
+      showMessage(photoMessage, error.message || "Your profile photo could not be saved.", true);
+    } finally {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+      photoButton.disabled = false;
+      removePhotoButton.disabled = false;
+    }
+  });
+
+  removePhotoButton.addEventListener("click", async () => {
+    removePhotoButton.disabled = true;
+    photoButton.disabled = true;
+    try {
+      const result = await api("/users/profile/avatar", {
+        method: "PUT",
+        body: JSON.stringify({ avatar_url: null })
+      });
+      updateAvatarDisplay(null);
+      showMessage(photoMessage, result.message || "Your profile photo has been removed.");
+    } catch (error) {
+      showMessage(photoMessage, error.message, true);
+    } finally {
+      removePhotoButton.disabled = !avatarUrl;
+      photoButton.disabled = false;
+    }
+  });
+
   get("emailChangeForm")?.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = event.currentTarget;

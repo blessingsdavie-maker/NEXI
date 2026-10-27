@@ -222,6 +222,42 @@ return res.json({
 );
 
 router.put(
+'/profile/avatar',
+requireAuth,
+async (req, res) => {
+  const avatarUrl = req.body?.avatar_url;
+  const isSupportedImage =
+    typeof avatarUrl === 'string' &&
+    avatarUrl.length <= 650000 &&
+    /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/.test(avatarUrl);
+
+  if (avatarUrl !== null && !isSupportedImage) {
+    return res.status(400).json({
+      success: false,
+      message: 'Choose a JPEG profile photo under 450 KB, or remove your current photo.'
+    });
+  }
+
+  const result = await query(
+    `
+      INSERT INTO user_profiles (user_id, avatar_url)
+      VALUES ($1, $2)
+      ON CONFLICT (user_id)
+      DO UPDATE SET avatar_url = EXCLUDED.avatar_url
+      RETURNING avatar_url
+    `,
+    [req.user.id, avatarUrl]
+  );
+
+  return res.json({
+    success: true,
+    message: avatarUrl ? 'Your profile photo has been updated.' : 'Your profile photo has been removed.',
+    avatar_url: result.rows[0].avatar_url
+  });
+}
+);
+
+router.put(
 '/profile',
 requireAuth,
 async (req, res) => {
