@@ -56,7 +56,7 @@ return result.rows[0] || null;
 function getFrontendUrl() {
   return (
     process.env.FRONTEND_URL ||
-    'http://localhost:3000'
+    'http://localhost:4173'
   )
     .split(',')[0]
     .trim()
@@ -948,7 +948,7 @@ try {
 
 
   const inviteUrl =
-    `${getFrontendUrl()}/login.html?mode=signup&invite=${encodeURIComponent(token)}`;
+    `${getFrontendUrl()}/login.html?mode=register&invite=${encodeURIComponent(token)}`;
 
 
   return res.status(201).json({

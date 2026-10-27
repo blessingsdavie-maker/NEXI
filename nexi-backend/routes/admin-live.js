@@ -90,7 +90,7 @@ router.post('/invitations', async (req, res) => {
   const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:4173').split(',')[0].trim().replace(/\/$/, '');
   return res.status(201).json({
     success: true,
-    invitation: { id: result.rows[0].id, email_sent: false, invite_url: `${frontendUrl}/login.html?mode=signup&invite=${encodeURIComponent(token)}` }
+    invitation: { id: result.rows[0].id, email_sent: false, invite_url: `${frontendUrl}/login.html?mode=register&invite=${encodeURIComponent(token)}` }
   });
 });
 

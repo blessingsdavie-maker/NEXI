@@ -23,7 +23,7 @@ PORT=5000
 NODE_ENV=development
 DATABASE_URL=postgresql://...
 JWT_SECRET=change-me-to-a-long-random-secret
-FRONTEND_URL=http://localhost:3000
+FRONTEND_URL=http://localhost:4173
 COOKIE_NAME=nalsafe_token
 ```
 

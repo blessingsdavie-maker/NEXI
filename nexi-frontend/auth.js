@@ -21,7 +21,7 @@
   const inviteToken = query.get("invite") || "";
 
   let accountMode =
-    query.get("mode") === "register" || inviteToken
+    ["register", "signup"].includes(query.get("mode")) || inviteToken
       ? "register"
       : "login";
 
