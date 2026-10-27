@@ -188,3 +188,58 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- After registering the designated owner account, make it the sole super administrator:
 -- UPDATE users SET role = 'admin', is_super_admin = TRUE WHERE email = 'your-owner-email@example.com';
+
+-- =====================================================
+-- PASSWORD RESET TOKENS
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id BIGSERIAL PRIMARY KEY,
+
+    token_hash CHAR(64) NOT NULL UNIQUE,
+
+    user_id BIGINT NOT NULL
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    expires_at TIMESTAMPTZ NOT NULL,
+
+    used_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user
+    ON password_reset_tokens(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expiry
+    ON password_reset_tokens(expires_at);
+
+
+-- =====================================================
+-- EMAIL CHANGE VERIFICATION TOKENS
+-- =====================================================
+
+CREATE TABLE IF NOT EXISTS email_change_tokens (
+    id BIGSERIAL PRIMARY KEY,
+
+    token_hash CHAR(64) NOT NULL UNIQUE,
+
+    user_id BIGINT NOT NULL
+        REFERENCES users(id)
+        ON DELETE CASCADE,
+
+    new_email VARCHAR(255) NOT NULL,
+
+    expires_at TIMESTAMPTZ NOT NULL,
+
+    used_at TIMESTAMPTZ,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_email_change_tokens_user
+    ON email_change_tokens(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_email_change_tokens_expiry
+    ON email_change_tokens(expires_at);

@@ -93,6 +93,137 @@ async function sendPasswordResetEmail(email, token) {
     throw error;
   }
 
+  // =====================================================
+// EMAIL CHANGE VERIFICATION EMAIL
+// =====================================================
+
+async function sendEmailChangeVerificationEmail(email, token) {
+  if (
+    !process.env.RESEND_API_KEY ||
+    !process.env.EMAIL_FROM
+  ) {
+    const error = new Error(
+      "Email verification is not configured."
+    );
+
+    error.code = "EMAIL_NOT_CONFIGURED";
+    throw error;
+  }
+
+  const confirmationPage = (
+    process.env.EMAIL_CHANGE_CONFIRM_URL ||
+    `${getFrontendUrl()}/change-email.html`
+  ).replace(/\/+$/, "");
+
+  const separator = confirmationPage.includes("?")
+    ? "&"
+    : "?";
+
+  const verificationUrl =
+    `${confirmationPage}${separator}token=${encodeURIComponent(token)}`;
+
+  const response = await fetch(
+    "https://api.resend.com/emails",
+    {
+      method: "POST",
+
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        from: process.env.EMAIL_FROM,
+
+        to: [email],
+
+        subject: "Verify your new NALSAFE email address",
+
+        text:
+          "You requested to change your NALSAFE email address.\n\n" +
+          "Open the following link to confirm your new email address:\n\n" +
+          `${verificationUrl}\n\n` +
+          "This link expires in one hour. If you did not request " +
+          "this change, you can ignore this email.",
+
+        html:
+          "<p>You requested to change your NALSAFE email address.</p>" +
+          `<p><a href="${verificationUrl}">Verify your new email address</a></p>` +
+          "<p>This link expires in one hour. If you did not request " +
+          "this change, you can ignore this email.</p>"
+      })
+    }
+  );
+
+  if (!response.ok) {
+    const details = await response.text();
+
+    console.error(
+      "Email-change delivery failed:",
+      response.status,
+      details
+    );
+
+    throw new Error(
+      "The verification email could not be delivered."
+    );
+  }
+}
+
+
+// =====================================================
+// NOTIFY THE OLD ADDRESS AFTER AN EMAIL CHANGE
+// =====================================================
+
+async function sendEmailChangedNotification(oldEmail, newEmail) {
+  if (
+    !process.env.RESEND_API_KEY ||
+    !process.env.EMAIL_FROM
+  ) {
+    console.warn(
+      "Email-change notification skipped: email service is not configured."
+    );
+
+    return;
+  }
+
+  const response = await fetch(
+    "https://api.resend.com/emails",
+    {
+      method: "POST",
+
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        from: process.env.EMAIL_FROM,
+
+        to: [oldEmail],
+
+        subject: "Your NALSAFE email address was changed",
+
+        text:
+          `Your NALSAFE account email address was changed to ${newEmail}.\n\n` +
+          "If you did not authorize this change, contact NALSAFE support.",
+
+        html:
+          `<p>Your NALSAFE account email address was changed to ` +
+          `<strong>${newEmail}</strong>.</p>` +
+          "<p>If you did not authorize this change, contact NALSAFE support.</p>"
+      })
+    }
+  );
+
+  if (!response.ok) {
+    console.error(
+      "Email-change notification failed:",
+      response.status,
+      await response.text()
+    );
+  }
+}
   const resetUrl =
     `${getFrontendUrl()}/login.html?reset=${encodeURIComponent(token)}`;
 
@@ -766,7 +897,426 @@ router.post(
   }
 );
 
+// =====================================================
+// REQUEST AN EMAIL CHANGE
+// POST /api/change-email/request
+// =====================================================
 
+router.post(
+  "/change-email/request",
+  requireAuth,
+  async (req, res) => {
+    const newEmail = String(
+      req.body?.new_email || ""
+    ).trim().toLowerCase();
+
+    const currentPassword = String(
+      req.body?.current_password || ""
+    );
+
+    if (!isValidEmail(newEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid new email address."
+      });
+    }
+
+    if (!currentPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Your current password is required."
+      });
+    }
+
+    try {
+      // Load the current user directly from the database.
+      const userResult = await query(
+        `
+          SELECT
+            id,
+            email,
+            password_hash,
+            status
+          FROM users
+          WHERE id = $1
+          LIMIT 1
+        `,
+        [req.user.id]
+      );
+
+      if (!userResult.rowCount) {
+        return res.status(401).json({
+          success: false,
+          message: "Your account could not be verified."
+        });
+      }
+
+      const user = userResult.rows[0];
+
+      if (user.status !== "active") {
+        return res.status(403).json({
+          success: false,
+          message: "Your account is not active."
+        });
+      }
+
+      // Require the current password.
+      const passwordMatches = await bcrypt.compare(
+        currentPassword,
+        user.password_hash
+      );
+
+      if (!passwordMatches) {
+        return res.status(401).json({
+          success: false,
+          message: "Your current password is incorrect."
+        });
+      }
+
+      if (
+        user.email.toLowerCase() === newEmail
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "This is already your email address."
+        });
+      }
+
+      // Prevent a change to an email already assigned to
+      // another account.
+      const existingEmail = await query(
+        `
+          SELECT id
+          FROM users
+          WHERE LOWER(email) = LOWER($1)
+            AND id <> $2
+          LIMIT 1
+        `,
+        [newEmail, user.id]
+      );
+
+      if (existingEmail.rowCount) {
+        return res.status(409).json({
+          success: false,
+          message: "That email address is already in use."
+        });
+      }
+
+      // Check that the email delivery service is configured.
+      if (
+        !process.env.RESEND_API_KEY ||
+        !process.env.EMAIL_FROM
+      ) {
+        return res.status(503).json({
+          success: false,
+          message: "Email verification is temporarily unavailable."
+        });
+      }
+
+      // Generate a random token and store only its hash.
+      const token = crypto.randomBytes(32).toString("hex");
+
+      const tokenHash = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+
+      // Remove expired and previously used records.
+      await query(
+        `
+          DELETE FROM email_change_tokens
+          WHERE expires_at <= NOW()
+             OR used_at IS NOT NULL
+        `
+      );
+
+      // A new request replaces the user's previous pending request.
+      await query(
+        `
+          DELETE FROM email_change_tokens
+          WHERE user_id = $1
+            AND used_at IS NULL
+        `,
+        [user.id]
+      );
+
+      await query(
+        `
+          INSERT INTO email_change_tokens (
+            user_id,
+            new_email,
+            token_hash,
+            expires_at
+          )
+          VALUES (
+            $1,
+            $2,
+            $3,
+            NOW() + INTERVAL '1 hour'
+          )
+        `,
+        [
+          user.id,
+          newEmail,
+          tokenHash
+        ]
+      );
+
+      try {
+        await sendEmailChangeVerificationEmail(
+          newEmail,
+          token
+        );
+      } catch (emailError) {
+        // Remove the unused token if email delivery fails.
+        await query(
+          `
+            DELETE FROM email_change_tokens
+            WHERE token_hash = $1
+          `,
+          [tokenHash]
+        ).catch((cleanupError) => {
+          console.error(
+            "Email-change token cleanup failed:",
+            cleanupError
+          );
+        });
+
+        console.error(
+          "Unable to send email-change verification:",
+          emailError
+        );
+
+        return res.status(503).json({
+          success: false,
+          message:
+            "We could not send the verification email. Please try again later."
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message:
+          "A verification link has been sent to your new email address. Your account email has not changed yet."
+      });
+    } catch (error) {
+      console.error(
+        "Email-change request error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Unable to process your email-change request right now."
+      });
+    }
+  }
+);
+
+
+// =====================================================
+// CONFIRM AN EMAIL CHANGE
+// POST /api/change-email/confirm
+// =====================================================
+
+router.post(
+  "/change-email/confirm",
+  async (req, res) => {
+    const token = String(
+      req.body?.token || ""
+    ).trim();
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "The email verification token is required."
+      });
+    }
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+    let client;
+    let transactionStarted = false;
+    let oldEmail = null;
+    let newEmail = null;
+
+    try {
+      client = await pool.connect();
+
+      await client.query("BEGIN");
+      transactionStarted = true;
+
+      // Lock the matching token so it cannot be confirmed
+      // twice concurrently.
+      const tokenResult = await client.query(
+        `
+          SELECT
+            id,
+            user_id,
+            new_email
+          FROM email_change_tokens
+          WHERE token_hash = $1
+            AND used_at IS NULL
+            AND expires_at > NOW()
+          FOR UPDATE
+        `,
+        [tokenHash]
+      );
+
+      if (!tokenResult.rowCount) {
+        await client.query("ROLLBACK");
+        transactionStarted = false;
+
+        return res.status(400).json({
+          success: false,
+          message:
+            "This verification link is invalid, expired, or already used."
+        });
+      }
+
+      const change = tokenResult.rows[0];
+
+      // Lock the associated account.
+      const userResult = await client.query(
+        `
+          SELECT id, email
+          FROM users
+          WHERE id = $1
+          FOR UPDATE
+        `,
+        [change.user_id]
+      );
+
+      if (!userResult.rowCount) {
+        await client.query("ROLLBACK");
+        transactionStarted = false;
+
+        return res.status(400).json({
+          success: false,
+          message: "The associated account could not be found."
+        });
+      }
+
+      oldEmail = userResult.rows[0].email;
+      newEmail = change.new_email;
+
+      // Check again because another account could have
+      // claimed the address after the request was created.
+      const duplicate = await client.query(
+        `
+          SELECT id
+          FROM users
+          WHERE LOWER(email) = LOWER($1)
+            AND id <> $2
+          LIMIT 1
+        `,
+        [newEmail, change.user_id]
+      );
+
+      if (duplicate.rowCount) {
+        await client.query("ROLLBACK");
+        transactionStarted = false;
+
+        return res.status(409).json({
+          success: false,
+          message:
+            "That email address is now assigned to another account."
+        });
+      }
+
+      // Apply the email change only after successful verification.
+      await client.query(
+        `
+          UPDATE users
+          SET
+            email = $1,
+            updated_at = NOW()
+          WHERE id = $2
+        `,
+        [
+          newEmail,
+          change.user_id
+        ]
+      );
+
+      // Consume all pending email-change tokens for this user.
+      await client.query(
+        `
+          UPDATE email_change_tokens
+          SET used_at = NOW()
+          WHERE user_id = $1
+            AND used_at IS NULL
+        `,
+        [change.user_id]
+      );
+
+      await client.query("COMMIT");
+      transactionStarted = false;
+
+      // Notify the previous email address after the change
+      // has committed. Notification failure must not undo it.
+      if (
+        oldEmail &&
+        oldEmail.toLowerCase() !== newEmail.toLowerCase()
+      ) {
+        try {
+          await sendEmailChangedNotification(
+            oldEmail,
+            newEmail
+          );
+        } catch (notificationError) {
+          console.error(
+            "Email-change notification error:",
+            notificationError
+          );
+        }
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Your email address has been updated successfully.",
+        email: newEmail
+      });
+    } catch (error) {
+      if (transactionStarted && client) {
+        await client.query("ROLLBACK").catch(
+          (rollbackError) => {
+            console.error(
+              "Email-change rollback error:",
+              rollbackError
+            );
+          }
+        );
+      }
+
+      if (error.code === "23505") {
+        return res.status(409).json({
+          success: false,
+          message: "That email address is already in use."
+        });
+      }
+
+      console.error(
+        "Email-change confirmation error:",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Unable to complete the email change right now."
+      });
+    } finally {
+      if (client) {
+        client.release();
+      }
+    }
+  }
+);
 /* =========================================================
    LOGIN
    ========================================================= */
