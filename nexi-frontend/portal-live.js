@@ -119,11 +119,11 @@
     profileName.split(/\s+/)[0] || "there";
 
   get("userProfileName").textContent = profileName;
-  get("userAvatar").textContent = initials;
+  get("userAvatarInitials").textContent = initials;
   get("userProfileDisplayName").textContent = profileName;
   get("userProfileEmail").textContent = userSession.email || "Email unavailable";
   get("profileAccountEmail").textContent = userSession.email || "Email unavailable";
-  get("userProfileAvatar").textContent = initials;
+  get("userProfileAvatarInitials").textContent = initials;
 
   const avatarImageIds = ["userAvatarImage", "userProfileAvatarImage"];
   const photoMessage = get("profilePhotoMessage");
@@ -137,6 +137,7 @@
       : null;
     avatarImageIds.forEach((id) => {
       const image = get(id);
+      if (!image) return;
       image.hidden = !avatarUrl;
       if (avatarUrl) image.src = avatarUrl;
       else image.removeAttribute("src");
