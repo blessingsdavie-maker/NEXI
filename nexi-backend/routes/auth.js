@@ -1291,7 +1291,8 @@ router.post(
             );
           }
         );
-      }
+      }const resetUrl =
+  `${getFrontendUrl()}/reset-password.html?token=${encodeURIComponent(token)}`;
 
       if (error.code === "23505") {
         return res.status(409).json({
