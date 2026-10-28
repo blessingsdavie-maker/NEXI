@@ -1896,5 +1896,135 @@ aria-atomic="true"
     });
   </script>
 
+
+
+  <style>
+    .nalsafe-social-widget{position:fixed;right:22px;bottom:22px;z-index:9998;font-family:Inter,Arial,sans-serif;color:#1e2b24}
+    .social-chat-toggle{display:flex;align-items:center;gap:10px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:linear-gradient(135deg,#28513e,#17382b);color:#fff;padding:13px 17px;box-shadow:0 12px 38px rgba(23,56,43,.28);cursor:pointer;font-weight:600;letter-spacing:.01em;transition:transform .2s ease,box-shadow .2s ease}
+    .social-chat-toggle:hover{transform:translateY(-2px);box-shadow:0 16px 42px rgba(23,56,43,.36)}
+    .social-chat-symbol{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.14);font-size:17px}
+    .social-chat-badge,.social-unread-count{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;background:#e77b57;color:#fff;font-size:11px;border-radius:999px;font-weight:700}
+    .social-chat-panel{position:absolute;right:0;bottom:68px;width:min(410px,calc(100vw - 28px));max-height:min(690px,calc(100vh - 112px));display:flex;flex-direction:column;overflow:hidden;border:1px solid #dce5dd;border-radius:20px;background:#fff;box-shadow:0 24px 80px rgba(17,38,28,.24)}
+    .social-chat-panel[hidden],.social-chat-body [hidden]{display:none!important}
+    .social-chat-header{display:flex;align-items:center;gap:12px;padding:16px;background:linear-gradient(130deg,#17382b,#28513e);color:#fff}
+    .social-chat-header-copy{min-width:0;flex:1}.social-chat-header-copy strong{display:block;font-size:15px}.social-chat-header-copy small{display:block;margin-top:3px;color:#d7e5dc;font-size:11px}
+    .social-chat-close{border:0;background:transparent;color:#fff;font-size:24px;line-height:1;cursor:pointer;padding:5px}
+    .social-chat-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;padding:9px;border-bottom:1px solid #e7ece7;background:#f7f9f6}
+    .social-chat-tabs button{border:0;border-radius:10px;background:transparent;color:#55665b;padding:9px 5px;font-size:12px;font-weight:600;cursor:pointer}
+    .social-chat-tabs button.is-active{background:#e3eee5;color:#17382b;box-shadow:inset 0 0 0 1px #d3e3d7}
+    .social-chat-body{min-height:180px;overflow:auto;padding:13px;background:#fff}
+    .social-chat-section-title{font-size:13px;font-weight:700;margin:1px 0 8px;color:#20382a}
+    .social-chat-intro{font-size:12px;line-height:1.5;color:#68766d;margin:0 0 12px}
+    .social-username-card{border:1px solid #dfe8e0;border-radius:13px;padding:12px;background:#f8faf7;margin-bottom:13px}
+    .social-username-top{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:8px}.social-username-top label{font-size:12px;font-weight:700}.social-username-top span{font-size:11px;color:#28513e;font-weight:600}
+    .social-inline-form{display:flex;gap:7px}.social-inline-form .input-control{min-width:0;flex:1}
+    .social-mini-field{width:100%;box-sizing:border-box;border:1px solid #d7e1d8;border-radius:10px;background:#fff;color:#20382a;padding:10px 11px;font:inherit;font-size:12px;outline:none}
+    .social-mini-field:focus{border-color:#6d9a7e;box-shadow:0 0 0 3px rgba(87,139,103,.12)}
+    .social-mini-button{white-space:nowrap;font-size:11px!important;padding:9px 11px!important}
+    .social-status{min-height:16px;margin:7px 1px;font-size:11px;line-height:1.45;color:#4d6d55}.social-status.is-error{color:#b53b35}
+    .social-search-form{display:flex;gap:7px;margin-bottom:9px}.social-search-form input{flex:1;min-width:0}
+    .social-person-row,.social-invitation-row,.social-conversation-row{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid #edf1ed;min-width:0}
+    .social-conversation-row{width:100%;text-align:left;border:0;border-bottom:1px solid #edf1ed;background:transparent;cursor:pointer;font:inherit}
+    .social-conversation-row:hover{background:#f7faf7}
+    .social-avatar{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:50%;background:#e5eee6;color:#28513e;font-size:11px;font-weight:700}
+    .social-person-copy{min-width:0;flex:1;display:flex;flex-direction:column;gap:3px}.social-person-copy b{font-size:12px;color:#25372c;overflow-wrap:anywhere}.social-person-copy small{font-size:10px;line-height:1.4;color:#758078;overflow-wrap:anywhere}
+    .social-person-actions{display:flex;flex-direction:column;gap:5px;align-items:stretch;max-width:135px}.social-person-actions .button{font-size:10px!important;padding:7px 9px!important;white-space:nowrap}
+    .social-state-label{font-size:10px;font-weight:700;color:#39734a;align-self:center}.social-state-label.is-pending{color:#9a6b26}
+    .social-empty{padding:16px 9px;text-align:center;color:#748077;font-size:12px;line-height:1.6;background:#fafbf9;border:1px dashed #dfe7df;border-radius:12px;margin:8px 0}
+    .social-share-actions{display:flex;flex-wrap:wrap;align-items:center;gap:7px;padding:10px;background:#f7faf7;border:1px solid #e0e9e0;border-radius:12px;margin:9px 0}.social-share-actions a{font-size:11px;color:#28513e;overflow-wrap:anywhere}
+    .social-thread-header{display:flex;gap:8px;align-items:center;padding:2px 0 10px;border-bottom:1px solid #e7ece7;margin-bottom:9px}.social-thread-header button{border:1px solid #dbe5dc;border-radius:9px;background:#f7faf7;padding:7px 9px;color:#28513e;cursor:pointer;font-size:11px}.social-thread-name{display:flex;flex-direction:column;gap:3px;min-width:0}.social-thread-name strong{font-size:12px;overflow-wrap:anywhere}.social-thread-name small{font-size:10px;color:#758078}
+    .social-messages-list{height:260px;overflow:auto;display:flex;flex-direction:column;gap:7px;padding:6px 2px 10px}.social-message-line{display:flex}.social-message-line.is-own{justify-content:flex-end}.social-message-line.is-other{justify-content:flex-start}.social-message-bubble{max-width:84%;background:#f0f4ef;border:1px solid #e4ebe3;border-radius:13px 13px 13px 4px;padding:9px 11px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.45;color:#26372b}.is-own .social-message-bubble{background:#28513e;color:#fff;border-color:#28513e;border-radius:13px 13px 4px 13px}.social-message-bubble small{display:block;text-align:right;font-size:9px;opacity:.72;margin-top:4px}
+    .social-message-form{display:flex;gap:7px;padding-top:9px;border-top:1px solid #e7ece7}.social-message-form input{min-width:0;flex:1}.social-message-form button{min-width:48px}
+    @media(max-width:520px){.nalsafe-social-widget{right:12px;bottom:12px}.social-chat-panel{right:-2px;bottom:62px;width:calc(100vw - 24px);max-height:calc(100vh - 92px)}.social-chat-toggle{padding:11px 13px}.social-chat-toggle-label{font-size:12px}.social-messages-list{height:220px}}
+    [data-theme="dark"] .social-chat-panel{background:#15231a;border-color:#314438;color:#edf4ee}
+    [data-theme="dark"] .social-chat-tabs{background:#1c2b21;border-color:#314438}
+    [data-theme="dark"] .social-chat-tabs button{color:#bdcbbf}
+    [data-theme="dark"] .social-chat-tabs button.is-active{background:#2e4c39;color:#fff;box-shadow:inset 0 0 0 1px #456a51}
+    [data-theme="dark"] .social-chat-body{background:#15231a}
+    [data-theme="dark"] .social-chat-section-title,[data-theme="dark"] .social-person-copy b,[data-theme="dark"] .social-message-bubble{color:#edf4ee}
+    [data-theme="dark"] .social-username-card,[data-theme="dark"] .social-empty,[data-theme="dark"] .social-share-actions{background:#1d2d22;border-color:#34493a}
+    [data-theme="dark"] .social-mini-field{background:#18271e;color:#edf4ee;border-color:#3c5142}
+    [data-theme="dark"] .social-person-row,[data-theme="dark"] .social-invitation-row,[data-theme="dark"] .social-conversation-row,[data-theme="dark"] .social-thread-header,[data-theme="dark"] .social-message-form{border-color:#314438}
+    [data-theme="dark"] .social-conversation-row:hover{background:#1c2b21}
+    [data-theme="dark"] .social-avatar{background:#294735;color:#e8f2e8}
+    [data-theme="dark"] .social-thread-header button{background:#1d2d22;color:#e5f0e6;border-color:#3a5140}
+    [data-theme="dark"] .social-message-bubble{background:#24352a;border-color:#36483a}
+    [data-theme="dark"] .social-message-line.is-own .social-message-bubble{background:#28513e;border-color:#28513e;color:#fff}
+  </style>
+
+  <aside class="nalsafe-social-widget" id="socialChatWidget" aria-label="NALSAFE chat and invitations">
+    <section class="social-chat-panel" id="socialChatPanel" aria-label="Chat and invitations" hidden>
+      <header class="social-chat-header">
+        <span class="social-chat-symbol" aria-hidden="true">✦</span>
+        <span class="social-chat-header-copy"><strong>People & messages</strong><small>Connect with your NALSAFE circle</small></span>
+        <button class="social-chat-close" id="socialChatClose" type="button" aria-label="Close chat panel">×</button>
+      </header>
+      <nav class="social-chat-tabs" aria-label="Chat sections">
+        <button type="button" data-social-tab="people" class="is-active" aria-selected="true">Find people</button>
+        <button type="button" data-social-tab="messages" aria-selected="false">Chats</button>
+        <button type="button" data-social-tab="invitations" aria-selected="false">Invitations</button>
+      </nav>
+      <div class="social-chat-body">
+        <section id="socialPeopleView">
+          <div class="social-username-card">
+            <div class="social-username-top"><label for="socialOwnUsername">Your username</label><span id="socialOwnUsernameLabel">Not set yet</span></div>
+            <form id="socialUsernameForm" class="social-inline-form">
+              <input class="social-mini-field" id="socialOwnUsername" name="username" minlength="3" maxlength="24" pattern="[A-Za-z0-9_]{3,24}" autocomplete="nickname" placeholder="e.g. baraka_d" required>
+              <button type="submit" class="button button-primary button-small social-mini-button">Save</button>
+            </form>
+            <p class="social-chat-intro" id="socialUsernameHint">Choose a unique username so people can find and invite you.</p>
+            <p class="social-status" id="socialUsernameStatus" role="status" aria-live="polite"></p>
+          </div>
+          <h3 class="social-chat-section-title">Find a registered member</h3>
+          <p class="social-chat-intro">Enter their exact username. Email addresses remain private.</p>
+          <form class="social-search-form" id="socialSearchForm">
+            <input class="social-mini-field" id="socialSearchUsername" autocomplete="off" maxlength="25" placeholder="Enter username" aria-label="Member username" required>
+            <button class="button button-primary button-small social-mini-button" type="submit">Search</button>
+          </form>
+          <p class="social-status" id="socialSearchStatus" role="status" aria-live="polite"></p>
+          <div id="socialSearchResults"></div>
+        </section>
+
+        <section id="socialMessagesView" hidden>
+          <p class="social-status" id="socialConversationsStatus" role="status" aria-live="polite"></p>
+          <div id="socialConversationList"></div>
+          <div id="socialThread" hidden>
+            <div class="social-thread-header">
+              <button id="socialThreadBack" type="button" aria-label="Back to conversations">← Back</button>
+              <span class="social-thread-name"><strong id="socialThreadName">Conversation</strong><small id="socialThreadUsername"></small></span>
+            </div>
+            <div class="social-messages-list" id="socialMessagesList" aria-live="polite"><div class="social-empty">Loading messages…</div></div>
+            <form class="social-message-form" id="socialMessagesForm">
+              <input class="social-mini-field" id="socialMessageInput" maxlength="2000" placeholder="Write a message…" aria-label="Message" required>
+              <button class="button button-primary button-small" type="submit" aria-label="Send message">➤</button>
+            </form>
+            <p class="social-status" id="socialMessageStatus" role="status" aria-live="polite"></p>
+          </div>
+        </section>
+
+        <section id="socialInvitationsView" hidden>
+          <h3 class="social-chat-section-title">Invite someone new</h3>
+          <p class="social-chat-intro">For people who have not registered, send an email invitation or share a one-time link.</p>
+          <form id="socialExternalInviteForm">
+            <div style="display:grid;gap:7px">
+              <input class="social-mini-field" id="socialExternalInviteName" maxlength="120" placeholder="Person's name" autocomplete="name" required>
+              <input class="social-mini-field" id="socialExternalInviteEmail" type="email" maxlength="254" placeholder="Email address" autocomplete="email" required>
+              <button class="button button-primary button-small" type="submit">Send invitation</button>
+            </div>
+          </form>
+          <p class="social-status" id="socialExternalInviteStatus" role="status" aria-live="polite"></p>
+          <div id="socialExternalInviteResult"></div>
+          <div style="height:1px;background:#e7ece7;margin:14px 0"></div>
+          <h3 class="social-chat-section-title">Member invitations</h3>
+          <p class="social-status" id="socialInvitationsStatus" role="status" aria-live="polite"></p>
+          <div id="socialInvitationList"><div class="social-empty">Loading invitations…</div></div>
+        </section>
+      </div>
+    </section>
+    <button class="social-chat-toggle" id="socialChatToggle" type="button" aria-expanded="false" aria-controls="socialChatPanel">
+      <span class="social-chat-symbol" aria-hidden="true">☏</span><span class="social-chat-toggle-label">Chat & invite</span><span class="social-chat-badge" id="socialChatBadge" hidden>0</span>
+    </button>
+  </aside>
+
 </body>
 </html>

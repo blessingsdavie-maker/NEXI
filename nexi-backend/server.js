@@ -1,18 +1,19 @@
+
 require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-const {
-  checkDatabase,
-  initializeSchema
-} = require("./db");
-
+const { checkDatabase, initializeSchema } = require("./db");
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const adminRoutes = require("./routes/admin");
 const adminDashboardRoutes = require("./routes/admin-live");
+const {
+  router: socialRoutes,
+  initializeSocialSchema
+} = require("./routes/social");
 
 // =========================================================
 // ENVIRONMENT VALIDATION
@@ -24,8 +25,13 @@ if (!process.env.JWT_SECRET) {
   );
 }
 
-const app = express();
+if (!process.env.DATABASE_URL) {
+  throw new Error(
+    "DATABASE_URL is not configured. Add it to your environment variables."
+  );
+}
 
+const app = express();
 const port = Number(process.env.PORT) || 5000;
 
 // =========================================================
@@ -43,22 +49,18 @@ const allowedOrigins = (process.env.FRONTEND_URL || "")
 app.use(
   cors({
     origin(origin, callback) {
-      // Allow requests without an Origin header, such as
-      // server-to-server requests and command-line health checks.
+      // Allow server-to-server and command-line requests.
       if (!origin) {
         return callback(null, true);
       }
 
       const normalizedOrigin = normalizeOrigin(origin);
 
-      // During initial setup, allow cross-origin requests when
-      // FRONTEND_URL has not yet been configured.
-      // Configure FRONTEND_URL in Render before commercial launch.
-      if (allowedOrigins.length === 0) {
-        return callback(null, true);
-      }
-
-      if (allowedOrigins.includes(normalizedOrigin)) {
+      // Configure FRONTEND_URL before commercial launch.
+      if (
+        allowedOrigins.length === 0 ||
+        allowedOrigins.includes(normalizedOrigin)
+      ) {
         return callback(null, true);
       }
 
@@ -93,11 +95,7 @@ app.use(
 // BODY PARSERS AND COOKIES
 // =========================================================
 
-app.use(
-  express.json({
-    limit: "1mb"
-  })
-);
+app.use(express.json({ limit: "1mb" }));
 
 app.use(
   express.urlencoded({
@@ -112,7 +110,6 @@ app.use(cookieParser());
 // BASIC SERVICE ROUTES
 // =========================================================
 
-// Public root endpoint.
 app.get("/", (_req, res) => {
   return res.status(200).json({
     success: true,
@@ -121,8 +118,6 @@ app.get("/", (_req, res) => {
   });
 });
 
-// Lightweight liveness check for Render.
-// This does not depend on the database connection.
 app.get("/health/live", (_req, res) => {
   return res.status(200).json({
     success: true,
@@ -132,15 +127,13 @@ app.get("/health/live", (_req, res) => {
   });
 });
 
-// Database health check.
 app.get("/health", async (_req, res) => {
   try {
     const databaseTime = await checkDatabase();
 
     return res.status(200).json({
       success: true,
-      message:
-        "NALSAFE backend is connected to Neon PostgreSQL",
+      message: "NALSAFE backend is connected to Neon PostgreSQL",
       databaseTime
     });
   } catch (error) {
@@ -158,12 +151,6 @@ app.get("/health", async (_req, res) => {
 // AUTHENTICATION ROUTES
 // =========================================================
 
-// Primary API endpoints:
-// POST /api/signup
-// POST /api/login
-// GET  /api/me
-// POST /api/logout
-
 app.use("/api", authRoutes);
 
 // Retain existing root-level compatibility routes.
@@ -173,24 +160,22 @@ app.use("/", authRoutes);
 app.use("/api/auth", authRoutes);
 
 // =========================================================
-// USER ROUTES
+// SOCIAL ROUTES
+// Usernames, invitations, connections and chat.
 // =========================================================
 
-// Existing frontend endpoints may include:
-// GET  /api/dashboard
-// GET  /api/checkins
-// POST /api/checkins
-// GET  /api/checkins/today
-// PUT  /api/reminder
-// POST /api/circle/invitations
+app.use("/api/social", socialRoutes);
+
+// =========================================================
+// EXISTING USER ROUTES
+// =========================================================
 
 app.use("/api", userRoutes);
 
-// Retain the /api/users namespace for compatibility.
 app.use("/api/users", userRoutes);
 
 // =========================================================
-// ADMIN ROUTES
+// EXISTING ADMIN ROUTES
 // =========================================================
 
 app.use("/api/admin", adminRoutes);
@@ -241,10 +226,19 @@ async function startServer() {
   try {
     console.log("Initializing NALSAFE backend...");
 
-    // Initialize the database schema before accepting requests.
+    // Initialize the existing database schema first.
     await initializeSchema();
 
-    console.log("Database schema initialization completed.");
+    console.log(
+      "Main database schema initialization completed."
+    );
+
+    // Initialize social tables and the username field.
+    await initializeSocialSchema();
+
+    console.log(
+      "Social schema initialization completed."
+    );
 
     const server = app.listen(port, "0.0.0.0", () => {
       console.log(
@@ -254,6 +248,7 @@ async function startServer() {
       console.log("Liveness endpoint: /health/live");
       console.log("Database health endpoint: /health");
       console.log("API routes mounted at /api");
+      console.log("Social routes mounted at /api/social");
 
       if (allowedOrigins.length > 0) {
         console.log(
@@ -262,13 +257,18 @@ async function startServer() {
       } else {
         console.warn(
           "FRONTEND_URL is not configured. " +
-          "Cross-origin requests are currently unrestricted."
+          "Cross-origin requests are currently unrestricted. " +
+          "Configure FRONTEND_URL before commercial launch."
         );
       }
     });
 
     server.on("error", (error) => {
-      console.error("NALSAFE server failed to listen:", error);
+      console.error(
+        "NALSAFE server failed to listen:",
+        error
+      );
+
       process.exit(1);
     });
 
