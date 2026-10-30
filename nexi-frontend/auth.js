@@ -288,6 +288,7 @@
         : "";
 
       const registering = accountMode === "register";
+      const submitLabel = registering ? "Create account" : "Sign in";
 
       /*
        * Validate registration fields.
@@ -342,6 +343,9 @@
 
       if (accountSubmit) {
         accountSubmit.disabled = true;
+        accountSubmit.setAttribute("aria-busy", "true");
+        accountSubmit.classList.remove("is-error");
+        accountSubmit.innerHTML = `<span>${registering ? "Creating account…" : "Signing in…"}</span><i class="button-spinner" aria-hidden="true"></i>`;
       }
 
       showMessage(
@@ -395,6 +399,7 @@
          * Handle API errors.
          */
         if (!response.ok) {
+          accountSubmit?.classList.add("is-error");
           showMessage(
             data.message || "Your request could not be completed.",
             true
@@ -433,8 +438,14 @@
         const role = data.user.role;
 
         if (role === "admin" || role === "support_admin") {
+          accountSubmit?.classList.add("is-success");
+          if (accountSubmit) accountSubmit.textContent = registering ? "Account created" : "Signed in";
+          await new Promise((resolve) => window.setTimeout(resolve, 220));
           window.location.replace("admin-dashboard.html");
         } else if (role === "user") {
+          accountSubmit?.classList.add("is-success");
+          if (accountSubmit) accountSubmit.textContent = registering ? "Account created" : "Signed in";
+          await new Promise((resolve) => window.setTimeout(resolve, 220));
           window.location.replace("user-dashboard.html");
         } else {
           console.error("Unexpected account role:", role);
@@ -446,6 +457,7 @@
         }
       } catch (error) {
         console.error("NALSAFE authentication error:", error);
+        accountSubmit?.classList.add("is-error");
 
         const message = error.code === "TIMEOUT"
           ? error.message
@@ -456,6 +468,10 @@
       } finally {
         if (accountSubmit) {
           accountSubmit.disabled = false;
+          accountSubmit.removeAttribute("aria-busy");
+          accountSubmit.classList.remove("is-success");
+          accountSubmit.innerHTML = `${submitLabel} <span aria-hidden="true">→</span>`;
+          window.setTimeout(() => accountSubmit.classList.remove("is-error"), 450);
         }
       }
     });

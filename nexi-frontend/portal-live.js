@@ -203,7 +203,10 @@
 
   document.querySelectorAll("[data-user-signout]").forEach((button) => button.addEventListener("click", async () => {
 
+    const previousLabel = button.textContent;
     button.disabled = true;
+    button.setAttribute("aria-busy", "true");
+    button.textContent = "Signing out…";
 
     try {
 
@@ -216,6 +219,8 @@
     } catch (error) {
 
       button.disabled = false;
+      button.removeAttribute("aria-busy");
+      button.textContent = previousLabel;
 
       showError(error);
 
@@ -2349,7 +2354,7 @@
             event.currentTarget;
 
           const action = button.dataset.checkinAction;
-          const previousLabel = button.textContent;
+          const previousLabel = button.innerHTML;
 
           button.disabled = true;
           button.setAttribute("aria-busy", "true");
@@ -2360,9 +2365,12 @@
             get("userCheckinMessage")
           );
 
-          if (!succeeded) button.textContent = previousLabel;
+          button.classList.remove("is-success", "is-error");
+          button.classList.add(succeeded ? "is-success" : "is-error");
+          if (!succeeded) button.innerHTML = previousLabel;
           button.removeAttribute("aria-busy");
           button.disabled = false;
+          window.setTimeout(() => button.classList.remove("is-success", "is-error"), 700);
       }
     );
 
@@ -3277,6 +3285,9 @@
       const body = input.value.trim();
       if (!body) return;
       submit.disabled = true;
+      submit.setAttribute("aria-busy", "true");
+      submit.classList.remove("is-sent", "is-error");
+      submit.classList.add("is-sending");
       try {
         await api("/social/messages", {
           method: "POST",
@@ -3284,11 +3295,19 @@
         });
         input.value = "";
         await loadSocialThread();
+        const ownMessages = get("socialMessagesList").querySelectorAll(".social-message-line.is-own");
+        ownMessages[ownMessages.length - 1]?.classList.add("social-message-arrive");
+        submit.classList.remove("is-sending");
+        submit.classList.add("is-sent");
+        window.setTimeout(() => submit.classList.remove("is-sent"), 700);
         socialStatus("socialMessageStatus", "");
       } catch (error) {
+        submit.classList.remove("is-sending");
+        submit.classList.add("is-error");
         socialStatus("socialMessageStatus", error.message, true);
       } finally {
         submit.disabled = false;
+        submit.removeAttribute("aria-busy");
         input.focus();
       }
     });

@@ -46,6 +46,9 @@ button, a, input, select { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
 button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--portal-coral); outline-offset: 3px; }
+button:not(:disabled), .role-switch, .auth-secondary-link { transition: transform .16s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease; }
+button:not(:disabled):active { transform: scale(.96); }
+button:disabled { cursor: wait; }
 [hidden] { display: none !important; }
 .portal-skip { position: fixed; z-index: 50; top: 8px; left: 8px; transform: translateY(-150%); border-radius: 6px; background: var(--portal-surface); padding: 10px 14px; color: var(--portal-green); box-shadow: var(--portal-shadow); }
 .portal-skip:focus { transform: translateY(0); }
@@ -59,6 +62,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
 .role-switch { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--portal-line); border-radius: 7px; background: var(--portal-surface); padding: 8px 11px; color: var(--portal-muted); font-size: .8rem; font-weight: 650; }
 .role-switch:hover { border-color: var(--portal-green); color: var(--portal-green); }
+.role-switch span { display: inline-block; transition: transform .18s ease; }
+.role-switch:hover span { transform: translateX(-3px); }
 .theme-button, .mobile-menu-button { display: grid; width: 38px; height: 38px; place-items: center; border: 1px solid var(--portal-line); border-radius: 7px; background: var(--portal-surface); color: var(--portal-ink); }
 .theme-button svg { width: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 1.7; }
 .mobile-menu-button { display: none; font-size: 1.15rem; }
@@ -131,6 +136,24 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .date-label { color: var(--portal-muted); font-size: .76rem; white-space: nowrap; }
 .button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; border: 1px solid transparent; border-radius: 6px; padding: 8px 13px; font-size: .8rem; font-weight: 700; transition: background .16s, color .16s, border-color .16s, transform .16s; }
 .button:hover { transform: translateY(-1px); }
+.button:not(:disabled):active, .auth-submit:not(:disabled):active, .role-switch:active { transform: translateY(1px) scale(.97); }
+.button[aria-busy="true"], .auth-submit[aria-busy="true"] { cursor: wait; }
+.button[aria-busy="true"] { opacity: .8; }
+.button.is-success { animation: button-success-pop .38s ease both; }
+.button.is-error { animation: button-error-shake .36s ease both; }
+.button.is-success::after { content: "✓"; animation: button-check-in .3s ease both; }
+.button-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; vertical-align: -.15em; animation: button-spin .7s linear infinite; }
+@keyframes button-spin { to { transform: rotate(360deg); } }
+@keyframes button-success-pop { 50% { transform: scale(1.05); } }
+@keyframes button-error-shake { 25% { transform: translateX(-4px); } 50% { transform: translateX(4px); } 75% { transform: translateX(-2px); } }
+@keyframes button-check-in { from { opacity: 0; transform: scale(.5); } to { opacity: 1; transform: scale(1); } }
+.social-message-form button:hover { transform: translate(2px, -1px) rotate(-8deg); }
+.social-message-form button.is-sending { animation: chat-send-flight .42s ease-in-out infinite alternate; }
+.social-message-form button.is-sent { animation: button-success-pop .38s ease both; }
+.social-message-form button.is-error { animation: button-error-shake .36s ease both; }
+.social-message-arrive { animation: chat-message-arrive .3s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes chat-send-flight { to { transform: translate(3px, -3px) rotate(-12deg); } }
+@keyframes chat-message-arrive { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .button-primary { background: var(--portal-green); color: #fff; }
 .button-primary:hover { background: var(--portal-green-dark); }
 .button-secondary { border-color: var(--portal-line); background: var(--portal-surface); color: var(--portal-ink); }
@@ -284,7 +307,9 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .auth-submit { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 10px; border: 0; border-radius: 5px; background: var(--portal-green); margin-top: 4px; padding: 0 13px; color: #fff; font-size: .82rem; font-weight: 700; }
 .auth-submit:hover { background: var(--portal-green-dark); }
 .auth-submit:disabled { cursor: wait; opacity: .7; }
+.auth-submit.is-error { animation: button-error-shake .36s ease both; }
 .auth-submit span { font-size: 1.1rem; }
+.auth-submit .button-spinner { width: 15px; height: 15px; }
 .auth-reset { border: 0; background: transparent; margin-top: 13px; padding: 0; color: var(--portal-green); font-size: .75rem; font-weight: 700; }
 .auth-reset:hover { color: var(--portal-coral); }
 .auth-message { min-height: 1.3em; margin: 10px 0 0; color: var(--portal-green); font-size: .74rem; }
@@ -311,7 +336,7 @@ body, button, input, select { font-family: var(--portal-body); }
 .button, .auth-submit, .auth-reset, .auth-secondary-link { font-weight: 600; }
 
 @media (prefers-reduced-motion: reduce) {
-  .auth-step-entering, .auth-form.auth-step-entering .auth-field:not([hidden]) { animation: none; }
+  .auth-step-entering, .auth-form.auth-step-entering .auth-field:not([hidden]), .button-spinner { animation: none; }
 }
 
 @media (max-width: 1000px) {
