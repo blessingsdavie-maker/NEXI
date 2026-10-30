@@ -2,31 +2,8 @@
   "use strict";
 
   const byId = (id) => document.getElementById(id);
-  const storageKey = "nalsafe-theme";
-  const legacyStorageKey = "nexi-theme";
-  const themeToggle = byId("themeToggle");
   const navToggle = byId("navToggle");
   const primaryNav = byId("primaryNav");
-  const getDefaultTheme = () => {
-    const hour = new Date().getHours();
-    return hour >= 18 || hour < 6 ? "dark" : "light";
-  };
-  let theme = localStorage.getItem(storageKey) || localStorage.getItem(legacyStorageKey) || getDefaultTheme();
-  if (!localStorage.getItem(storageKey)) {
-    localStorage.setItem(storageKey, theme);
-    localStorage.removeItem(legacyStorageKey);
-  }
-  const setTheme = () => {
-    if (theme === "dark") document.documentElement.dataset.theme = "dark";
-    else delete document.documentElement.dataset.theme;
-    themeToggle?.setAttribute("aria-label", theme === "dark" ? "Use light theme" : "Use dark theme");
-  };
-  setTheme();
-  themeToggle?.addEventListener("click", () => {
-    theme = theme === "dark" ? "light" : "dark";
-    localStorage.setItem(storageKey, theme);
-    setTheme();
-  });
 
   navToggle?.addEventListener("click", () => {
     const open = navToggle.getAttribute("aria-expanded") === "true";

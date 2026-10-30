@@ -98,46 +98,6 @@
 
 
 
-  const themeKey = "nalsafe-theme";
-
-  const legacyThemeKey = "nexi-theme";
-
-  const themeButton = get("portalTheme");
-
-  let theme = localStorage.getItem(themeKey) || localStorage.getItem(legacyThemeKey);
-
-  if (!localStorage.getItem(themeKey) && theme) {
-
-    localStorage.setItem(themeKey, theme);
-
-    localStorage.removeItem(legacyThemeKey);
-
-  }
-
-  const setTheme = () => {
-
-    if (theme === "dark") document.documentElement.dataset.theme = "dark";
-
-    else delete document.documentElement.dataset.theme;
-
-    themeButton?.setAttribute("aria-label", theme === "dark" ? "Use light theme" : "Use dark theme");
-
-  };
-
-  setTheme();
-
-  themeButton?.addEventListener("click", () => {
-
-    theme = theme === "dark" ? "light" : "dark";
-
-    localStorage.setItem(themeKey, theme);
-
-    setTheme();
-
-  });
-
-
-
   const sidebar = get("portalSidebar");
 
   const menuButton = get("portalMenu");

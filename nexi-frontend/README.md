@@ -24,6 +24,8 @@ python -m http.server 4173
 
 Open `http://localhost:4173`. The frontend uses `http://localhost:5000/api` on localhost. `GET http://localhost:5000/health` checks the Neon connection.
 
+The site automatically uses its light theme from 6:00 a.m. to 5:59 p.m. and its dark theme overnight, based on the visitor's local time. Theme buttons temporarily override the current theme until the next scheduled change.
+
 To designate the initial super administrator, first create the account, then run this once in Neon using that account's email:
 
 ```sql
