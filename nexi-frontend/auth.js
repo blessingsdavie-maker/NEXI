@@ -365,16 +365,29 @@
               password
             };
 
-        const response = await window.nalsafeApi.request(
-          endpoint,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-          }
-        );
+        const requestOptions = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body),
+          ...(registering ? {} : { timeout: 60000 })
+        };
+        let response;
+
+        try {
+          response = await window.nalsafeApi.request(endpoint, requestOptions);
+        } catch (error) {
+          const canRetry = !registering &&
+            navigator.onLine &&
+            (error.code === "TIMEOUT" || error instanceof TypeError);
+
+          if (!canRetry) throw error;
+
+          showMessage("The account service is taking longer than usual. Retrying sign in…");
+          await new Promise((resolve) => window.setTimeout(resolve, 1000));
+          response = await window.nalsafeApi.request(endpoint, requestOptions);
+        }
 
         const data = await response.json().catch(() => ({}));
 
@@ -434,10 +447,12 @@
       } catch (error) {
         console.error("NALSAFE authentication error:", error);
 
-        showMessage(
-          "Could not connect to the account service. Please try again.",
-          true
-        );
+        const message = error.code === "TIMEOUT"
+          ? error.message
+          : !navigator.onLine
+            ? "You appear to be offline. Check your internet connection and try again."
+            : "Could not connect to the account service. Please try again in a moment.";
+        showMessage(message, true);
       } finally {
         if (accountSubmit) {
           accountSubmit.disabled = false;
