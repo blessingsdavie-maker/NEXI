@@ -923,37 +923,23 @@
 
   const renderRefreshControl = () => {
 
-    if (get("dashboardRefreshButton")) {
+    let button = get("dashboardRefreshButton");
 
-      return;
+    if (!button) {
+      const heading = document.querySelector("#userOverview .view-heading");
+      if (!heading) return;
 
+      button = document.createElement("button");
+      button.id = "dashboardRefreshButton";
+      button.type = "button";
+      button.className = "button button-secondary button-small";
+      button.textContent = "↻ Refresh";
+      button.setAttribute("aria-label", "Refresh dashboard");
+      heading.append(button);
     }
 
-
-
-    const heading = document.querySelector("#userOverview .view-heading");
-
-
-
-    if (!heading) {
-
-      return;
-
-    }
-
-
-
-    const button = document.createElement("button");
-
-    button.id = "dashboardRefreshButton";
-
-    button.type = "button";
-
-    button.className = "button button-secondary button-small";
-
-    button.textContent = "↻ Refresh";
-
-    button.setAttribute("aria-label", "Refresh dashboard");
+    if (button.dataset.refreshHandlerBound) return;
+    button.dataset.refreshHandlerBound = "true";
 
 
 
@@ -978,10 +964,6 @@
       }
 
     });
-
-
-
-    heading.append(button);
 
   };
 
@@ -2786,69 +2768,25 @@
 
   const addMarkAllRead = () => {
 
-    if (
+    const list = get("userNotificationsList");
+    if (!list) return;
 
-      !get("userNotificationsList") ||
+    let button = get("markAllNotificationsRead");
+    if (!button) {
+      const panel = list.closest(".panel");
+      const heading = panel?.querySelector(".panel-heading");
+      if (!heading) return;
 
-      get("markAllNotificationsRead")
-
-    ) {
-
-      return;
-
+      button = document.createElement("button");
+      button.id = "markAllNotificationsRead";
+      button.type = "button";
+      button.className = "button button-secondary button-small";
+      button.textContent = "Mark all as read";
+      heading.append(button);
     }
 
-
-
-    const panel =
-
-      get("userNotificationsList")
-
-        .closest(".panel");
-
-
-
-    if (!panel) {
-
-      return;
-
-    }
-
-
-
-    const button =
-
-      document.createElement("button");
-
-
-
-    button.id =
-
-      "markAllNotificationsRead";
-
-
-
-    button.type = "button";
-
-    button.className =
-
-      "button button-secondary button-small";
-
-
-
-    button.textContent =
-
-      "Mark all as read";
-
-
-
-    const heading =
-
-      panel.querySelector(".panel-heading");
-
-
-
-    heading?.append(button);
+    if (button.dataset.markAllReadHandlerBound) return;
+    button.dataset.markAllReadHandlerBound = "true";
 
 
 
@@ -3052,11 +2990,23 @@
 
   renderConnectionState();
 
-  setupSocialWidget();
+  setupSocialWidget({
+    mergeSocialConnections,
+    renderMembers,
+    refreshDashboard,
+    memberInitials,
+    getSocialConnections: () => socialConnections
+  });
 }
 
 
-  function setupSocialWidget() {
+  function setupSocialWidget({
+    mergeSocialConnections,
+    renderMembers,
+    refreshDashboard,
+    memberInitials,
+    getSocialConnections
+  }) {
     const toggle = get("socialChatToggle");
     const panel = get("socialChatPanel");
     if (!toggle || !panel) return;
@@ -3085,7 +3035,7 @@
       username: String(person.username || "")
     });
 
-    const activeConnection = (id) => socialConnections.some((person) => String(person.id) === String(id));
+    const activeConnection = (id) => getSocialConnections().some((person) => String(person.id) === String(id));
 
     const setSocialTab = (tab) => {
       activeTab = tab;
