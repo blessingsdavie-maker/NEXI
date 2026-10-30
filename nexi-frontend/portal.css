@@ -392,6 +392,40 @@ body, button, input, select { font-family: var(--portal-body); }
   .member-meta { gap: 5px; }
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .button:not(:disabled):hover,
+  .theme-button:hover,
+  .mobile-menu-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px color-mix(in srgb, var(--portal-green) 18%, transparent);
+  }
+
+  .theme-button:hover, .mobile-menu-button:hover { border-color: var(--portal-green); }
+  .portal-nav button { transition: transform .18s ease, background-color .18s ease, color .18s ease; }
+  .portal-nav button:hover { transform: translateX(3px); }
+}
+
+@media (hover: none), (pointer: coarse) {
+  button, .button, .theme-button, .mobile-menu-button, .role-switch, .auth-submit, .auth-reset, .auth-link-button, .auth-secondary-link {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .theme-button, .mobile-menu-button { min-width: 44px; }
+  .portal-nav button { min-height: 48px; }
+  .button:not(:disabled):active,
+  .theme-button:active,
+  .mobile-menu-button:active,
+  .portal-nav button:active { transform: scale(.97); }
+  .button:hover, .theme-button:hover, .mobile-menu-button:hover { transform: none; box-shadow: none; }
+  .button-primary:hover { background: var(--portal-green); }
+  .button-secondary:hover { border-color: var(--portal-line); background: var(--portal-surface); }
+  .role-switch:hover { border-color: var(--portal-line); color: var(--portal-muted); }
+  .portal-nav button:hover:not([aria-current="page"]) { background: transparent; color: var(--portal-muted); }
+  .checkin-banner .button:hover { background: #fff; }
+  .auth-link-button:hover, .auth-secondary-link:hover { color: var(--portal-green); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }

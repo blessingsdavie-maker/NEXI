@@ -1762,3 +1762,32 @@ html[data-theme="dark"] body[data-role="admin"] .portal-view .view-heading > div
   body[data-role="admin"] *::before,
   body[data-role="admin"] *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+@media (hover: hover) and (pointer: fine) {
+  .landing-page .btn:not(:disabled):hover { transform: translateY(-2px) scale(1.015); }
+  .landing-page .nav-actions .btn:hover { box-shadow: 0 14px 30px rgba(40, 81, 62, .24); }
+  .benefit-card, .service-card { transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+  .benefit-card:hover, .service-card:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in srgb, var(--teal) 35%, var(--line));
+    box-shadow: var(--shadow);
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  button, .btn, .button, .icon-button, .nav-toggle, .theme-button, .mobile-menu-button, .role-switch {
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  .icon-button, .nav-toggle, .theme-button, .mobile-menu-button { min-width: 44px; }
+  .btn:hover { transform: none; }
+  .btn:hover::before { left: -120%; }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--forest), color-mix(in srgb, var(--forest) 75%, var(--teal)));
+    box-shadow: 0 10px 25px rgba(40, 81, 62, .18), 0 0 0 1px rgba(255, 255, 255, .08) inset;
+  }
+  .icon-button:hover { background: transparent; }
+  .step-card:hover, .benefit-card:hover, .service-card:hover { transform: none; box-shadow: none; }
+  .landing-page .nav-links > a:hover { transform: none; border: 0; background: transparent; box-shadow: none; color: inherit; }
+}
