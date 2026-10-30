@@ -235,6 +235,20 @@
 
   const profileName = String(userSession.full_name || "NALSAFE member").trim();
 
+  const greeting = get("userGreeting");
+  const localHour = new Date().getHours();
+  const timeOfDay = localHour >= 5 && localHour < 12
+    ? "morning"
+    : localHour >= 12 && localHour < 17
+      ? "afternoon"
+      : "evening";
+  greeting?.setAttribute("data-time-of-day", timeOfDay);
+  get("userGreetingText").textContent = `Good ${timeOfDay},`;
+
+  if (greeting && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    window.requestAnimationFrame(() => greeting.classList.add("greeting-arrive"));
+  }
+
 
 
   const initials = profileName

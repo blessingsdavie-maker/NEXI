@@ -300,22 +300,32 @@ content="Your NALSAFE circle, check-ins, schedule, activity, notifications, and 
 
       <div class="view-heading">
 
-        <div>
+        <div class="greeting-welcome" id="userGreeting" data-time-of-day="evening">
 
-          <p class="eyebrow">
-            Your circle, your pace
-          </p>
+          <div class="greeting-copy">
+            <p class="eyebrow">
+              Your circle, your pace
+            </p>
 
-          <h1 id="userOverviewTitle">
-            Good evening,
-            <span id="userGreetingName">
-              Member
-            </span>
-          </h1>
+            <h1 id="userOverviewTitle">
+              <span id="userGreetingText">Good evening,</span>
+              <span id="userGreetingName">Member</span>
+            </h1>
 
-          <p>
-            One small update can help your people feel close.
-          </p>
+            <p>
+              One small update can help your people feel close.
+            </p>
+          </div>
+
+          <div class="greeting-scene" aria-hidden="true">
+            <span class="greeting-orbit"></span>
+            <span class="greeting-sun"></span>
+            <span class="greeting-moon"></span>
+            <span class="greeting-star greeting-star-one"></span>
+            <span class="greeting-star greeting-star-two"></span>
+            <span class="greeting-star greeting-star-three"></span>
+            <span class="greeting-horizon"></span>
+          </div>
 
         </div>
 
