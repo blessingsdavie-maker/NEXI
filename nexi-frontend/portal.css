@@ -65,6 +65,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .notification-button { position: relative; font-size: 1rem; }
 .notification-button i { position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border: 1px solid var(--portal-surface); border-radius: 50%; background: var(--portal-coral); }
 .portal-layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: calc(100vh - 70px); }
+.portal-layout.is-sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
+.portal-layout.is-sidebar-collapsed .portal-sidebar { display: none; }
 .portal-sidebar { position: sticky; top: 70px; display: flex; height: calc(100vh - 70px); flex-direction: column; border-right: 1px solid var(--portal-line); background: var(--portal-surface); padding: 25px 15px 16px; }
 .sidebar-caption { margin: 0 10px 12px; color: var(--portal-muted); font-size: .64rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .portal-nav { display: grid; gap: 4px; }
@@ -290,10 +292,9 @@ body, button, input, select { font-family: var(--portal-body); }
   .role-switch { min-height: 35px; padding: 6px 8px; font-size: .72rem; }
   .theme-button { width: 35px; height: 35px; }.mobile-menu-button { display: grid; width: 35px; height: 35px; }
   .portal-layout { display: block; min-height: calc(100vh - 62px); }
-  .portal-sidebar { position: fixed; z-index: 18; top: 62px; left: 0; width: min(280px, 86vw); height: calc(100dvh - 62px); transform: translateX(-105%); box-shadow: var(--portal-shadow); transition: transform .2s ease; }
+  .portal-sidebar { position: fixed; z-index: 31; top: 62px; left: 0; width: min(280px, 86vw); height: calc(100dvh - 62px); overflow-y: auto; transform: translateX(-105%); box-shadow: var(--portal-shadow); transition: transform .2s ease; }
   .portal-sidebar.is-open { transform: translateX(0); }
   .portal-main { padding: 25px 16px 35px; }
-  body[data-role="user"] .portal-sidebar { display: none; }
   body[data-role="user"] .portal-main { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
   .user-bottom-nav { position: fixed; z-index: 30; right: 0; bottom: 0; left: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--portal-line); background: color-mix(in srgb, var(--portal-surface) 94%, transparent); padding: 7px 8px calc(7px + env(safe-area-inset-bottom)); backdrop-filter: blur(16px); }
   .user-bottom-nav button { display: grid; min-width: 0; min-height: 48px; justify-items: center; align-content: center; gap: 2px; border: 0; border-radius: 6px; background: transparent; color: var(--portal-muted); font: 500 .63rem/1.2 var(--portal-body); }

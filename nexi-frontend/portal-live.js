@@ -142,13 +142,34 @@
 
   const menuButton = get("portalMenu");
 
+  const layout = sidebar?.closest(".portal-layout");
+  const mobileMenuQuery = window.matchMedia("(max-width: 700px)");
+  const isMenuOpen = () => mobileMenuQuery.matches
+    ? Boolean(sidebar?.classList.contains("is-open"))
+    : Boolean(layout && !layout.classList.contains("is-sidebar-collapsed"));
+  const syncMenuState = () => {
+    const open = isMenuOpen();
+    menuButton?.setAttribute("aria-expanded", String(open));
+    menuButton?.setAttribute("aria-label", open ? "Close dashboard menu" : "Open dashboard menu");
+  };
+
+  syncMenuState();
+
+  mobileMenuQuery.addEventListener("change", () => {
+    sidebar?.classList.remove("is-open");
+    layout?.classList.remove("is-sidebar-collapsed");
+    syncMenuState();
+  });
+
   menuButton?.addEventListener("click", () => {
 
-    const open = sidebar.classList.toggle("is-open");
-
-    menuButton.setAttribute("aria-expanded", String(open));
-
-    menuButton.setAttribute("aria-label", open ? "Close dashboard menu" : "Open dashboard menu");
+    if (!sidebar || !layout) return;
+    if (mobileMenuQuery.matches) {
+      sidebar.classList.toggle("is-open");
+    } else {
+      layout.classList.toggle("is-sidebar-collapsed");
+    }
+    syncMenuState();
 
   });
 
@@ -164,7 +185,7 @@
 
     sidebar?.classList.remove("is-open");
 
-    menuButton?.setAttribute("aria-expanded", "false");
+    syncMenuState();
 
     window.scrollTo({ top: 0, behavior: "smooth" });
 

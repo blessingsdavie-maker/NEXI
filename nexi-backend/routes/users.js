@@ -625,9 +625,10 @@ if (!circle) {
 const client =
   await pool.connect();
 
+let checkin;
+
 try {
   await client.query('BEGIN');
-
 
   const result =
     await client.query(
@@ -660,15 +661,22 @@ try {
       ]
     );
 
+  checkin = result.rows[0];
 
-  const checkin =
-    result.rows[0];
+  await client.query('COMMIT');
 
+} catch (error) {
+  await client.query('ROLLBACK');
+  throw error;
 
-  /*
-   * Notify active circle members.
-   */
-  await client.query(
+} finally {
+  client.release();
+}
+
+let notificationsSent = true;
+
+try {
+  await query(
     `
       INSERT INTO notifications (
         user_id,
@@ -724,28 +732,21 @@ try {
       circle.id
     ]
   );
-
-
-  await client.query('COMMIT');
-
-
-  return res.status(201).json({
-    success: true,
-    message:
-      status === 'safe'
-        ? 'Your safe check-in has been saved.'
-        : 'Your support check-in has been saved.',
-    checkin
-  });
-
 } catch (error) {
-  await client.query('ROLLBACK');
-  throw error;
-
-} finally {
-  client.release();
+  notificationsSent = false;
+  console.error('Check-in saved, but circle notifications could not be created:', error);
 }
 
+return res.status(201).json({
+  success: true,
+  message: notificationsSent
+    ? status === 'safe'
+      ? 'Your safe check-in has been saved.'
+      : 'Your support check-in has been saved.'
+    : 'Your check-in was saved, but your circle could not be notified.',
+  checkin,
+  notificationsSent
+});
 
 }
 );
