@@ -294,17 +294,11 @@
 
 
 
-  try {
-
-    const profile = await api("/users/profile");
-
-    updateAvatarDisplay(profile.user?.avatar_url);
-
-  } catch (error) {
-
-    showMessage(photoMessage, `Your saved profile photo could not be loaded. ${error.message}`, true);
-
-  }
+  api("/users/profile")
+    .then((profile) => updateAvatarDisplay(profile.user?.avatar_url))
+    .catch((error) => {
+      showMessage(photoMessage, `Your saved profile photo could not be loaded. ${error.message}`, true);
+    });
 
 
 
@@ -532,6 +526,8 @@
 
   };
 
+  let dashboardRevision = 0;
+
 
   // Pull accepted member-to-member connections into the existing dashboard
   // member list, without changing the existing check-in / invitation API.
@@ -567,19 +563,21 @@
     dashboard.members = existingMembers;
   };
 
-  try {
-
-    dashboard = await api("/dashboard");
-
-  } catch (error) {
-
-    showError(new Error("Your dashboard data is temporarily unavailable. Some details may be limited until the service is back."));
-
-  }
-
-  // Merge social connections only after the normal dashboard response has
-  // loaded; otherwise its assignment would overwrite the merged member list.
-  await mergeSocialConnections();
+  const initialDashboardRevision = dashboardRevision;
+  api("/dashboard")
+    .then(async (initialDashboard) => {
+      if (initialDashboardRevision !== dashboardRevision) return;
+      dashboard = initialDashboard;
+      await mergeSocialConnections();
+      if (initialDashboardRevision !== dashboardRevision) return;
+      renderMembers();
+      renderCheckin();
+      renderActivity();
+      setReminderText();
+    })
+    .catch(() => {
+      showError(new Error("Your dashboard data is temporarily unavailable. Some details may be limited until the service is back."));
+    });
 
   const NOTIFICATION_READ_KEY =
 
@@ -1878,11 +1876,25 @@
         reminder.enabled
 
           ? `Preference saved for ${reminder.time}. Delivery is not configured.`
-
           : "Reminder preference paused for your account.";
+
+      get("scheduleSaved").classList.remove("is-error");
 
     }
 
+  };
+
+  const syncReminderControls = () => {
+    const reminder = dashboard.reminder || { enabled: false, time: "19:00" };
+    const toggle = get("userScheduleEnabled");
+    const time = get("userScheduleTime");
+
+    if (toggle && document.activeElement !== toggle) {
+      toggle.checked = Boolean(reminder.enabled);
+    }
+    if (time && document.activeElement !== time) {
+      time.value = reminder.time || "19:00";
+    }
   };
 
 
@@ -1957,18 +1969,22 @@
 
   const refreshDashboard = async ({
 
-    notify = false
+    notify = false,
+    silent = false
 
   } = {}) => {
 
     const previousActivityLength = activity().length;
 
-
+    const revision = ++dashboardRevision;
 
     try {
 
-      dashboard = await api("/dashboard");
+      const refreshedDashboard = await api("/dashboard");
+      if (revision !== dashboardRevision) return true;
+      dashboard = refreshedDashboard;
       await mergeSocialConnections();
+      if (revision !== dashboardRevision) return true;
 
       renderMembers();
 
@@ -1977,6 +1993,7 @@
       renderActivity();
 
       setReminderText();
+      syncReminderControls();
 
 
 
@@ -1996,17 +2013,15 @@
 
       }
 
-
-
-      return dashboard;
+      return true;
 
     } catch (error) {
 
       renderConnectionState();
-
-      showError(new Error("The dashboard is temporarily unavailable. Your latest saved view remains open."));
-
-      return dashboard;
+      if (!silent) {
+        showError(new Error("The dashboard is temporarily unavailable. Your latest saved view remains open."));
+      }
+      return false;
 
     }
 
@@ -2129,6 +2144,7 @@
 
 
     const saveReminder = async () => {
+      const previousReminder = { ...dashboard.reminder };
 
       scheduleToggle.disabled = true;
 
@@ -2161,6 +2177,7 @@
 
 
         setReminderText();
+        syncReminderControls();
 
 
 
@@ -2182,6 +2199,11 @@
 
       } catch (error) {
 
+        dashboard.reminder = previousReminder;
+        scheduleToggle.checked = Boolean(previousReminder.enabled);
+        scheduleTime.value = previousReminder.time || "19:00";
+        setReminderText();
+        showMessage(get("scheduleSaved"), error.message, true);
         showError(error);
 
       } finally {
@@ -2219,10 +2241,59 @@
 
 
   /*
-
    * Main check-in button
-
    */
+
+  const submitCheckin = async (status, feedback) => {
+    showMessage(feedback, status === "clear" ? "Clearing today's check-in…" : "Saving your check-in…");
+
+    try {
+      const result = status === "clear"
+        ? await api("/checkins/today", { method: "DELETE" })
+        : await api("/checkins", {
+          method: "POST",
+          body: JSON.stringify({ status })
+        });
+
+      if (status === "clear") {
+        dashboard.checkins = dashboard.checkins.filter((item) =>
+          String(item.user_id) !== String(userSession.id) || !isToday(item.created_at)
+        );
+        dashboard.activity = dashboard.activity.filter((item) =>
+          String(item.user_id) !== String(userSession.id) || !isToday(item.created_at)
+        );
+      } else if (result.checkin) {
+        dashboard.checkins = [...dashboard.checkins, result.checkin];
+        dashboard.activity = [...dashboard.activity, result.checkin];
+      }
+
+      renderMembers();
+      renderCheckin();
+      renderActivity();
+
+      const refreshed = await refreshDashboard({ silent: true });
+      const message = result.message || (status === "clear"
+        ? "Today's check-in was cleared."
+        : "Your check-in has been saved.");
+      const confirmation = refreshed
+        ? message
+        : `${message} Your dashboard could not refresh, but your response was saved.`;
+
+      showMessage(feedback, confirmation);
+      if (feedback !== get("userCheckinMessage")) {
+        showMessage(get("userCheckinMessage"), confirmation);
+      }
+
+      if (status !== "clear") maybeNotify(message);
+      return true;
+    } catch (error) {
+      showMessage(feedback, error.message, true);
+      if (feedback !== get("userCheckinMessage")) {
+        showMessage(get("userCheckinMessage"), error.message, true);
+      }
+      return false;
+    }
+  };
 
   const checkinButton =
 
@@ -2238,84 +2309,26 @@
 
       async (event) => {
 
-        const button =
+          const button =
 
-          event.currentTarget;
+            event.currentTarget;
 
+          const action = button.dataset.checkinAction;
+          const previousLabel = button.textContent;
 
+          button.disabled = true;
+          button.setAttribute("aria-busy", "true");
+          button.textContent = action === "reset" ? "Clearing…" : "Saving…";
 
-        button.disabled = true;
+          const succeeded = await submitCheckin(
+            action === "reset" ? "clear" : "safe",
+            get("userCheckinMessage")
+          );
 
-
-
-        try {
-
-          if (
-
-            button.dataset.checkinAction ===
-
-            "reset"
-
-          ) {
-
-            await api(
-
-              "/checkins/today",
-
-              {
-
-                method: "DELETE"
-
-              }
-
-            );
-
-          } else {
-
-            await api(
-
-              "/checkins",
-
-              {
-
-                method: "POST",
-
-                body: JSON.stringify({
-
-                  status: "safe"
-
-                })
-
-              }
-
-            );
-
-
-
-            maybeNotify(
-
-              "Your safe check-in has been saved."
-
-            );
-
-          }
-
-
-
-          await refreshDashboard();
-
-        } catch (error) {
-
-          showError(error);
-
-        } finally {
-
+          if (!succeeded) button.textContent = previousLabel;
+          button.removeAttribute("aria-busy");
           button.disabled = false;
-
-        }
-
       }
-
     );
 
   }
@@ -2380,52 +2393,20 @@
 
       async () => {
 
-        supportButton.disabled = true;
+          supportButton.disabled = true;
+          supportButton.setAttribute("aria-busy", "true");
+          supportButton.textContent = "Saving…";
 
-
-
-        try {
-
-          await api("/checkins", {
-
-            method: "POST",
-
-            body: JSON.stringify({
-
-              status: "support"
-
-            })
-
-          });
-
-
-
-          await refreshDashboard();
-
-
-
-          maybeNotify(
-
-            "Your support check-in has been saved."
-
+          const succeeded = await submitCheckin(
+            "support",
+            get("supportCheckinMessage")
           );
 
-
-
-          get("supportConfirmDialog")?.close();
-
-        } catch (error) {
-
-          showError(error);
-
-        } finally {
-
+          if (succeeded) get("supportConfirmDialog")?.close();
+          supportButton.textContent = "Save support check-in";
+          supportButton.removeAttribute("aria-busy");
           supportButton.disabled = false;
-
-        }
-
       }
-
     );
 
   }
@@ -2983,10 +2964,9 @@
   renderMembers();
 
   renderCheckin();
-
   renderActivity();
-
   setReminderText();
+  syncReminderControls();
 
   renderConnectionState();
 

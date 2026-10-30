@@ -119,6 +119,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .checkin-banner > * { position: relative; z-index: 1; }
 .checkin-banner h2 { margin: 0 0 6px; font: 680 clamp(1.15rem, 2.3vw, 1.55rem)/1.15 var(--portal-display); }
 .checkin-banner p:not(.eyebrow) { max-width: 440px; margin: 0; color: #d5e5da; font-size: .82rem; }
+.checkin-banner .checkin-feedback { min-height: 1.2em; margin-top: 6px; color: #fff; font-weight: 600; }
+.checkin-banner .checkin-feedback.is-error { color: #ffd1c6; }
 .checkin-banner .eyebrow { color: #f3b493; }
 .checkin-banner .button { min-width: 138px; border: 0; background: #fff; color: var(--portal-green-dark); }
 .checkin-banner .button:hover { background: #f4eee5; }
